@@ -4,18 +4,19 @@ import Image from "next/image";
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { useRouter } from "next/navigation";
+import { useCart } from "@/context/CartContext"; // ✅ Cart hook
 
 // Placeholder SVG
 const PLACEHOLDER_SVG =
   "data:image/svg+xml;utf8," +
   encodeURIComponent(`
-  <svg xmlns='http://www.w3.org/2000/svg' width='600' height='400'>
-    <rect width='100%' height='100%' fill='#e5e7eb'/>
-    <text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle'
-      font-size='24' fill='#374151' font-family='Arial, Helvetica, sans-serif'>
-      Demo Product Image
-    </text>
-  </svg>`);
+<svg xmlns='http://www.w3.org/2000/svg' width='600' height='400'>
+  <rect width='100%' height='100%' fill='#e5e7eb'/>
+  <text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle'
+    font-size='24' fill='#374151' font-family='Arial, Helvetica, sans-serif'>
+    Demo Product Image
+  </text>
+</svg>`);
 
 export default function CreateDemoKitPage() {
   const [products, setProducts] = useState<any[]>([]);
@@ -30,6 +31,7 @@ export default function CreateDemoKitPage() {
   });
 
   const router = useRouter();
+  const { addToCart, openCart } = useCart(); // ✅ Cart actions
 
   // Fetch products
   useEffect(() => {
@@ -64,37 +66,31 @@ export default function CreateDemoKitPage() {
       !selectedFilters.formFactor.includes(product.form_factor)
     )
       return false;
-
     if (
       selectedFilters.processor.length &&
       !selectedFilters.processor.includes(product.processor)
     )
       return false;
-
     if (
       selectedFilters.screenSize.length &&
       !selectedFilters.screenSize.includes(product.screen_size)
     )
       return false;
-
     if (
       selectedFilters.memory.length &&
       !selectedFilters.memory.includes(product.memory)
     )
       return false;
-
     if (
       selectedFilters.storage.length &&
       !selectedFilters.storage.includes(product.storage)
     )
       return false;
-
     if (
       selectedFilters.copilot.length &&
       (product.copilot ? "Yes" : "No") !== selectedFilters.copilot[0]
     )
       return false;
-
     if (
       selectedFilters.fiveG.length &&
       (product.five_g ? "Yes" : "No") !== selectedFilters.fiveG[0]
@@ -216,7 +212,21 @@ export default function CreateDemoKitPage() {
                     <p className="text-xs text-gray-500">SKU: {product.sku}</p>
                   </div>
 
-                  <button className="mt-3 w-full bg-yellow-400 text-black py-2 rounded hover:bg-yellow-500 transition text-sm">
+                  {/* ✅ Add to Cart Button with default quantity */}
+                  <button
+                    onClick={() => {
+                      addToCart({
+                        id: product.id,
+                        product_name: product.product_name,
+                        image_url: product.image_url,
+                        sku: product.sku,
+                        slug: product.slug,
+                        quantity: 1, // ✅ Default quantity
+                      });
+                      openCart();
+                    }}
+                    className="mt-3 w-full bg-yellow-400 text-black py-2 rounded hover:bg-yellow-500 transition text-sm"
+                  >
                     Add to Cart
                   </button>
                 </div>
@@ -229,7 +239,9 @@ export default function CreateDemoKitPage() {
   );
 }
 
-// Filter Group
+// ------------------------
+// Filter Group Component
+// ------------------------
 function FilterGroup({
   title,
   options,
@@ -253,7 +265,9 @@ function FilterGroup({
         className="flex w-full items-center justify-between text-sm font-semibold"
       >
         <span>{title}</span>
-        <span className={`transform transition-transform ${open ? "rotate-180" : ""}`}>
+        <span
+          className={`transform transition-transform ${open ? "rotate-180" : ""}`}
+        >
           <svg
             width="16"
             height="16"
