@@ -12,10 +12,11 @@ import { useAuth } from "@/app/context/AuthContext"; // ✅ AuthContext import
 export default function Navbar() {
   const router = useRouter();
   const { cartItems, openCart } = useCart();
-  const { role, user, loading } = useAuth(); // ✅ useAuth hook with loading
+  const { role, user, loading } = useAuth(); // ✅ get loading too
 
   const [mounted, setMounted] = useState(false);
 
+  // Prevent hydration mismatch
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -26,7 +27,8 @@ export default function Navbar() {
     router.push("/login");
   };
 
-  if (!mounted) return null;
+  // Don't render menu until mounted AND auth loading finished
+  if (!mounted || loading) return null;
 
   return (
     <nav className="w-full bg-white py-2 border-b relative z-50">
@@ -61,8 +63,8 @@ export default function Navbar() {
                 <Link href="/report-a-win" className="hover:opacity-70">Report a Win</Link>
               </li>
 
-              {/* ✅ Admin-only link, wait until loading false */}
-              {!loading && role === "admin" && (
+              {/* ✅ Admin-only link */}
+              {role === "admin" && (
                 <li>
                   <Link href="/admin/Dashboard360" className="hover:opacity-70">360 Dashboard</Link>
                 </li>
@@ -77,7 +79,9 @@ export default function Navbar() {
           {user && (
             <button aria-label="Notifications" className="relative hover:opacity-70">
               <FiBell className="w-6 h-8" />
-              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full px-1">0</span>
+              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full px-1">
+                0
+              </span>
             </button>
           )}
 
@@ -98,25 +102,37 @@ export default function Navbar() {
             <div className="absolute right-0 top-full pt-0 w-36 bg-white border border-gray-200 rounded shadow-md text-[13px] leading-[20px] font-normal text-[#2B3F50] opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity z-50">
               {!user ? (
                 <>
-                  <Link href="/account-registration" className="block w-full px-3 py-3 rounded-t hover:bg-[#2B3F50] hover:text-white transition-colors">Register</Link>
-                  <Link href="/login" className="block w-full px-3 py-3 rounded-b hover:bg-[#2B3F50] hover:text-white transition-colors">Login</Link>
+                  <Link href="/account-registration" className="block w-full px-3 py-3 rounded-t hover:bg-[#2B3F50] hover:text-white transition-colors">
+                    Register
+                  </Link>
+                  <Link href="/login" className="block w-full px-3 py-3 rounded-b hover:bg-[#2B3F50] hover:text-white transition-colors">
+                    Login
+                  </Link>
                 </>
               ) : (
-                <button
-                  onClick={handleLogout}
-                  className="block w-full px-3 py-3 rounded hover:bg-[#2B3F50] hover:text-white transition-colors bg-transparent border-none text-left"
-                >
-                  Logout
-                </button>
+                <>
+                  <button
+                    onClick={handleLogout}
+                    className="block w-full px-3 py-3 rounded hover:bg-[#2B3F50] hover:text-white transition-colors bg-transparent border-none text-left"
+                  >
+                    Logout
+                  </button>
+                </>
               )}
             </div>
           </div>
 
           {/* CART ICON */}
-          <button aria-label="Cart" className="relative hover:opacity-70" onClick={openCart}>
+          <button
+            aria-label="Cart"
+            className="relative hover:opacity-70"
+            onClick={openCart} // ✅ Open cart drawer
+          >
             <FiShoppingCart className="w-6 h-8" />
             {cartItems.length > 0 && (
-              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full px-1">{cartItems.length}</span>
+              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full px-1">
+                {cartItems.length} {/* ✅ Cart item count */}
+              </span>
             )}
           </button>
 
