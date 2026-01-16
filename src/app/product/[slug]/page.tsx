@@ -81,7 +81,7 @@ export default function ProductPage() {
             onClick={() => setZoomOpen(true)}
           >
             <Image
-              src={product.image_url || PLACEHOLDER_SVG}
+              src={product.thumbnail_url || PLACEHOLDER_SVG}
               alt={product.product_name}
               fill
               className="object-cover"
@@ -134,7 +134,7 @@ export default function ProductPage() {
         >
           <div className="w-[80%] max-w-4xl h-[80%] relative">
             <Image
-              src={product.image_url || PLACEHOLDER_SVG}
+              src={product.thumbnail_url || PLACEHOLDER_SVG}
               alt={product.product_name}
               fill
               className="object-contain"
@@ -156,7 +156,7 @@ export default function ProductPage() {
               >
                 <div className="relative w-full h-[180px] mb-3 overflow-hidden rounded">
                   <Image
-                    src={item.image_url || PLACEHOLDER_SVG}
+                    src={item.thumbnail_url || PLACEHOLDER_SVG}
                     alt={item.product_name}
                     fill
                     className="object-cover group-hover:scale-105 transition"

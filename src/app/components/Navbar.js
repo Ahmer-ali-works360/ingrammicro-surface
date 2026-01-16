@@ -57,7 +57,7 @@ export default function Navbar() {
             src="/Ingram_micro_logo.png"
             alt="Ingram Micro"
             width={140}
-            height={40}
+            height={28}
             priority
           />
         </Link>
