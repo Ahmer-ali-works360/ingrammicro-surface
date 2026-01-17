@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { useParams } from "next/navigation";
+import { useAuth } from "@/app/context/AuthContext";
 
 // Inline SVG Placeholder
 const PLACEHOLDER_SVG =
@@ -20,14 +21,16 @@ const PLACEHOLDER_SVG =
 
 export default function ProductPage() {
   const { slug } = useParams();
+  const { user } = useAuth();
+
   const [product, setProduct] = useState<any>(null);
   const [relatedProducts, setRelatedProducts] = useState<any[]>([]);
   const [quantity, setQuantity] = useState(1);
   const [zoomOpen, setZoomOpen] = useState(false);
+  const [companyName, setCompanyName] = useState("");
 
   useEffect(() => {
     const fetchProduct = async () => {
-      // Fetch main product
       const { data, error } = await supabase
         .from("products")
         .select("*")
@@ -41,14 +44,12 @@ export default function ProductPage() {
 
       setProduct(data);
 
-      // Related Products: match form_factor, processor, memory (relaxed)
       const relatedQuery = supabase
         .from("products")
         .select("*")
         .neq("slug", slug)
         .limit(4);
 
-      // Build OR conditions dynamically
       const conditions: string[] = [];
       if (data.form_factor) conditions.push(`form_factor.eq.${data.form_factor}`);
       if (data.processor) conditions.push(`processor.eq.${data.processor}`);
@@ -67,15 +68,24 @@ export default function ProductPage() {
 
   if (!product) return <p className="text-center mt-10">Loading...</p>;
 
-  const increaseQty = () => setQuantity((q) => q + 1);
-  const decreaseQty = () => setQuantity((q) => (q > 1 ? q - 1 : 1));
+  const stockQty = product?.stock_quantity ?? 0;
+
+  const increaseQty = () => {
+    if (quantity < stockQty) {
+      setQuantity((q) => q + 1);
+    }
+  };
+
+  const decreaseQty = () => {
+    setQuantity((q) => (q > 1 ? q - 1 : 1));
+  };
 
   return (
     <div className="max-w-6xl mx-auto p-6">
       {/* PRODUCT SECTION */}
       <div className="flex flex-col lg:flex-row gap-10">
-        {/* Left: Product Image */}
-        <div className="lg:w-1/2 w-full flex justify-center items-start relative">
+        {/* Left: Image */}
+        <div className="lg:w-1/2 w-full flex justify-center">
           <div
             className="w-[300px] lg:w-[400px] h-[300px] lg:h-[400px] relative rounded-xl overflow-hidden shadow cursor-zoom-in"
             onClick={() => setZoomOpen(true)}
@@ -89,40 +99,91 @@ export default function ProductPage() {
           </div>
         </div>
 
-        {/* Right: Product Details */}
+        {/* Right: Details */}
         <div className="lg:w-1/2 w-full flex flex-col justify-between space-y-6">
           <div className="space-y-3">
             <h1 className="text-3xl font-bold">{product.product_name}</h1>
             <p className="text-gray-500">SKU: {product.sku}</p>
-            <p className="text-gray-700 leading-relaxed">
+            <p className="text-gray-700">
               {product.description || "No description available."}
             </p>
 
-            {/* Quantity Selector */}
-            <div className="flex items-center gap-3 mt-4">
-              <span className="font-semibold">Quantity:</span>
-              <div className="flex items-center border rounded">
-                <button
-                  onClick={decreaseQty}
-                  className="px-3 py-1 bg-gray-200 hover:bg-gray-300"
-                >
-                  -
-                </button>
-                <span className="px-4">{quantity}</span>
-                <button
-                  onClick={increaseQty}
-                  className="px-3 py-1 bg-gray-200 hover:bg-gray-300"
-                >
-                  +
-                </button>
+            {/* Quantity selector (only if stock > 0) */}
+            {stockQty > 0 && (
+              <div className="flex items-center gap-3 mt-4">
+                <span className="font-semibold">Quantity:</span>
+                <div className="flex items-center border rounded">
+                  <button
+                    onClick={decreaseQty}
+                    className="px-3 py-1 bg-gray-200 hover:bg-gray-300"
+                  >
+                    -
+                  </button>
+                  <span className="px-4">{quantity}</span>
+                  <button
+                    onClick={increaseQty}
+                    className="px-3 py-1 bg-gray-200 hover:bg-gray-300"
+                  >
+                    +
+                  </button>
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
-          {/* Add to Cart */}
-          <button className="mt-2 w-xs bg-yellow-400 text-black py-3 rounded hover:bg-yellow-500 font-semibold">
-            Add to Cart
-          </button>
+          {/* Stock Info */}
+          <p className="text-sm text-gray-600">
+            Available Stock:{" "}
+            <span
+              className={`font-semibold ${
+                stockQty > 0 ? "text-green-600" : "text-red-500"
+              }`}
+            >
+              {stockQty}
+            </span>
+          </p>
+
+          {/* IN STOCK */}
+          {stockQty > 0 ? (
+            <button className="w-xs bg-yellow-400 text-black py-3 rounded hover:bg-yellow-500 font-semibold">
+              Add to Cart
+            </button>
+          ) : (
+            /* OUT OF STOCK */
+            <div className="border rounded-lg p-4 bg-gray-50 space-y-4">
+              {/* Locked Email */}
+              <div>
+                <label className="text-sm font-medium text-gray-600">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  value={user?.email || ""}
+                  disabled
+                  className="mt-1 w-full px-3 py-2 border rounded bg-gray-200 text-gray-600 cursor-not-allowed"
+                />
+              </div>
+
+              {/* Company Name */}
+              <div>
+                <label className="text-sm font-medium text-gray-600">
+                  Company Name
+                </label>
+                <input
+                  type="text"
+                  value={companyName}
+                  onChange={(e) => setCompanyName(e.target.value)}
+                  placeholder="Enter company name"
+                  className="mt-1 w-full px-3 py-2 border rounded"
+                />
+              </div>
+
+              {/* Wishlist / Waitlist */}
+              <button className="w-full bg-blue-600 text-white py-3 rounded hover:bg-blue-700 font-semibold">
+                Add to Wishlist / Waitlist
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
