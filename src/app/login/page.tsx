@@ -12,7 +12,7 @@ export default function LoginPage() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [keepSignedIn, setKeepSignedIn] = useState(true); // default checked
+  const [keepSignedIn, setKeepSignedIn] = useState(true); // UI only
   const [loading, setLoading] = useState(false);
 
   // Check if user is already logged in
@@ -44,10 +44,10 @@ export default function LoginPage() {
       }
 
       if (data.user) {
-        // ✅ Fetch status AND role from profiles
+        // Fetch user role & status
         const { data: profileData, error: profileError } = await supabase
           .from("profiles")
-          .select("status, role") // role fetch added
+          .select("status, role")
           .eq("id", data.user.id)
           .single();
 
@@ -57,23 +57,12 @@ export default function LoginPage() {
           return;
         }
 
-        // Console check: role fetch hua ya nahi
-        console.log("Fetched user role:", profileData?.role);
-
         if (profileData?.status !== "approved") {
           toast.error("Your account is not approved yet.");
           await supabase.auth.signOut();
           return;
         }
 
-        // Handle "Keep me signed in"
-        if (!keepSignedIn) {
-          const { data: sessionData } = await supabase.auth.getSession();
-          if (sessionData?.session) {
-            sessionStorage.setItem("sb-session", JSON.stringify(sessionData.session));
-          }
-        }
-        
         // Redirect approved user
         router.push(redirectTo || "/");
       }

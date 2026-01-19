@@ -45,7 +45,7 @@ export default function CreateDemoKitPage() {
     });
   }, [router]);
 
-  // ✅ FETCH PRODUCTS (NO FILTERS HERE)
+  // ✅ FETCH PRODUCTS
   useEffect(() => {
     const fetchProducts = async () => {
       setLoading(true);
@@ -76,52 +76,63 @@ export default function CreateDemoKitPage() {
     });
   };
 
-  // ✅ CLIENT SIDE FILTERING (FIXED)
-  const filteredProducts = products.filter((product) => {
-    if (
-      selectedFilters.formFactor.length &&
-      !selectedFilters.formFactor.includes(product.form_factor)
-    )
-      return false;
+  // ✅ FILTER + SORT
+  const filteredProducts = products
+    .filter((product) => {
+      // 🔒 PRIVATE PRODUCT → ONLY ADMIN
+      if (product.status === "Private" && role !== "admin") return false;
 
-    if (
-      selectedFilters.processor.length &&
-      !selectedFilters.processor.includes(product.processor)
-    )
-      return false;
+      if (
+        selectedFilters.formFactor.length &&
+        !selectedFilters.formFactor.includes(product.form_factor)
+      )
+        return false;
 
-    if (
-      selectedFilters.screenSize.length &&
-      !selectedFilters.screenSize.includes(product.screen_size)
-    )
-      return false;
+      if (
+        selectedFilters.processor.length &&
+        !selectedFilters.processor.includes(product.processor)
+      )
+        return false;
 
-    if (
-      selectedFilters.memory.length &&
-      (!product.memory || !selectedFilters.memory.includes(product.memory))
-    )
-      return false;
+      if (
+        selectedFilters.screenSize.length &&
+        !selectedFilters.screenSize.includes(product.screen_size)
+      )
+        return false;
 
-    if (
-      selectedFilters.storage.length &&
-      (!product.storage || !selectedFilters.storage.includes(product.storage))
-    )
-      return false;
+      if (
+        selectedFilters.memory.length &&
+        (!product.memory || !selectedFilters.memory.includes(product.memory))
+      )
+        return false;
 
-    if (
-      selectedFilters.copilot.length &&
-      !selectedFilters.copilot.includes(product.copilot ? "Yes" : "No")
-    )
-      return false;
+      if (
+        selectedFilters.storage.length &&
+        (!product.storage || !selectedFilters.storage.includes(product.storage))
+      )
+        return false;
 
-    if (
-      selectedFilters.fiveG.length &&
-      !selectedFilters.fiveG.includes(product.five_g ? "Yes" : "No")
-    )
-      return false;
+      if (
+        selectedFilters.copilot.length &&
+        !selectedFilters.copilot.includes(product.copilot ? "Yes" : "No")
+      )
+        return false;
 
-    return true;
-  });
+      if (
+        selectedFilters.fiveG.length &&
+        !selectedFilters.fiveG.includes(product.five_g ? "Yes" : "No")
+      )
+        return false;
+
+      return true;
+    })
+    .sort((a, b) => {
+      const aOut = a.stock_quantity === 0 || a.stock_quantity == null;
+      const bOut = b.stock_quantity === 0 || b.stock_quantity == null;
+
+      if (aOut === bOut) return 0;
+      return aOut ? 1 : -1;
+    });
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -140,63 +151,16 @@ export default function CreateDemoKitPage() {
       <div className="max-w-7xl mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-[240px_1fr] gap-6">
         {/* Filters */}
         <aside className="bg-white rounded-2xl shadow p-5 space-y-4">
-          <FilterGroup
-            title="Form Factor"
-            options={["2 in 1's", "Accessories", "Notebooks"]}
-            category="formFactor"
-            selectedFilters={selectedFilters}
-            onChange={handleFilterChange}
-          />
-          <FilterGroup
-            title="Processor"
-            options={[
-              "Intel® Core™ Ultra 5",
-              "Intel® Core™ Ultra 7",
-              "Snapdragon X Elite",
-              "Snapdragon X Plus",
-            ]}
-            category="processor"
-            selectedFilters={selectedFilters}
-            onChange={handleFilterChange}
-          />
-          <FilterGroup
-            title="Screen Size"
-            options={['12"', '13"', '13.8"', '15"']}
-            category="screenSize"
-            selectedFilters={selectedFilters}
-            onChange={handleFilterChange}
-          />
-          <FilterGroup
-            title="Memory"
-            options={["16GB", "32GB"]}
-            category="memory"
-            selectedFilters={selectedFilters}
-            onChange={handleFilterChange}
-          />
-          <FilterGroup
-            title="Storage"
-            options={["256GB", "512GB", "1TB"]}
-            category="storage"
-            selectedFilters={selectedFilters}
-            onChange={handleFilterChange}
-          />
-          <FilterGroup
-            title="Copilot+ PC"
-            options={["Yes"]}
-            category="copilot"
-            selectedFilters={selectedFilters}
-            onChange={handleFilterChange}
-          />
-          <FilterGroup
-            title="5G Enabled"
-            options={["Yes"]}
-            category="fiveG"
-            selectedFilters={selectedFilters}
-            onChange={handleFilterChange}
-          />
+          <FilterGroup title="Form Factor" options={["2 in 1's", "Accessories", "Notebooks"]} category="formFactor" selectedFilters={selectedFilters} onChange={handleFilterChange} />
+          <FilterGroup title="Processor" options={["Intel® Core™ Ultra 5","Intel® Core™ Ultra 7","Snapdragon X Elite","Snapdragon X Plus"]} category="processor" selectedFilters={selectedFilters} onChange={handleFilterChange} />
+          <FilterGroup title="Screen Size" options={['12"','13"','13.8"','15"']} category="screenSize" selectedFilters={selectedFilters} onChange={handleFilterChange} />
+          <FilterGroup title="Memory" options={["16GB","32GB"]} category="memory" selectedFilters={selectedFilters} onChange={handleFilterChange} />
+          <FilterGroup title="Storage" options={["256GB","512GB","1TB"]} category="storage" selectedFilters={selectedFilters} onChange={handleFilterChange} />
+          <FilterGroup title="Copilot+ PC" options={["Yes"]} category="copilot" selectedFilters={selectedFilters} onChange={handleFilterChange} />
+          <FilterGroup title="5G Enabled" options={["Yes"]} category="fiveG" selectedFilters={selectedFilters} onChange={handleFilterChange} />
         </aside>
 
-        {/* Products Section */}
+        {/* Products */}
         <section className="flex flex-col">
           {role === "admin" && (
             <div className="flex justify-end mb-4">
@@ -217,57 +181,81 @@ export default function CreateDemoKitPage() {
             </p>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {filteredProducts.map((product) => (
-                <div
-                  key={product.id}
-                  className="bg-white rounded-2xl shadow hover:shadow-lg transition flex flex-col group"
-                >
-                  <div className="w-full h-[200px] relative rounded-t-2xl overflow-hidden">
-                    {product.five_g && (
-                      <Image
-                        src="/5g-logo.png"
-                        alt="5G Badge"
-                        width={40}
-                        height={40}
-                        className="absolute top-2 right-2 z-10"
-                      />
-                    )}
-                    <Image
-                      src={product.thumbnail_url || PLACEHOLDER_SVG}
-                      alt={product.product_name}
-                      fill
-                      className="object-cover cursor-pointer transition-transform duration-300 group-hover:scale-105"
-                      onClick={() => {
-                        if (!product.slug) return;
-                        router.push(`/product/${product.slug}`);
-                      }}
-                    />
-                  </div>
+              {filteredProducts.map((product) => {
+                const outOfStock =
+                  product.stock_quantity === 0 ||
+                  product.stock_quantity == null;
 
-                  <div className="p-4 flex-1 flex flex-col justify-between">
-                    <div>
-                      <h3 className="font-medium text-sm">{product.product_name}</h3>
-                      <p className="text-xs text-gray-500">SKU: {product.sku}</p>
+                return (
+                  <div
+                    key={product.id}
+                    className="bg-white rounded-2xl shadow hover:shadow-lg transition flex flex-col group"
+                  >
+                    <div className="w-full h-[200px] relative rounded-t-2xl overflow-hidden">
+                      {product.five_g && (
+                        <Image
+                          src="/5g-logo.png"
+                          alt="5G Badge"
+                          width={40}
+                          height={40}
+                          className="absolute top-2 right-2 z-10"
+                        />
+                      )}
+
+                      {outOfStock && (
+                        <div className="absolute top-2 left-2 z-10 bg-red-600 text-white text-xs font-semibold px-2 py-1 rounded">
+                          Out of Stock
+                        </div>
+                      )}
+
+                      <Image
+                        src={product.thumbnail_url || PLACEHOLDER_SVG}
+                        alt={product.product_name}
+                        fill
+                        className="object-cover cursor-pointer transition-transform duration-300 group-hover:scale-105"
+                        onClick={() => {
+                          if (!product.slug) return;
+                          router.push(`/product/${product.slug}`);
+                        }}
+                      />
                     </div>
-                    <button
-                      onClick={() => {
-                        addToCart({
-                          id: product.id,
-                          product_name: product.product_name,
-                          image_url: product.thumbnail_url,
-                          sku: product.sku,
-                          slug: product.slug,
-                          quantity: 1,
-                        });
-                        openCart();
-                      }}
-                      className="mt-3 w-full bg-yellow-400 text-black py-2 rounded hover:bg-yellow-500 transition text-sm"
-                    >
-                      Add to Cart
-                    </button>
+
+                    <div className="p-4 flex-1 flex flex-col justify-between">
+                      <div>
+                        <h3 className="font-medium text-sm">
+                          {product.product_name}
+                        </h3>
+                        <p className="text-xs text-gray-500">
+                          SKU: {product.sku}
+                        </p>
+                      </div>
+
+                      <button
+                        disabled={outOfStock}
+                        onClick={() => {
+                          if (outOfStock) return;
+                          addToCart({
+                            id: product.id,
+                            product_name: product.product_name,
+                            image_url: product.thumbnail_url,
+                            sku: product.sku,
+                            slug: product.slug,
+                            quantity: 1,
+                          });
+                          openCart();
+                        }}
+                        className={`mt-3 w-full py-2 rounded text-sm transition ${
+                          outOfStock
+                            ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                            : "bg-yellow-400 text-black hover:bg-yellow-500"
+                        }`}
+                      >
+                        {outOfStock ? "Out of Stock" : "Add to Cart"}
+                      </button>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </section>
@@ -302,7 +290,11 @@ function FilterGroup({
         className="flex w-full items-center justify-between text-sm font-semibold"
       >
         <span>{title}</span>
-        <span className={`transform transition-transform ${open ? "rotate-180" : ""}`}>
+        <span
+          className={`transform transition-transform ${
+            open ? "rotate-180" : ""
+          }`}
+        >
           <svg
             width="16"
             height="16"

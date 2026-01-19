@@ -1,4 +1,4 @@
-//src/app/components/Navbar.js
+// src/app/components/Navbar.js
 
 "use client";
 
@@ -6,13 +6,13 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { FiSearch, FiUser, FiChevronDown, FiShoppingCart, FiBell } from "react-icons/fi";
-import { supabase } from "@/lib/supabaseClient";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/app/context/AuthContext";
+import { useRouter } from "next/navigation";
 
 export default function Navbar() {
   const { cartItems, openCart } = useCart();
-  const { role, user, setUser, setRole } = useAuth();
+  const { role, user, logout } = useAuth();
 
   const [mounted, setMounted] = useState(false);
 
@@ -20,30 +20,17 @@ export default function Navbar() {
     setMounted(true);
   }, []);
 
-  const handleLogout = async () => {
-    setUser(null);
-    setRole(null);
+  const router = useRouter();
 
-    const { error } = await supabase.auth.signOut({ scope: "global" });
-    if (error) {
-      console.error("Logout error:", error.message);
-    }
-
-    // ✅ Explicitly clear Supabase tokens
-    try {
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (key && key.startsWith("sb-") && key.endsWith("-auth-token")) {
-          localStorage.removeItem(key);
-        }
-      }
-    } catch (e) {
-      console.warn("Token cleanup warning:", e);
-    }
-
-    // ✅ Hard redirect
-    window.location.href = "/login";
+   const handleLogout = async () => {
+    console.log("[Navbar] Logging out...");
+    await logout();
   };
+  // const handleLogout = async () => {
+  //   console.log("[Navbar] Logging out...");
+  //   await logout();
+  //   router.replace("/login");
+  // };
 
   if (!mounted) return null;
 

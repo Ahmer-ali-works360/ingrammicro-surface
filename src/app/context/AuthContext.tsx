@@ -1,6 +1,12 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from "react";
 import { supabase } from "@/lib/supabaseClient";
 
 interface AuthContextType {
@@ -8,8 +14,7 @@ interface AuthContextType {
   role: string | null;
   status: string | null;
   loading: boolean;
-  setUser: (user: any | null) => void;
-  setRole: (role: string | null) => void;
+  logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -18,93 +23,90 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<any | null>(null);
   const [role, setRole] = useState<string | null>(null);
   const [status, setStatus] = useState<string | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState(true);
 
-  const fetchProfile = async (userData: any) => {
-    try {
-      const { data: profileData } = await supabase
-        .from("profiles")
-        .select("role, status")
-        .eq("id", userData.id)
-        .single();
+  const fetchProfile = async (userId: string) => {
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("role, status")
+      .eq("id", userId)
+      .single();
 
-      if (profileData) {
-        setRole(profileData.role);
-        setStatus(profileData.status);
-      } else {
-        setRole(null);
-        setStatus(null);
-      }
-    } catch {
+    if (error) console.error("fetchProfile error:", error);
+    setRole(data?.role ?? null);
+    setStatus(data?.status ?? null);
+  };
+
+  const syncSession = async () => {
+    setLoading(true);
+
+    const {
+      data: { session },
+      error,
+    } = await supabase.auth.getSession();
+
+    if (error) {
+      console.error("getSession error:", error);
+      setLoading(false);
+      return;
+    }
+
+    if (!session?.user) {
+      setUser(null);
       setRole(null);
       setStatus(null);
+      setLoading(false);
+      return;
     }
+
+    setUser(session.user);
+    await fetchProfile(session.user.id);
+    setLoading(false);
+  };
+
+  const logout = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) console.error("Logout error:", error);
+
+    setUser(null);
+    setRole(null);
+    setStatus(null);
+
+    // force reload to clear session
+    window.location.href = "/login";
   };
 
   useEffect(() => {
-    const getSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) {
-        if (session.expires_at && session.expires_at * 1000 < Date.now()) {
-          setUser(null);
-          setRole(null);
-          setStatus(null);
-        } else {
-          setUser(session.user);
-          await fetchProfile(session.user);
-        }
-      } else {
-        setUser(null);
-        setRole(null);
-        setStatus(null);
-      }
-      setLoading(false);
-    };
+    syncSession();
 
-    getSession();
-
-    const { data: listener } = supabase.auth.onAuthStateChange(async (event, session) => {
+    const { data } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === "SIGNED_OUT") {
         setUser(null);
         setRole(null);
         setStatus(null);
-
-        // ✅ Explicitly clear Supabase tokens
-        try {
-          for (let i = 0; i < localStorage.length; i++) {
-            const key = localStorage.key(i);
-            if (key && key.startsWith("sb-") && key.endsWith("-auth-token")) {
-              localStorage.removeItem(key);
-            }
-          }
-        } catch (e) {
-          console.warn("Token cleanup warning:", e);
-        }
+        return;
       }
 
       if (session?.user) {
         setUser(session.user);
-        await fetchProfile(session.user);
-      } else {
-        setUser(null);
-        setRole(null);
-        setStatus(null);
+        fetchProfile(session.user.id);
       }
-      setLoading(false);
     });
 
-    return () => listener.subscription.unsubscribe();
+    return () => {
+      data.subscription.unsubscribe();
+    };
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, role, status, loading, setUser, setRole }}>
+    <AuthContext.Provider value={{ user, role, status, loading, logout }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
 export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) throw new Error("useAuth must be used within AuthProvider");
-  return context;
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error("useAuth must be used within AuthProvider");
+  return ctx;
 };
