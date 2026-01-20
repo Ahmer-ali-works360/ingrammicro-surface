@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { Check, X } from "lucide-react";
 import * as XLSX from "xlsx";
+import { useRouter } from "next/navigation";
 
 type Profile = {
   id: string;
@@ -17,9 +18,14 @@ type Profile = {
 };
 
 export default function AdminUsersPage() {
+  const router = useRouter();
+
   const [users, setUsers] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(false);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+
+  // **NEW: auth loading state**
+  const [authLoading, setAuthLoading] = useState(true);
 
   // UI state
   const [search, setSearch] = useState("");
@@ -31,6 +37,38 @@ export default function AdminUsersPage() {
   const [statusFilter, setStatusFilter] = useState<
     "all" | "approved" | "rejected" | "pending"
   >("all");
+
+  // ----------------------------
+  // 🔒 AUTH + ADMIN CHECK
+  // ----------------------------
+  useEffect(() => {
+    const checkAdmin = async () => {
+      const { data: sessionData } = await supabase.auth.getSession();
+
+      // if user is not logged in
+      if (!sessionData?.session?.user) {
+        router.replace("/login");
+        return;
+      }
+
+      // if logged in, check role from profiles
+      const { data: profileData, error } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", sessionData.session.user.id)
+        .single();
+
+      if (error || profileData?.role !== "admin") {
+        router.replace("/");
+        return;
+      }
+
+      // if admin
+      setAuthLoading(false);
+    };
+
+    checkAdmin();
+  }, [router]);
 
   // Fetch users
   async function fetchUsers() {
@@ -129,6 +167,9 @@ export default function AdminUsersPage() {
     document.body.removeChild(a);
     window.URL.revokeObjectURL(url);
   }
+
+  // **NEW: prevent page render until auth confirmed**
+  if (authLoading) return null;
 
   return (
     <div className="p-8">

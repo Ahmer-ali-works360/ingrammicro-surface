@@ -33,6 +33,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       .single();
 
     if (error) console.error("fetchProfile error:", error);
+
     setRole(data?.role ?? null);
     setStatus(data?.status ?? null);
   };
@@ -109,4 +110,19 @@ export const useAuth = () => {
   const ctx = useContext(AuthContext);
   if (!ctx) throw new Error("useAuth must be used within AuthProvider");
   return ctx;
+};
+
+/**
+ * 🔥 New Hook: Role based access
+ * @param allowedRoles array of roles allowed to view this page
+ */
+export const useAuthRole = (allowedRoles: string[]) => {
+  const { role, loading } = useAuth();
+
+  const userRole = role?.toLowerCase() ?? "";
+  const isAllowed = allowedRoles
+    .map((r) => r.toLowerCase())
+    .includes(userRole);
+
+  return { userRole, loading, isAllowed };
 };

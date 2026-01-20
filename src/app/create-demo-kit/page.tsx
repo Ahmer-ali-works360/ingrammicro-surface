@@ -82,7 +82,11 @@ export default function CreateDemoKitPage() {
   // ✅ FILTER + SORT
   const filteredProducts = products
     .filter((product) => {
-      if (product.status === "Private" && role !== "admin") return false;
+      if (
+  product.status === "Private" &&
+  !["admin", "shop manager"].includes(role ?? "")
+)
+  return false;
 
       if (
         selectedFilters.formFactor.length &&
@@ -165,7 +169,7 @@ export default function CreateDemoKitPage() {
 
             {/* Products */}
             <section className="flex flex-col">
-              {role === "admin" && (
+              {(role === "admin"|| role === "shop manager") && (
                 <div className="flex justify-end mb-4">
                   <button
                     onClick={() => router.push("/add-product")}
