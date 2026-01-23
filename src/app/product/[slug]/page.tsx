@@ -108,7 +108,7 @@ export default function ProductPage() {
             {isAllowed && (
               <div className="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition">
                 <button
-                  onClick={() => router.push(`/admin/edit-product/${product.id}`)}
+                  onClick={() => router.push(`/edit-product?id=${product.id}`)}
                   className="p-2 bg-white rounded-full shadow hover:bg-gray-100"
                 >
                   <Pencil size={18} />
@@ -167,7 +167,7 @@ export default function ProductPage() {
                   quantity,
                 })
               }
-              className="bg-yellow-400 px-6 py-3 rounded font-semibold hover:bg-yellow-500"
+              className="bg-yellow-400 px-6 py-3  cursor-pointer rounded font-semibold hover:bg-yellow-500"
             >
               Add to Cart
             </button>

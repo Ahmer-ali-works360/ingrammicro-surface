@@ -122,7 +122,7 @@ case "NEW_USER_REGISTRATION":
     /* -------- USER APPROVED -------- */
     case "USER_APPROVED":
       return {
-        subject: "Your Account Has Been Approved",
+        subject: "User Approved | Ingrammicro Surface",
         html: baseLayout(
           "Account Approved",
           `
@@ -155,7 +155,7 @@ case "NEW_USER_REGISTRATION":
       return {
         subject: "Your Account Has Been Rejected",
         html: baseLayout(
-          "Account REjected",
+          "Account Rejected",
           `
           <p>Hello <strong>${data.name}</strong>,</p>
 

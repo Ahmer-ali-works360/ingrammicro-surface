@@ -5,7 +5,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { FiSearch, FiUser, FiChevronDown, FiShoppingCart, FiBell } from "react-icons/fi";
+import { FiSearch, FiUser, FiChevronDown, FiShoppingCart, FiBell, FiMenu, FiX } from "react-icons/fi";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/app/context/AuthContext";
 import { useRouter } from "next/navigation";
@@ -15,22 +15,16 @@ export default function Navbar() {
   const { role, user, logout } = useAuth();
 
   const [mounted, setMounted] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  const router = useRouter();
-
-   const handleLogout = async () => {
+  const handleLogout = async () => {
     console.log("[Navbar] Logging out...");
     await logout();
   };
-  // const handleLogout = async () => {
-  //   console.log("[Navbar] Logging out...");
-  //   await logout();
-  //   router.replace("/login");
-  // };
 
   if (!mounted) return null;
 
@@ -49,7 +43,7 @@ export default function Navbar() {
           />
         </Link>
 
-        {/* CENTER: MENU */}
+        {/* CENTER: MENU (Desktop) */}
         <ul className="hidden md:flex items-center gap-10 text-[14px] leading-[20px] font-normal text-[#2B3F50]">
           <li><Link href="/" className="hover:opacity-70">Home</Link></li>
           <li><Link href="/how-it-works" className="hover:opacity-70">How it Works</Link></li>
@@ -65,8 +59,17 @@ export default function Navbar() {
           )}
         </ul>
 
-        {/* RIGHT: ICONS */}
-        <div className="flex items-center gap-6 text-xl text-[#2B3F50] relative">
+        {/* MOBILE: HAMBURGER */}
+        <button
+          className="md:hidden text-xl text-[#2B3F50] hover:opacity-70"
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          aria-label="Toggle Menu"
+        >
+          {mobileMenuOpen ? <FiX size={24} /> : <FiMenu size={24} />}
+        </button>
+
+        {/* RIGHT: ICONS (Desktop only) */}
+        <div className="hidden md:flex items-center gap-6 text-xl text-[#2B3F50] relative">
           {user && (
             <button aria-label="Notifications" className="relative hover:opacity-70">
               <FiBell className="w-6 h-8" />
@@ -114,6 +117,71 @@ export default function Navbar() {
           </button>
         </div>
       </div>
+
+      {/* MOBILE MENU (with icons inside) */}
+      {mobileMenuOpen && (
+        <div className="md:hidden bg-white border-t border-gray-200">
+          <ul className="flex flex-col gap-2 px-4 py-4 text-[14px] leading-[20px] font-normal text-[#2B3F50]">
+            <li><Link href="/" className="block py-2 hover:opacity-70">Home</Link></li>
+            <li><Link href="/how-it-works" className="block py-2 hover:opacity-70">How it Works</Link></li>
+            <li><Link href="/create-demo-kit" className="block py-2 hover:opacity-70">Create Demo Kit</Link></li>
+
+            {user && (
+              <>
+                <li><Link href="/report-a-win" className="block py-2 hover:opacity-70">Report a Win</Link></li>
+                {role === "admin" && (
+                  <li><Link href="/admin/Dashboard360" className="block py-2 hover:opacity-70">360 Dashboard</Link></li>
+                )}
+              </>
+            )}
+
+            {/* Icons inside dropdown */}
+            <li className="flex items-center gap-4 pt-2 border-t border-gray-200">
+              {user && (
+                <button aria-label="Notifications" className="relative hover:opacity-70">
+                  <FiBell className="w-6 h-8" />
+                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full px-1">0</span>
+                </button>
+              )}
+
+              <button aria-label="Search" className="hover:opacity-70">
+                <FiSearch className="w-6 h-8" />
+              </button>
+
+              {/* User Icon */}
+              <Link href="/account" aria-label="Account" className="hover:opacity-70">
+                <FiUser className="w-6 h-8" />
+              </Link>
+
+              <button aria-label="Cart" className="relative hover:opacity-70" onClick={openCart}>
+                <FiShoppingCart className="w-6 h-8" />
+                {cartItems.length > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full px-1">
+                    {cartItems.length}
+                  </span>
+                )}
+              </button>
+            </li>
+
+            {/* Account Links inside dropdown */}
+            <li className="pt-2 border-t border-gray-200">
+              {!user ? (
+                <>
+                  <Link href="/account-registration" className="block py-2 hover:opacity-70">Register</Link>
+                  <Link href="/login" className="block py-2 hover:opacity-70">Login</Link>
+                </>
+              ) : (
+                <button
+                  onClick={handleLogout}
+                  className="block w-full text-left py-2 hover:opacity-70"
+                >
+                  Logout
+                </button>
+              )}
+            </li>
+          </ul>
+        </div>
+      )}
     </nav>
   );
 }

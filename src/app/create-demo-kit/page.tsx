@@ -173,7 +173,7 @@ export default function CreateDemoKitPage() {
                 <div className="flex justify-end mb-4">
                   <button
                     onClick={() => router.push("/add-product")}
-                    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition text-sm"
+                    className="bg-blue-600 cursor-pointer text-white px-4 py-2 rounded hover:bg-blue-700 transition text-sm"
                   >
                     Add Product
                   </button>
@@ -254,7 +254,7 @@ export default function CreateDemoKitPage() {
                             className={`mt-3 w-full py-2 rounded text-sm transition ${
                               outOfStock
                                 ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                                : "bg-yellow-400 text-black hover:bg-yellow-500"
+                                : "bg-yellow-400 text-black hover:bg-yellow-500 cursor-pointer"
                             }`}
                           >
                             {outOfStock ? "Out of Stock" : "Add to Cart"}
