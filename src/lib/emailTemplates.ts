@@ -8,112 +8,158 @@ type EmailTemplate = {
   html: string;
 };
 
-/* ---------- BASE LAYOUT (Professional) ---------- */
+/* ---------- BASE LAYOUT (Classic / Centered) ---------- */
 function baseLayout(title: string, body: string): string {
   return `
-  <!DOCTYPE html>
-  <html>
-  <head>
-    <meta charset="UTF-8" />
-    <title>${title}</title>
-  </head>
-  <body style="margin:0;padding:0;background:#f4f6f8;font-family:Arial,Helvetica,sans-serif;">
-    
-    <table width="100%" cellpadding="0" cellspacing="0">
-      <tr>
-        <td align="center" style="padding:30px 0;">
-          
-          <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:6px;overflow:hidden;">
-            
-            <!-- Header -->
-            <tr>
-              <td style="background:#3ba1da;padding:20px;text-align:center;color:#ffffff;">
-                <h1 style="margin:0;font-size:22px;">Ingrammicro-surface</h1>
-              </td>
-            </tr>
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>${title}</title>
+</head>
 
-            <!-- Body -->
-            <tr>
-              <td style="padding:30px;color:#333333;font-size:14px;line-height:1.6;">
-                ${body}
-              </td>
-            </tr>
+<body style="margin:0;padding:0;background:#f4f6f8;font-family:Arial,Helvetica,sans-serif;">
+  <p>&nbsp;</p>
 
-            <!-- Footer -->
-            <tr>
-              <td style="background:#f0f0f0;padding:15px;text-align:center;font-size:12px;color:#777;">
-                © ${new Date().getFullYear()} Your App Name. All rights reserved.
-              </td>
-            </tr>
+  <table
+    width="600"
+    align="center"
+    cellpadding="0"
+    cellspacing="0"
+    border="0"
+    style="background:#ffffff;border-radius:8px;overflow:hidden;border:1px solid #dddddd;"
+  >
 
-          </table>
+    <!-- Header -->
+    <tr>
+      <td
+        style="
+          background:#3ba1da;
+          padding:14px 20px;
+          font-size:18px;
+          font-weight:bold;
+          color:#ffffff;
+          text-align:center;
+        "
+      >
+        ${title}
+      </td>
+    </tr>
 
-        </td>
-      </tr>
-    </table>
+    <!-- Body -->
+    <tr>
+      <td style="padding:30px;font-size:15px;color:#333333;line-height:1.6;">
+        ${body}
+      </td>
+    </tr>
 
-  </body>
-  </html>
-  `;
+    <!-- Footer -->
+    <tr>
+      <td
+        style="
+          background:#3ba1da;
+          padding:12px 15px;
+          font-size:13px;
+          color:#ffffff;
+          text-align:center;
+        "
+      >
+        © 2026 Ingrammicro-Surface
+      </td>
+    </tr>
+
+  </table>
+
+  <p>&nbsp;</p>
+</body>
+</html>
+`;
 }
 
 /* ---------- EMAIL FACTORY ---------- */
-export function getEmailTemplate(
-  type: string,
-  data: any
-): EmailTemplate {
+export function getEmailTemplate(type: string, data: any): EmailTemplate {
   switch (type) {
 
-
     /* -------- ADMIN: NEW USER REGISTRATION -------- */
-case "NEW_USER_REGISTRATION":
-  return {
-    subject: "New User Registration",
-    html: baseLayout(
-      "New Registration Received",
-      `
-      <p>A new user has registered and is awaiting approval.</p>
+    case "NEW_USER_REGISTRATION":
+      return {
+        subject: "New User Registration",
+        html: baseLayout(
+          "New Registration | Ingrammicro Surface",
+          `
+          <p>Dear PM,</p>
 
-      <table style="margin-top:15px;font-size:14px;">
-        <tr>
-          <td><strong>Name:</strong></td>
-          <td>${data.name}</td>
-        </tr>
-        <tr>
-          <td><strong>Email:</strong></td>
-          <td>${data.email}</td>
-        </tr>
-        <tr>
-          <td><strong>Reseller:</strong></td>
-          <td>${data.reseller}</td>
-        </tr>
-      </table>
+          <p>
+            You have received a new user registration on
+            <strong>Ingrammicro Surface</strong>.
+            Please review to approve or reject this user.
+          </p>
 
-      <p style="margin-top:20px;">
-        Please login to the admin panel to review this account.
-      </p>
-      `
-    ),
-  };
+          <p style="margin:25px 0;text-align:center;">
+            <a
+              href="http://localhost:3000/login"
+              style="
+                background:#3ba1da;
+                color:#ffffff;
+                padding:10px 24px;
+                text-decoration:none;
+                border-radius:4px;
+                font-size:14px;
+                display:inline-block;
+              "
+            >
+              View Account
+            </a>
+          </p>
 
+          <p style="margin-top:25px;">
+            <strong>User Details:</strong>
+          </p>
+
+          <table style="margin-top:10px;font-size:14px;">
+            <tr>
+              <td style="padding:6px 10px 6px 0;"><strong>Name:</strong></td>
+              <td>${data.name}</td>
+            </tr>
+            <tr>
+              <td style="padding:6px 10px 6px 0;"><strong>Email:</strong></td>
+              <td>${data.email}</td>
+            </tr>
+            <tr>
+              <td style="padding:6px 10px 6px 0;"><strong>Reseller:</strong></td>
+              <td>${data.reseller}</td>
+            </tr>
+          </table>
+          `
+        ),
+      };
 
     /* -------- USER REGISTERED -------- */
     case "USER_REGISTERED":
       return {
         subject: "Registration Received",
         html: baseLayout(
-          "Registration Received",
+          "Registration Received | Ingrammicro Surface",
           `
           <p>Hello <strong>${data.name}</strong>,</p>
 
-          <p>Thank you for registering with us.</p>
+          <p>
+            Thank you for registering on the
+            <strong>Ingrammicro Surface portal</strong>.
+            Your request has been received and is currently under review.
+          </p>
 
-          <p>Your account is currently under review.  
-          You will receive another email once it is approved by the admin.</p>
+          <p>
+            You will receive a confirmation email once your account has been approved.
+          </p>
 
           <p style="margin-top:25px;">
-            Regards,<br/>
-            <strong>Your App Team</strong>
+            If you have any questions, feel free to contact our support team.
+          </p>
+
+          <p>
+            Best regards,<br/>
+            <strong>Ingrammicro Surface Team</strong>
           </p>
           `
         ),
@@ -122,25 +168,33 @@ case "NEW_USER_REGISTRATION":
     /* -------- USER APPROVED -------- */
     case "USER_APPROVED":
       return {
-        subject: "User Approved | Ingrammicro Surface",
+        subject: "Your Account Is Now Active",
         html: baseLayout(
-          "Account Approved",
+          "New User Registration | Ingrammicro Surface",
           `
-          <p>Hello <strong>${data.name}</strong>,</p>
+          <p>Dear <strong>${data.name}</strong>,</p>
 
-          <p>Your account has been approved. You can now login.</p>
+          <p>
+            Thank you for signing up! Your account is now active and ready to use.
+          </p>
 
-          <p style="margin:25px 0;">
-            <a href="${data.loginUrl}"
-               style="background:#3ba1da;color:#ffffff;
-                      padding:10px 18px;text-decoration:none;
-                      border-radius:4px;display:inline-block;">
+          <p style="margin:30px 0;text-align:center;">
+            <a
+              href="${data.loginUrl}"
+              style="
+                background:#3ba1da;
+                color:#ffffff;
+                padding:12px 30px;
+                text-decoration:none;
+                border-radius:4px;
+                font-size:14px;
+                display:inline-block;
+              "
+            >
               Login Now
             </a>
           </p>
 
-          <p>We’re happy to have you with us.</p>
-
           <p>
             Regards,<br/>
             <strong>Your App Team</strong>
@@ -149,21 +203,18 @@ case "NEW_USER_REGISTRATION":
         ),
       };
 
-
- /* -------- USER rejected -------- */
+    /* -------- USER REJECTED -------- */
     case "USER_REJECTED":
       return {
         subject: "Your Account Has Been Rejected",
         html: baseLayout(
-          "Account Rejected",
+          "Account Rejected | Ingrammicro Surface",
           `
           <p>Hello <strong>${data.name}</strong>,</p>
 
-          <p>Your account has been reject. You cannot login.</p>
-
-          
-
-          <p>We’re happy to have you with us.</p>
+          <p>
+            Unfortunately, your account has been rejected and you cannot login.
+          </p>
 
           <p>
             Regards,<br/>
@@ -172,18 +223,19 @@ case "NEW_USER_REGISTRATION":
           `
         ),
       };
-
 
     /* -------- ORDER APPROVED -------- */
     case "ORDER_APPROVED":
       return {
         subject: "Order Approved",
         html: baseLayout(
-          "Order Approved",
+          "Order Approved | Ingrammicro Surface",
           `
           <p>Hello <strong>${data.name}</strong>,</p>
 
-          <p>Your order <strong>#${data.orderId}</strong> has been approved.</p>
+          <p>
+            Your order <strong>#${data.orderId}</strong> has been approved.
+          </p>
 
           <p>We will process it shortly.</p>
 
