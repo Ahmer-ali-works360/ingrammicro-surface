@@ -33,6 +33,18 @@ export default function CreateDemoKitPage() {
     fiveG: [] as string[],
   });
 
+  const [filterOptions, setFilterOptions] = useState({
+    formFactor: [] as string[],
+    processor: [] as string[],
+    screenSize: [] as string[],
+    memory: [] as string[],
+    storage: [] as string[],
+    copilot: [] as string[],
+    fiveG: [] as string[],
+  });
+
+  const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
+
   const router = useRouter();
   const { addToCart, openCart } = useCart();
   const { role } = useAuth();
@@ -56,7 +68,7 @@ export default function CreateDemoKitPage() {
       const { data, error } = await supabase
         .from("products")
         .select("*")
-        .order("id", { ascending: true });
+        .order("publish_date", { ascending: false });
 
       if (error) console.error("Error fetching products:", error);
       else setProducts(data || []);
@@ -67,6 +79,131 @@ export default function CreateDemoKitPage() {
     fetchProducts();
   }, []);
 
+  // ✅ DYNAMIC FILTER FETCHING WITH NULL FILTERING
+  useEffect(() => {
+    const fetchFilterOptions = async () => {
+      try {
+        // Fetch unique form_factor options
+        const { data: formFactorData, error: formFactorError } = await supabase
+          .from("products")
+          .select("form_factor");
+
+        // Remove null values and log data
+        const uniqueFormFactor = Array.from(new Set(formFactorData?.map((item: any) => item.form_factor)))
+          .filter((value) => value !== null);
+
+        console.log("Fetched form_factor data (after removing nulls):", uniqueFormFactor);
+
+        if (formFactorError) {
+          console.error("Error fetching form_factor:", formFactorError);
+        }
+
+        // Fetch unique processor options
+        const { data: processorData, error: processorError } = await supabase
+          .from("products")
+          .select("processor");
+
+        const uniqueProcessor = Array.from(new Set(processorData?.map((item: any) => item.processor)))
+          .filter((value) => value !== null);
+
+        console.log("Fetched processor data (after removing nulls):", uniqueProcessor);
+
+        if (processorError) {
+          console.error("Error fetching processor:", processorError);
+        }
+
+        // Fetch unique screen_size options
+        const { data: screenSizeData, error: screenSizeError } = await supabase
+          .from("products")
+          .select("screen_size");
+
+        const uniqueScreenSize = Array.from(new Set(screenSizeData?.map((item: any) => item.screen_size)))
+          .filter((value) => value !== null);
+
+        console.log("Fetched screen_size data (after removing nulls):", uniqueScreenSize);
+
+        if (screenSizeError) {
+          console.error("Error fetching screen_size:", screenSizeError);
+        }
+
+        // Fetch unique memory options
+        const { data: memoryData, error: memoryError } = await supabase
+          .from("products")
+          .select("memory");
+
+        const uniqueMemory = Array.from(new Set(memoryData?.map((item: any) => item.memory)))
+          .filter((value) => value !== null);
+
+        console.log("Fetched memory data (after removing nulls):", uniqueMemory);
+
+        if (memoryError) {
+          console.error("Error fetching memory:", memoryError);
+        }
+
+        // Fetch unique storage options
+        const { data: storageData, error: storageError } = await supabase
+          .from("products")
+          .select("storage");
+
+        const uniqueStorage = Array.from(new Set(storageData?.map((item: any) => item.storage)))
+          .filter((value) => value !== null);
+
+        console.log("Fetched storage data (after removing nulls):", uniqueStorage);
+
+        if (storageError) {
+          console.error("Error fetching storage:", storageError);
+        }
+
+        // Fetch unique copilot options
+        const { data: copilotData, error: copilotError } = await supabase
+          .from("products")
+          .select("copilot");
+
+        const uniqueCopilot = Array.from(new Set(copilotData?.map((item: any) => (item.copilot ? "Yes" : "No"))))
+          .filter((value) => value !== null);
+
+        console.log("Fetched copilot data (after removing nulls):", uniqueCopilot);
+
+        if (copilotError) {
+          console.error("Error fetching copilot:", copilotError);
+        }
+
+        // Fetch unique 5G options
+        const { data: fiveGData, error: fiveGError } = await supabase
+          .from("products")
+          .select("five_g");
+
+        const uniqueFiveG = Array.from(new Set(fiveGData?.map((item: any) => (item.five_g ? "Yes" : "No"))))
+          .filter((value) => value !== null);
+
+        console.log("Fetched fiveG data (after removing nulls):", uniqueFiveG);
+
+        if (fiveGError) {
+          console.error("Error fetching fiveG:", fiveGError);
+        }
+
+        // Update filter options in the state
+        setFilterOptions({
+          formFactor: uniqueFormFactor,
+          processor: uniqueProcessor,
+          screenSize: uniqueScreenSize,
+          memory: uniqueMemory,
+          storage: uniqueStorage,
+          copilot: uniqueCopilot,
+          fiveG: uniqueFiveG,
+        });
+
+        console.log("Final filter options:", filterOptions);
+
+      } catch (error) {
+        console.error("Error fetching filter options:", error);
+      }
+    };
+
+    fetchFilterOptions();
+  }, []);
+
+  // ✅ HANDLE FILTER CHANGE
   const handleFilterChange = (category: string, value: string) => {
     setSelectedFilters((prev) => {
       const list = prev[category as keyof typeof prev];
@@ -83,10 +220,10 @@ export default function CreateDemoKitPage() {
   const filteredProducts = products
     .filter((product) => {
       if (
-  product.status === "Private" &&
-  !["admin", "shop manager"].includes(role ?? "")
-)
-  return false;
+        product.status === "Private" &&
+        !["admin", "shop manager"].includes(role ?? "")
+      )
+        return false;
 
       if (
         selectedFilters.formFactor.length &&
@@ -156,20 +293,33 @@ export default function CreateDemoKitPage() {
           </div>
 
           <div className="max-w-7xl mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-[240px_1fr] gap-6">
-            {/* Filters */}
-            <aside className="bg-white rounded-2xl shadow p-5 space-y-4">
-              <FilterGroup title="Form Factor" options={["2 in 1's", "Accessories", "Notebooks"]} category="formFactor" selectedFilters={selectedFilters} onChange={handleFilterChange} />
-              <FilterGroup title="Processor" options={["Intel® Core™ Ultra 5","Intel® Core™ Ultra 7","Snapdragon X Elite","Snapdragon X Plus"]} category="processor" selectedFilters={selectedFilters} onChange={handleFilterChange} />
-              <FilterGroup title="Screen Size" options={['12"','13"','13.8"','15"']} category="screenSize" selectedFilters={selectedFilters} onChange={handleFilterChange} />
-              <FilterGroup title="Memory" options={["16GB","32GB"]} category="memory" selectedFilters={selectedFilters} onChange={handleFilterChange} />
-              <FilterGroup title="Storage" options={["256GB","512GB","1TB"]} category="storage" selectedFilters={selectedFilters} onChange={handleFilterChange} />
-              <FilterGroup title="Copilot+ PC" options={["Yes"]} category="copilot" selectedFilters={selectedFilters} onChange={handleFilterChange} />
-              <FilterGroup title="5G Enabled" options={["Yes"]} category="fiveG" selectedFilters={selectedFilters} onChange={handleFilterChange} />
+            {/* Mobile Filter Button */}
+            <div className="lg:hidden mb-4 flex justify-end">
+              <button
+                className="bg-yellow-400 text-black px-4 py-2 rounded text-sm hover:bg-yellow-500 transition"
+                onClick={() => setMobileFilterOpen(true)}
+              >
+                Filters
+              </button>
+            </div>
+
+            {/* Filters for desktop */}
+            <aside className="hidden lg:block bg-white rounded-2xl shadow p-5 space-y-4">
+              {Object.keys(filterOptions).map((category) => (
+                <FilterGroup
+                  key={category}
+                  title={category.replace(/([A-Z])/g, " $1")}
+                  options={filterOptions[category] || []}
+                  category={category}
+                  selectedFilters={selectedFilters}
+                  onChange={handleFilterChange}
+                />
+              ))}
             </aside>
 
             {/* Products */}
             <section className="flex flex-col">
-              {(role === "admin"|| role === "shop manager") && (
+              {(role === "admin" || role === "shop manager") && (
                 <div className="flex justify-end mb-4">
                   <button
                     onClick={() => router.push("/add-product")}
@@ -267,6 +417,33 @@ export default function CreateDemoKitPage() {
               )}
             </section>
           </div>
+
+          {/* Mobile Filter Drawer */}
+          {mobileFilterOpen && (
+            <div className="fixed inset-0 bg-black bg-opacity-40 z-50 flex justify-end">
+              <div className="bg-white w-64 p-5 overflow-y-auto h-full">
+                <div className="flex justify-between items-center mb-4">
+                  <h2 className="text-lg font-semibold">Filters</h2>
+                  <button
+                    className="text-gray-500 hover:text-gray-700"
+                    onClick={() => setMobileFilterOpen(false)}
+                  >
+                    ✕
+                  </button>
+                </div>
+                {Object.keys(filterOptions).map((category) => (
+                  <FilterGroup
+                    key={category}
+                    title={category.replace(/([A-Z])/g, " $1")}
+                    options={filterOptions[category] || []}
+                    category={category}
+                    selectedFilters={selectedFilters}
+                    onChange={handleFilterChange}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
         </>
       )}
     </div>
