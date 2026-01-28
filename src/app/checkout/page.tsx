@@ -5,27 +5,43 @@ import { supabase } from "@/lib/supabaseClient";
 import { useCart } from "@/context/CartContext";
 import { useRouter } from "next/navigation";
 
-export default function CheckoutPage() {
-  const { cartItems, totalQuantity } = useCart();
-  const router = useRouter();
-   const [authLoading, setAuthLoading] = useState(true);
-     useEffect(() => {
-       supabase.auth.getSession().then(({ data }) => {
-         if (!data.session) {
-           router.replace("/login?redirect=/checkout");
-         } else {
-           setAuthLoading(false);
-         }
-       });
-     }, [router]);
+/* ================= TYPES ================= */
+type CheckoutForm = {
+  sellerName: string;
+  sellerEmail: string;
+  units: string;
+  budget: number;
+  revenue: string;
+  ingramAccount: string;
+  quote: string;
+  segment: string;
+  manufacturer: string;
+  isReseller: string;
+  companyName: string;
+  contactName: string;
+  contactEmail: string;
+  address: string;
+  city: string;
+  state: string;
+  zip: string;
+  deliveryDate: string;
+  notes: string;
+};
 
-  const [form, setForm] = useState({
+export default function CheckoutPage() {
+  const router = useRouter();
+  const { cartItems, totalQuantity, clearCart } = useCart();
+
+  const [authLoading, setAuthLoading] = useState<boolean>(true);
+  const [successModal, setSuccessModal] = useState<boolean>(false);
+  const [errorModal, setErrorModal] = useState<string>("");
+
+  const [form, setForm] = useState<CheckoutForm>({
     sellerName: "",
     sellerEmail: "",
-    opportunityName: "",
-    units: "",               // ✅ Device Opportunity Size
-    budget: 1800,            // 🔒 fixed
-    revenue: "",             // ✅ auto calculated
+    units: "",
+    budget: 1800,
+    revenue: "",
     ingramAccount: "",
     quote: "",
     segment: "",
@@ -42,94 +58,144 @@ export default function CheckoutPage() {
     notes: ""
   });
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalMessage, setModalMessage] = useState("");
+  // ---------------- AUTH GUARD ----------------
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data } = await supabase.auth.getSession();
+      if (!data.session) {
+        router.replace("/login?redirect=/checkout");
+      } else {
+        setAuthLoading(false);
+      }
+    };
+    checkAuth();
+  }, [router]);
 
+  // ---------------- USER EMAIL (TS SAFE) ----------------
   useEffect(() => {
     const fetchUser = async () => {
       const { data, error } = await supabase.auth.getUser();
-      if (error) {
-        console.log(error.message);
-        return;
-      }
+      if (error) return;
 
-      if (data?.user?.email) {
-        setForm(prev => ({ ...prev, sellerEmail: data.user.email || "" }));
-      }
+      const user = data?.user;
+      if (!user) return;
+
+      setForm(prev => ({
+        ...prev,
+        sellerEmail: user.email ?? "",
+      }));
     };
 
     fetchUser();
   }, []);
 
-  // ---------------------------
-  // Checkout Guard Logic
-  // ---------------------------
+  // ---------------- CART GUARD ----------------
   useEffect(() => {
-    // cart empty
-    if (cartItems.length === 0) {
-      setModalMessage("Your cart is empty. Please add product(s) first.");
-      setIsModalOpen(true);
-      return;
-    }
+    if (successModal) return;
 
-    // quantity exceeded
-    if (totalQuantity > 3) {
-      setModalMessage(
-        "Your cart limit exceeded. Please update cart (max 3 total items)."
-      );
-      setIsModalOpen(true);
-      return;
+    if (cartItems.length === 0) {
+      setErrorModal("Your cart is empty. Please add product(s) first.");
+    } else if (totalQuantity > 3) {
+      setErrorModal("Cart limit exceeded. Maximum 3 total items allowed.");
+    } else {
+      setErrorModal("");
     }
-  }, [cartItems, totalQuantity]);
+  }, [cartItems, totalQuantity, successModal]);
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >
   ) => {
     const { name, value } = e.target;
 
-    // ✅ AUTO CALCULATION LOGIC
     if (name === "units") {
       const units = Number(value) || 0;
-      const revenue = units * 1800;
-
       setForm(prev => ({
         ...prev,
         units: value,
-        revenue: revenue.toString()
+        revenue: (units * 1800).toString()
       }));
     } else {
-      setForm(prev => ({ ...prev, [name]: value }));
+      setForm(prev => ({
+        ...prev,
+        [name]: value
+      }));
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // ---------------- SUBMIT ----------------
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log(form);
+
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user;
+    if (!user) return;
+
+    const { error } = await supabase.from("orders").insert([
+      {
+        user_id: user.id,
+        seller_name: form.sellerName,
+        seller_email: form.sellerEmail,
+        units: Number(form.units),
+        budget: form.budget,
+        revenue: Number(form.revenue),
+        ingram_account: form.ingramAccount,
+        quote: form.quote,
+        segment: form.segment,
+        manufacturer: form.manufacturer,
+        is_reseller: form.isReseller === "yes",
+        company_name: form.companyName,
+        contact_name: form.contactName,
+        contact_email: form.contactEmail,
+        address: form.address,
+        city: form.city,
+        state: form.state,
+        zip: form.zip,
+        delivery_date: form.deliveryDate || null,
+        notes: form.notes,
+        cart_items: cartItems,
+        status: "pending"
+      },
+    ]);
+
+    if (error) {
+      setErrorModal("Something went wrong while placing order.");
+      return;
+    }
+
+    setSuccessModal(true); // ✅ cart yahan clear nahi ho raha
   };
 
-  // ---------------------------
-  // If modal is open, don't show checkout form
-  // ---------------------------
-  if (isModalOpen) {
-    return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center">
-        <div className="absolute inset-0 bg-black/40" />
+  if (authLoading) return null;
 
-        <div className="bg-white rounded-lg p-6 z-60 w-11/12 max-w-md">
-          <h2 className="text-lg font-semibold mb-2">Attention</h2>
-          <p className="text-gray-700 mb-4">{modalMessage}</p>
-          <button
-            onClick={() => router.back()}
-            className="w-full bg-blue-500 text-white py-2 rounded"
-          >
-            Back
-          </button>
-        </div>
-      </div>
+  // ---------------- ERROR MODAL ----------------
+  if (errorModal) {
+    return (
+      <Modal
+        title="Attention"
+        message={errorModal}
+        buttonText="Go Back"
+        onClose={() => router.back()}
+      />
     );
   }
 
-   if (authLoading) return null;
+  // ---------------- SUCCESS MODAL ----------------
+  if (successModal) {
+    return (
+      <Modal
+        title="🎉 Order Placed!"
+        message="Your order has been submitted successfully."
+        buttonText="Continue"
+        onClose={() => {
+          clearCart();              // ✅ CART EMPTY HERE
+          router.push("/thank-you");
+        }}
+      />
+    );
+  }
+
 
   return (
     <div className="max-w-6xl mx-auto p-4">
@@ -230,15 +296,21 @@ export default function CheckoutPage() {
                 value={form.segment}
                 onChange={handleChange}
                 className="border border-gray-300 p-2 rounded w-full"
+                required
               >
-                <option value="A">Corporate West</option>
-                <option value="B">Corporate Central</option>
-                <option value="C">Corporate East</option>
-                <option value="D">K-12</option>
-                <option value="E">Hi-Ed</option>
-                <option value="F">Healthcare</option>
-                <option value="G">CoreTrust</option>
+                <option value="" disabled hidden>
+                  Select Segment *
+                </option>
+
+                <option value="Corporate West">Corporate West</option>
+                <option value="Corporate Central">Corporate Central</option>
+                <option value="Corporate East">Corporate East</option>
+                <option value="K-12">K-12</option>
+                <option value="Hi-Ed">Hi-Ed</option>
+                <option value="Healthcare">Healthcare</option>
+                <option value="CoreTrust">CoreTrust</option>
               </select>
+
             </div>
 
             <div>
@@ -423,8 +495,36 @@ export default function CheckoutPage() {
             Place order
           </button>
         </div>
-
       </form>
+    </div>
+  );
+}
+
+// ---------------- MODAL COMPONENT ----------------
+function Modal({
+  title,
+  message,
+  buttonText,
+  onClose,
+}: {
+  title: string;
+  message: string;
+  buttonText: string;
+  onClose: () => void;
+}) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      <div className="absolute inset-0 bg-black/40" />
+      <div className="bg-white rounded-lg p-6 z-60 w-11/12 max-w-md text-center">
+        <h2 className="text-lg font-semibold mb-2">{title}</h2>
+        <p className="text-gray-700 mb-4">{message}</p>
+        <button
+          onClick={onClose}
+          className="w-full bg-blue-500 text-white py-2 rounded"
+        >
+          {buttonText}
+        </button>
+      </div>
     </div>
   );
 }

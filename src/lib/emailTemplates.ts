@@ -97,7 +97,7 @@ export function getEmailTemplate(type: string, data: any): EmailTemplate {
 
           <p style="margin:25px 0;text-align:center;">
             <a
-              href="http://localhost:3000/login"
+              href="http://localhost:3000/users"
               style="
                 background:#3ba1da;
                 color:#ffffff;
@@ -197,7 +197,7 @@ export function getEmailTemplate(type: string, data: any): EmailTemplate {
 
           <p>
             Regards,<br/>
-            <strong>Your App Team</strong>
+            <strong>Ingrammicro Surface Team</strong>
           </p>
           `
         ),
@@ -218,7 +218,7 @@ export function getEmailTemplate(type: string, data: any): EmailTemplate {
 
           <p>
             Regards,<br/>
-            <strong>Your App Team</strong>
+            <strong>Ingrammicro Surface Team</strong>
           </p>
           `
         ),
@@ -241,7 +241,7 @@ export function getEmailTemplate(type: string, data: any): EmailTemplate {
 
           <p>
             Regards,<br/>
-            <strong>Your App Team</strong>
+            <strong>Ingrammicro Surface Team</strong>
           </p>
           `
         ),

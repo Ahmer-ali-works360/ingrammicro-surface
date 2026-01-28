@@ -142,7 +142,7 @@ function wait(ms: number) {
     });
 
 
-    // ⏳ WAIT 4.5 seconds (Mailtrap free limit)
+    // ⏳ WAIT 15 seconds (Mailtrap free limit)
 await wait(15000);
     // 👉 User confirmation (registration received)
     await sendEmail({
@@ -160,128 +160,133 @@ await wait(15000);
   }
 
   return (
-    <div className="relative min-h-screen flex flex-col items-center pt-24 pb-32 overflow-hidden">
-      <div
-        className="absolute inset-0 bg-center bg-cover z-0"
-        style={{ backgroundImage: "url('/computer-mouse-object-background.jpg')" }}
-      />
-      <div className="absolute inset-0 bg-white opacity-95 z-0" />
+  <div className="relative min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 py-16 overflow-hidden">
+    {/* Background */}
+    <div
+      className="absolute inset-0 bg-center bg-cover z-0"
+      style={{ backgroundImage: "url('/computer-mouse-object-background.jpg')" }}
+    />
+    <div className="absolute inset-0 bg-white opacity-95 z-0" />
 
-      <div className="relative z-10 w-[480px] bg-white border-[10px] border-[#F9F9F9] p-12 rounded-[6px] animate-slide-up">
-        <h1 className="text-[28px] font-semibold text-gray-900 mb-6 text-center">
-          Registration
-        </h1>
+    {/* Form Card */}
+    <div className="relative z-10 w-full max-w-[480px] bg-white border-[8px] sm:border-[10px] border-[#F9F9F9] 
+      p-6 sm:p-8 md:p-10 lg:p-12 rounded-[6px] animate-slide-up">
+      
+      <h1 className="text-[22px] sm:text-[24px] md:text-[28px] font-semibold text-gray-900 mb-6 text-center">
+        Registration
+      </h1>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <div>
-            <label className="block text-sm text-gray-700 mb-1">
-              Email (Username)
-            </label>
-            <input
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full border border-gray-300 px-3 py-2 text-sm rounded-[4px]"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm text-gray-700 mb-1">
-              First Name
-            </label>
-            <input
-              type="text"
-              required
-              value={firstName}
-              onChange={(e) => setFirstName(e.target.value)}
-              className="w-full border border-gray-300 px-3 py-2 text-sm rounded-[4px]"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm text-gray-700 mb-1">
-              Last Name
-            </label>
-            <input
-              type="text"
-              required
-              value={lastName}
-              onChange={(e) => setLastName(e.target.value)}
-              className="w-full border border-gray-300 px-3 py-2 text-sm rounded-[4px]"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm text-gray-700 mb-1">
-              Password
-            </label>
-            <input
-              type="password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full border border-gray-300 px-3 py-2 text-sm rounded-[4px]"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm text-gray-700 mb-1">
-              Confirm Password
-            </label>
-            <input
-              type="password"
-              required
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              className="w-full border border-gray-300 px-3 py-2 text-sm rounded-[4px]"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm text-gray-700 mb-1">
-              Reseller
-            </label>
-            <input
-              type="text"
-              required
-              value={reseller}
-              onChange={(e) => setReseller(e.target.value)}
-              className="w-full border border-gray-300 px-3 py-2 text-sm rounded-[4px]"
-            />
-          </div>
-
-          <div className="flex justify-center">
-            <button
-              type="submit"
-              disabled={loading}
-              className="bg-[#3ba1da] text-white py-[11px] px-8 text-[14px] font-[500] rounded-[4px] hover:bg-[#44b0ec]"
-            >
-              {loading ? "Registering..." : "Register"}
-            </button>
-          </div>
-        </form>
-      </div>
-
-      {showSuccessModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-white w-[420px] rounded-md p-6 shadow-lg text-center animate-fade-in">
-            <h2 className="text-[18px] font-semibold text-gray-900 mb-3">
-              Registration Successful
-            </h2>
-            <p className="text-sm text-gray-600 mb-6">
-              User registration successful. You can login when admin approves
-              your registration.
-            </p>
-            <button
-              onClick={() => router.push("/")}
-              className="bg-[#3ba1da] text-white px-6 py-2 text-sm rounded hover:bg-[#44b0ec]"
-            >
-              OK
-            </button>
-          </div>
+      <form onSubmit={handleSubmit} className="space-y-5">
+        <div>
+          <label className="block text-sm text-gray-700 mb-1">
+            Email (Username)
+          </label>
+          <input
+            type="email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full border border-gray-300 px-3 py-2 text-sm rounded-[4px]"
+          />
         </div>
-      )}
+
+        <div>
+          <label className="block text-sm text-gray-700 mb-1">
+            First Name
+          </label>
+          <input
+            type="text"
+            required
+            value={firstName}
+            onChange={(e) => setFirstName(e.target.value)}
+            className="w-full border border-gray-300 px-3 py-2 text-sm rounded-[4px]"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm text-gray-700 mb-1">
+            Last Name
+          </label>
+          <input
+            type="text"
+            required
+            value={lastName}
+            onChange={(e) => setLastName(e.target.value)}
+            className="w-full border border-gray-300 px-3 py-2 text-sm rounded-[4px]"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm text-gray-700 mb-1">
+            Password
+          </label>
+          <input
+            type="password"
+            required
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="w-full border border-gray-300 px-3 py-2 text-sm rounded-[4px]"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm text-gray-700 mb-1">
+            Confirm Password
+          </label>
+          <input
+            type="password"
+            required
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            className="w-full border border-gray-300 px-3 py-2 text-sm rounded-[4px]"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm text-gray-700 mb-1">
+            Reseller
+          </label>
+          <input
+            type="text"
+            required
+            value={reseller}
+            onChange={(e) => setReseller(e.target.value)}
+            className="w-full border border-gray-300 px-3 py-2 text-sm rounded-[4px]"
+          />
+        </div>
+
+        <div className="flex justify-center">
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full sm:w-auto bg-[#3ba1da] text-white py-[11px] px-8 text-[14px] font-[500] rounded-[4px] hover:bg-[#44b0ec]"
+          >
+            {loading ? "Registering..." : "Register"}
+          </button>
+        </div>
+      </form>
     </div>
-  );
+
+    {/* Success Modal */}
+    {showSuccessModal && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+        <div className="bg-white w-full max-w-[420px] rounded-md p-6 shadow-lg text-center animate-fade-in">
+          <h2 className="text-[18px] font-semibold text-gray-900 mb-3">
+            Registration Successful
+          </h2>
+          <p className="text-sm text-gray-600 mb-6">
+            User registration successful. You can login when admin approves
+            your registration.
+          </p>
+          <button
+            onClick={() => router.push("/")}
+            className="w-full sm:w-auto bg-[#3ba1da] text-white px-6 py-2 text-sm rounded hover:bg-[#44b0ec]"
+          >
+            OK
+          </button>
+        </div>
+      </div>
+    )}
+  </div>
+);
 }

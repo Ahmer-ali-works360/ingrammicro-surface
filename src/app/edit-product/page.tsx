@@ -3,7 +3,6 @@
 import { useState, useRef, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
-import slugify from "slugify";
 import { useAuthRole } from "../context/AuthContext";
 
 type SelectedState = {
@@ -12,7 +11,7 @@ type SelectedState = {
   generation: string;
   memory: string;
   storage: string;
-  fiveg: string;
+  fiveg: string;   // 🔥 SAME AS ADD PRODUCT
   copilot: string;
   status: string;
   OS: string;
@@ -23,20 +22,20 @@ type SelectedState = {
 export default function EditProductPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const productId = searchParams.get("id");
+  const productIdRaw = searchParams.get("id");
+  const productId = productIdRaw ? Number(productIdRaw) : null;
 
   /* ================= ROLE CHECK ================= */
   const { loading, isAllowed } = useAuthRole(["admin", "shop manager"]);
 
   useEffect(() => {
-    if (!loading && !isAllowed) {
-      router.replace("/login");
-    }
+    if (!loading && !isAllowed) router.replace("/login");
   }, [loading, isAllowed, router]);
+
 
   useEffect(() => {
     if (!productId) {
-      alert("Invalid product");
+      alert("Invalid product ID");
       router.push("/create-demo-kit");
     }
   }, [productId, router]);
@@ -44,7 +43,9 @@ export default function EditProductPage() {
   /* ================= STATES ================= */
 
   const [showSuccess, setShowSuccess] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // 👇 UI DEPENDENCIES (DO NOT REMOVE)
   const [customBrand, setCustomBrand] = useState(false);
   const [customProcessor, setCustomProcessor] = useState(false);
   const [customGeneration, setCustomGeneration] = useState(false);
@@ -79,16 +80,13 @@ export default function EditProductPage() {
 
   const [thumbnail, setThumbnail] = useState<File | null>(null);
   const [gallery, setGallery] = useState<File[]>([]);
-
   const [existingThumbnail, setExistingThumbnail] = useState<string | null>(null);
   const [existingGallery, setExistingGallery] = useState<string[]>([]);
-
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const thumbnailRef = useRef<HTMLInputElement>(null);
   const galleryRef = useRef<HTMLInputElement>(null);
 
-  /* ================= HANDLERS ================= */
+  /* ================= HELPERS ================= */
 
   const handleSelect = (field: keyof SelectedState, value: string) => {
     setSelected((prev) => ({
@@ -97,35 +95,27 @@ export default function EditProductPage() {
     }));
   };
 
-  const handleThumbnailClick = () => {
-    thumbnailRef.current?.click();
-  };
-
-  const handleGalleryClick = () => {
-    galleryRef.current?.click();
-  };
+  const handleThumbnailClick = () => thumbnailRef.current?.click();
+  const handleGalleryClick = () => galleryRef.current?.click();
 
   const handleThumbnailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setThumbnail(e.target.files[0]);
-    }
+    if (e.target.files?.[0]) setThumbnail(e.target.files[0]);
   };
 
   const handleGalleryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const files = Array.from(e.target.files);
-      setGallery((prev) => {
-        const combined = [...prev, ...files];
-        if (combined.length > 5) {
-          alert("Maximum 5 images allowed");
-          return combined.slice(0, 5);
-        }
-        return combined;
-      });
-    }
+    if (!e.target.files) return;
+    const files = Array.from(e.target.files);
+    setGallery((prev) => {
+      const combined = [...prev, ...files];
+      if (combined.length > 5) {
+        alert("Maximum 5 images allowed");
+        return combined.slice(0, 5);
+      }
+      return combined;
+    });
   };
 
-  /* ================= PREFILL DATA ================= */
+  /* ================= PREFILL ================= */
 
   useEffect(() => {
     if (!productId) return;
@@ -143,12 +133,14 @@ export default function EditProductPage() {
         return;
       }
 
+      console.log("🟢 PREFILL PRODUCT:", data);
+
       setProductName(data.product_name || "");
       setSku(data.sku || "");
       setTechnologies(data.technologies || "");
-      setTotalInventory(data.inventory || "");
+      setTotalInventory(data.inventory ?? "");
       setInventoryType(data.inventory_type || "");
-      setStockQuantity(data.stock_quantity || "");
+      setStockQuantity(data.stock_quantity ?? "");
       setPublishDate(data.publish_date || "");
       setDescription(data.description || "");
 
@@ -176,18 +168,23 @@ export default function EditProductPage() {
   /* ================= SUBMIT ================= */
 
   const handleSubmit = async () => {
-    if (isSubmitting) return;
+    if (isSubmitting || !productId) return;
     setIsSubmitting(true);
 
     try {
+      console.log("🟡 EDIT SUBMIT START");
+      console.log("Product ID:", productId);
+      console.log("Selected:", selected);
+      console.log("Stock Qty:", stockQuantity);
+
       let thumbnailUrl = existingThumbnail;
       let galleryUrls = [...existingGallery];
 
       if (thumbnail) {
-        const safeName = thumbnail.name.replace(/\s/g, "_");
+        const safe = thumbnail.name.replace(/\s/g, "_");
         const { data } = await supabase.storage
           .from("product-images")
-          .upload(`thumbnails/${Date.now()}_${safeName}`, thumbnail);
+          .upload(`thumbnails/${Date.now()}_${safe}`, thumbnail);
 
         thumbnailUrl = supabase.storage
           .from("product-images")
@@ -195,21 +192,20 @@ export default function EditProductPage() {
       }
 
       for (const file of gallery) {
-        const safeName = file.name.replace(/\s/g, "_");
+        const safe = file.name.replace(/\s/g, "_");
         const { data } = await supabase.storage
           .from("product-images")
-          .upload(`gallery-images/${Date.now()}_${safeName}`, file);
+          .upload(`gallery-images/${Date.now()}_${safe}`, file);
 
-        const url = supabase.storage
-          .from("product-images")
-          .getPublicUrl(data!.path).data.publicUrl;
-
-        galleryUrls.push(url);
+        galleryUrls.push(
+          supabase.storage
+            .from("product-images")
+            .getPublicUrl(data!.path).data.publicUrl
+        );
       }
 
       const updatedProduct = {
         product_name: productName,
-        slug: slugify(productName, { lower: true, strict: true }),
         sku,
         brand: selected.brand || null,
         form_factor: selected.formFactor || null,
@@ -223,25 +219,33 @@ export default function EditProductPage() {
         OS: selected.OS || null,
         screen_size: selected.screen || null,
         technologies: technologies || null,
-        inventory: totalInventory || null,
+        inventory: totalInventory === "" ? null : Number(totalInventory),
         inventory_type: inventoryType || null,
-        stock_quantity: stockQuantity || null,
+        stock_quantity:
+          stockQuantity === "" ? null : Number(stockQuantity),
         publish_date: publishDate || null,
         description: description || null,
         thumbnail_url: thumbnailUrl,
-        gallery_urls: galleryUrls,
+        gallery_urls: galleryUrls.length ? galleryUrls : null,
       };
 
-      const { error } = await supabase
+      console.log("🟠 UPDATE PAYLOAD:", updatedProduct);
+
+      const { data, error } = await supabase
         .from("products")
         .update(updatedProduct)
-        .eq("id", productId);
+        .eq("id", productId)
+        .select();
 
-      if (error) throw error;
+      console.log("🔵 UPDATE RESPONSE:", data, error);
+
+      if (error || !data || data.length === 0) {
+        throw new Error("DB UPDATE FAILED (0 rows affected)");
+      }
 
       setShowSuccess(true);
-
     } catch (err: any) {
+      console.error("🔴 EDIT ERROR:", err);
       alert(err.message);
     } finally {
       setIsSubmitting(false);
@@ -250,7 +254,9 @@ export default function EditProductPage() {
 
   if (loading || !isAllowed) return null;
 
-  /* ================= RETURN (UI SAME AS ADD PAGE) ================= */
+  /* ================= RETURN (UI SAME AS BEFORE) ================= */
+
+
 
 
   /* ================= UI (SAME AS ADD PAGE) ================= */
