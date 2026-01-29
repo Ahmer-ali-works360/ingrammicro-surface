@@ -42,86 +42,129 @@ export default function AdminOrderDetailPage() {
   const router = useRouter();
   const { orderId } = useParams() as { orderId: string };
 
+  console.log("🧩 ORDER ID FROM URL:", orderId);
+
   const [authLoading, setAuthLoading] = useState(true);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
   const [order, setOrder] = useState<OrderRow | null>(null);
 
-  /* ================= AUTH CHECK (UNCHANGED) ================= */
+  /* ================= AUTH CHECK ================= */
   useEffect(() => {
     const checkAccess = async () => {
+      console.log("🔐 Checking session...");
+
       const { data } = await supabase.auth.getSession();
+      console.log("👤 Session data:", data?.session?.user);
+
       if (!data.session) {
+        console.log("❌ No session, redirecting to login");
         router.replace("/login");
         return;
       }
 
-      const { data: profile } = await supabase
+      const { data: profile, error } = await supabase
         .from("profiles")
         .select("role")
         .eq("id", data.session.user.id)
         .single();
 
+      console.log("👮 User profile:", profile, "Error:", error);
+
       if (!profile || !["admin", "program_manager"].includes(profile.role)) {
+        console.log("⛔ Not admin / PM, redirecting");
         router.replace("/");
         return;
       }
 
+      console.log("✅ Auth OK");
       setAuthLoading(false);
     };
 
     checkAccess();
   }, [router]);
 
-  /* ================= FETCH ORDER ================= */
+  /* ================= FETCH ORDER (API BASED) ================= */
   const fetchOrder = async () => {
+    console.log("📡 Fetching order from API...");
+    console.log("➡️ API URL:", `/api/admin-orders/${orderId}`);
+
     setLoading(true);
 
-    const { data, error } = await supabase
-      .from("orders")
-      .select("*")
-      .eq("id", orderId)
-      .single();
+    try {
+      const res = await fetch(`/api/admin-orders/${orderId}`);
+      console.log("📥 API response status:", res.status);
 
-    if (!error && data) {
-      setOrder(data as OrderRow);
+      const result = await res.json();
+      console.log("📦 API response body:", result);
+
+      if (res.ok && result.order) {
+        console.log("✅ Order fetched successfully");
+        setOrder(result.order);
+      } else {
+        console.log("❌ Order NOT found from API");
+        setOrder(null);
+      }
+    } catch (err) {
+      console.error("🔥 Fetch order exception:", err);
+      setOrder(null);
     }
 
     setLoading(false);
   };
 
   useEffect(() => {
-    if (orderId) fetchOrder();
-  }, [orderId]);
+    console.log("🔁 useEffect fired", { orderId, authLoading });
+
+    if (orderId && !authLoading) {
+      fetchOrder();
+    }
+  }, [orderId, authLoading]);
 
   /* ================= UPDATE STATUS ================= */
   const updateStatus = async (newStatus: "approved" | "rejected") => {
-  if (!order) return;
+    if (!order) {
+      console.log("❌ No order in state, cannot update");
+      return;
+    }
 
-  setUpdating(true);
+    console.log("✏️ Updating order status:", {
+      orderId: order.id,
+      newStatus,
+    });
 
-  const { error } = await supabase
-    .from("orders")
-    .update({ status: newStatus })
-    .eq("id", order.id);
+    setUpdating(true);
 
-  setUpdating(false);
+    const { error } = await supabase
+      .from("orders")
+      .update({ status: newStatus })
+      .eq("id", order.id);
 
-  if (error) {
-    console.error("STATUS UPDATE ERROR:", error);
-    alert(error.message);
-    return;
-  }
+    setUpdating(false);
 
-  router.push("/orders");
-};
+    if (error) {
+      console.error("🔥 STATUS UPDATE ERROR:", error);
+      alert(error.message);
+      return;
+    }
 
+    console.log("✅ Status updated, redirecting to orders list");
+    router.push("/orders");
+  };
+
+  /* ================= STATES ================= */
+  console.log("📊 PAGE STATE:", {
+    authLoading,
+    loading,
+    hasOrder: !!order,
+  });
 
   if (authLoading || loading) {
     return <div className="p-8 text-center">Loading...</div>;
   }
 
   if (!order) {
+    console.log("🚫 Rendering: Order not found");
     return <div className="p-8 text-center">Order not found</div>;
   }
 
@@ -131,7 +174,7 @@ export default function AdminOrderDetailPage() {
       : order.status === "rejected"
       ? "bg-red-100 text-red-700"
       : "bg-yellow-100 text-yellow-700";
-
+      
   /* ================= UI ================= */
   return (
     <div className="max-w-6xl mx-auto p-4 space-y-6">

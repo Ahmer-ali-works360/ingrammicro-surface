@@ -1,13 +1,13 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { supabase } from "@/lib/supabaseClient";
 import * as XLSX from "xlsx";
 import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabaseClient";
 
 type Order = {
   id: string;
-   order_number: number;   
+  order_number: number;
   seller_email: string;
   revenue: number;
   delivery_date: string | null;
@@ -56,18 +56,22 @@ export default function AdminOrdersPage() {
   }, [router]);
 
   // ----------------------------
-  // Fetch Orders
+  // ✅ Fetch Orders (ADMIN API)
   // ----------------------------
   const fetchOrders = async () => {
     setLoading(true);
 
-    const { data, error } = await supabase
-      .from("orders")
-      .select("id, order_number,seller_email, revenue, delivery_date, created_at, status")
-      .order("created_at", { ascending: false });
+    try {
+      const res = await fetch("/api/admin-orders");
+      const result = await res.json();
 
-    if (!error && data) {
-      setOrders(data as Order[]);
+      if (res.ok && result.orders) {
+        setOrders(result.orders as Order[]);
+      } else {
+        console.error("Failed to fetch orders:", result);
+      }
+    } catch (err) {
+      console.error("Fetch orders error:", err);
     }
 
     setLoading(false);
@@ -154,14 +158,13 @@ export default function AdminOrdersPage() {
       <div className="overflow-x-auto rounded-lg shadow border border-gray-200 bg-white">
         <table className="w-full text-sm">
           <thead className="bg-gradient-to-t from-gray-100 via-gray-200 to-gray-300 text-gray-700 border-b">
-
             <tr>
               <th colSpan={6} className="px-4 py-4 text-center text-3xl font-semibold">
                 Orders List
               </th>
             </tr>
           </thead>
-          
+
           <thead className="bg-gradient-to-t from-gray-100 via-gray-200 to-gray-300 text-gray-700 border-b">
             <tr>
               <th className="px-4 py-3 text-left">Order ID</th>
@@ -197,19 +200,20 @@ export default function AdminOrdersPage() {
                   <td
                     className="px-4 py-3 font-medium text-blue-600 cursor-pointer underline"
                     onClick={() => router.push(`/orders/${order.id}`)}
-                    >
+                  >
                     #{order.order_number}
-                    </td>
+                  </td>
                   <td className="px-4 py-3">{order.seller_email}</td>
                   <td className="px-4 py-3">${order.revenue}</td>
                   <td className="px-4 py-3">
                     <span
-                      className={`px-3 py-1 rounded-full text-xs font-medium ${order.status === "approved"
-                        ? "bg-gray-300 text-gray-800"
-                        : order.status === "rejected"
-                          ? " text-black"
+                      className={`px-3 py-1 rounded-full text-xs font-medium ${
+                        order.status === "approved"
+                          ? "bg-gray-300 text-gray-800"
+                          : order.status === "rejected"
+                          ? "text-black"
                           : "text-gray-400"
-                        }`}
+                      }`}
                     >
                       {order.status}
                     </span>

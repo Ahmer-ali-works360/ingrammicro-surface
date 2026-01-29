@@ -58,6 +58,11 @@ export default function CheckoutPage() {
     notes: ""
   });
 
+
+  const delay = (ms: number) =>
+    new Promise(resolve => setTimeout(resolve, ms));
+
+
   // ---------------- AUTH GUARD ----------------
   useEffect(() => {
     const checkAuth = async () => {
@@ -132,40 +137,94 @@ export default function CheckoutPage() {
     const user = data?.user;
     if (!user) return;
 
-    const { error } = await supabase.from("orders").insert([
-      {
-        user_id: user.id,
-        seller_name: form.sellerName,
-        seller_email: form.sellerEmail,
-        units: Number(form.units),
-        budget: form.budget,
-        revenue: Number(form.revenue),
-        ingram_account: form.ingramAccount,
-        quote: form.quote,
-        segment: form.segment,
-        manufacturer: form.manufacturer,
-        is_reseller: form.isReseller === "yes",
-        company_name: form.companyName,
-        contact_name: form.contactName,
-        contact_email: form.contactEmail,
-        address: form.address,
-        city: form.city,
-        state: form.state,
-        zip: form.zip,
-        delivery_date: form.deliveryDate || null,
-        notes: form.notes,
-        cart_items: cartItems,
-        status: "pending"
-      },
-    ]);
+    const { data: orderData, error } = await supabase
+      .from("orders")
+      .insert([
+        {
+          user_id: user.id,
+          seller_name: form.sellerName,
+          seller_email: form.sellerEmail,
+          units: Number(form.units),
+          budget: form.budget,
+          revenue: Number(form.revenue),
+          ingram_account: form.ingramAccount,
+          quote: form.quote,
+          segment: form.segment,
+          manufacturer: form.manufacturer,
+          is_reseller: form.isReseller === "yes",
+          company_name: form.companyName,
+          contact_name: form.contactName,
+          contact_email: form.contactEmail,
+          address: form.address,
+          city: form.city,
+          state: form.state,
+          zip: form.zip,
+          delivery_date: form.deliveryDate || null,
+          notes: form.notes,
+          cart_items: cartItems,
+          status: "pending"
+        },
+      ])
+      .select("id")
+      .single();
 
     if (error) {
       setErrorModal("Something went wrong while placing order.");
       return;
     }
 
+    // 👇 YAHAN email Send hogi
+
+    // 📧 EMAIL TO ADMIN (IMMEDIATE)
+    await fetch("/api/send-email", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        to: "ahmer.ali.works360@gmail.com", // 🔴 admin email
+        type: "ORDER_PLACED_ADMIN",
+        data: {
+          orderId: orderData.id,
+          email: form.sellerEmail,
+        },
+      })
+    });
+
+    // ⏱️ WAIT 15 SECONDS
+    await delay(15000);
+
+    // 📧 EMAIL TO USER (AFTER 5 SECONDS)
+    await fetch("/api/send-email", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        to: form.sellerEmail,
+        type: "ORDER_PLACED_USER",
+        data: {
+          orderId: orderData.id,
+          name: form.sellerName,
+        },
+      })
+    });
+
+
+    // 👇 YAHAN ORDER SUCCESS HO CHUKA HAI
+
+
+    await fetch("/api/notifications/create", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        type: "order",
+        event: "order_placed",
+        reference_id: orderData.id,
+      }),
+    });
+
     setSuccessModal(true); // ✅ cart yahan clear nahi ho raha
   };
+
 
   if (authLoading) return null;
 
@@ -189,7 +248,7 @@ export default function CheckoutPage() {
         message="Your order has been submitted successfully."
         buttonText="Continue"
         onClose={() => {
-          clearCart();              // ✅ CART EMPTY HERE
+          clearCart();
           router.push("/thank-you");
         }}
       />
@@ -491,7 +550,7 @@ export default function CheckoutPage() {
 
 
         <div className="flex justify-center">
-          <button className="min-w-xs custom-blue text-white py-4 rounded font-semibold">
+          <button className="min-w-xs custom-blue cursor-pointer text-white py-4 rounded font-semibold">
             Place order
           </button>
         </div>

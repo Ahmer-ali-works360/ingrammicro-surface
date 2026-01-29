@@ -1,14 +1,21 @@
-// src/app/components/Navbar.js
+// src/app/components/navbar.js
 
 "use client";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { FiSearch, FiUser, FiChevronDown, FiShoppingCart, FiBell, FiMenu, FiX } from "react-icons/fi";
+import {
+  FiSearch,
+  FiUser,
+  FiChevronDown,
+  FiShoppingCart,
+  FiBell,
+  FiMenu,
+  FiX
+} from "react-icons/fi";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/app/context/AuthContext";
-import { useRouter } from "next/navigation";
 
 export default function Navbar() {
   const { cartItems, openCart } = useCart();
@@ -17,12 +24,38 @@ export default function Navbar() {
   const [mounted, setMounted] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  // 🔔 REAL notification counts (from API)
+  const [notificationCounts, setNotificationCounts] = useState({
+    users: 0,
+    orders: 0,
+    total: 0,
+  });
+
+  const isAdminOrPM = user && (role === "admin" || role === "program_manager");
+
   useEffect(() => {
     setMounted(true);
   }, []);
 
+  // 🔔 Fetch notification counts
+  useEffect(() => {
+    if (!isAdminOrPM) return;
+
+    async function fetchNotificationCounts() {
+      try {
+        const res = await fetch("/api/notifications/count");
+        const data = await res.json();
+        setNotificationCounts(data);
+      } catch (err) {
+        console.error("Failed to fetch notification counts", err);
+      }
+    }
+
+    fetchNotificationCounts();
+  }, [isAdminOrPM]);
+
+
   const handleLogout = async () => {
-    console.log("[Navbar] Logging out...");
     await logout();
   };
 
@@ -70,17 +103,83 @@ export default function Navbar() {
 
         {/* RIGHT: ICONS (Desktop only) */}
         <div className="hidden md:flex items-center gap-6 text-xl text-[#2B3F50] relative">
-          {user && (
-            <button aria-label="Notifications" className="relative hover:opacity-70">
-              <FiBell className="w-6 h-8" />
-              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full px-1">0</span>
-            </button>
+
+          {/* 🔔 NOTIFICATIONS (Admin & PM only) */}
+          {isAdminOrPM && (
+            <div className="relative group">
+              <button aria-label="Notifications" className="relative hover:opacity-70 flex items-center">
+                <FiBell className="w-6 h-8" />
+                {notificationCounts.total > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full px-1">
+                    {notificationCounts.total}
+                  </span>
+                )}
+              </button>
+
+              {/* Notification dropdown (SAME UI AS USER DROPDOWN) */}
+              <div className="absolute right-0 top-full pt-0 w-36 bg-white border border-gray-200 rounded shadow-md text-[13px] leading-[20px] font-normal text-[#2B3F50] opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity z-50">
+
+                <Link
+                  href="/orders"
+                  onClick={async () => {
+                    await fetch("/api/notifications/mark-read", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ type: "order" }),
+                    });
+                    // 🔥 YEH LINE REAL-TIME UPDATE KARTI HAI
+    setNotificationCounts(prev => ({
+      ...prev,
+      orders: 0,
+      total: prev.total - prev.orders,
+    }));
+                  }}
+                  className="flex items-center justify-between w-full px-3 py-3 rounded-t hover:bg-[#2B3F50] hover:text-white"
+                >
+                  <span>Orders</span>
+                  {notificationCounts.orders > 0 && (
+                    <span className="bg-red-500 text-white text-xs rounded-full px-2">
+                      {notificationCounts.orders}
+                    </span>
+                  )}
+                </Link>
+
+
+                <Link
+                  href="/users"
+                  onClick={async () => {
+                    await fetch("/api/notifications/mark-read", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ type: "user" }),
+                    });
+                    setNotificationCounts(prev => ({
+  ...prev,
+  users: 0,
+  total: prev.total - prev.users,
+}));
+                  }}
+                  className="flex items-center justify-between w-full px-3 py-3 rounded-b hover:bg-[#2B3F50] hover:text-white"
+                >
+                  <span>Users</span>
+                  {notificationCounts.users > 0 && (
+                    <span className="bg-red-500 text-white text-xs rounded-full px-2">
+                      {notificationCounts.users}
+                    </span>
+                  )}
+                </Link>
+
+
+              </div>
+            </div>
           )}
 
+          {/* SEARCH */}
           <button aria-label="Search" className="hover:opacity-70">
             <FiSearch className="w-6 h-8" />
           </button>
 
+          {/* USER ACCOUNT */}
           <div className="relative group">
             <Link href="/account" aria-label="Account" className="flex items-center gap-1 hover:opacity-70">
               <FiUser size={22} />
@@ -94,19 +193,17 @@ export default function Navbar() {
                   <Link href="/login" className="block w-full px-3 py-3 rounded-b hover:bg-[#2B3F50] hover:text-white">Login</Link>
                 </>
               ) : (
-                <>
-                  <button
-                    onClick={handleLogout}
-                    className="block w-full px-3 py-3 rounded hover:bg-[#2B3F50] hover:text-white bg-transparent border-none text-left"
-                  >
-                    Logout
-                  </button>
-                </>
+                <button
+                  onClick={handleLogout}
+                  className="block w-full px-3 py-3 rounded hover:bg-[#2B3F50] hover:text-white bg-transparent border-none text-left"
+                >
+                  Logout
+                </button>
               )}
             </div>
           </div>
 
-          {/* CART ICON */}
+          {/* CART */}
           <button aria-label="Cart" className="relative hover:opacity-70" onClick={openCart}>
             <FiShoppingCart className="w-6 h-8" />
             {cartItems.length > 0 && (
@@ -118,43 +215,123 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* MOBILE MENU (with icons inside) */}
+      {/* MOBILE MENU */}
       {mobileMenuOpen && (
         <div className="md:hidden bg-white border-t border-gray-200">
           <ul className="flex flex-col gap-2 px-4 py-4 text-[14px] leading-[20px] font-normal text-[#2B3F50]">
-            <li><Link href="/" className="block py-2 hover:opacity-70">Home</Link></li>
-            <li><Link href="/how-it-works" className="block py-2 hover:opacity-70">How it Works</Link></li>
-            <li><Link href="/create-demo-kit" className="block py-2 hover:opacity-70">Create Demo Kit</Link></li>
+
+            {/* NAV LINKS */}
+            <li>
+              <Link href="/" onClick={() => setMobileMenuOpen(false)} className="block py-2 hover:opacity-70">
+                Home
+              </Link>
+            </li>
+            <li>
+              <Link href="/how-it-works" onClick={() => setMobileMenuOpen(false)} className="block py-2 hover:opacity-70">
+                How it Works
+              </Link>
+            </li>
+            <li>
+              <Link href="/create-demo-kit" onClick={() => setMobileMenuOpen(false)} className="block py-2 hover:opacity-70">
+                Create Demo Kit
+              </Link>
+            </li>
 
             {user && (
               <>
-                <li><Link href="/report-a-win" className="block py-2 hover:opacity-70">Report a Win</Link></li>
+                <li>
+                  <Link href="/report-a-win" onClick={() => setMobileMenuOpen(false)} className="block py-2 hover:opacity-70">
+                    Report a Win
+                  </Link>
+                </li>
+
                 {role === "admin" && (
-                  <li><Link href="/admin/Dashboard360" className="block py-2 hover:opacity-70">360 Dashboard</Link></li>
+                  <li>
+                    <Link href="/admin/Dashboard360" onClick={() => setMobileMenuOpen(false)} className="block py-2 hover:opacity-70">
+                      360 Dashboard
+                    </Link>
+                  </li>
                 )}
               </>
             )}
 
-            {/* Icons inside dropdown */}
-            <li className="flex items-center gap-4 pt-2 border-t border-gray-200">
-              {user && (
-                <button aria-label="Notifications" className="relative hover:opacity-70">
-                  <FiBell className="w-6 h-8" />
-                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full px-1">0</span>
-                </button>
-              )}
+            {/* 🔔 NOTIFICATIONS */}
+            {isAdminOrPM && (
+              <li className="pt-2 border-t border-gray-200">
+                <Link
+                  href="/orders"
+                  onClick={async () => {
+                    await fetch("/api/notifications/mark-read", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ type: "order" }),
+                    });
+                    // 🔥 YEH LINE REAL-TIME UPDATE KARTI HAI
+    setNotificationCounts(prev => ({
+      ...prev,
+      orders: 0,
+      total: prev.total - prev.orders,
+    }));
+                    setMobileMenuOpen(false);
+                  }}
+                  className="flex justify-between py-2 hover:opacity-70"
+                >
 
-              <button aria-label="Search" className="hover:opacity-70">
-                <FiSearch className="w-6 h-8" />
+                  <span>Orders</span>
+                  {notificationCounts.orders > 0 && (
+                    <span className="bg-red-500 text-white text-xs rounded-full px-2">
+                      {notificationCounts.orders}
+                    </span>
+                  )}
+                </Link>
+
+                <Link
+                  href="/users"
+                  onClick={async () => {
+                    await fetch("/api/notifications/mark-read", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ type: "user" }),
+                    });
+                    setNotificationCounts(prev => ({
+  ...prev,
+  users: 0,
+  total: prev.total - prev.users,
+}));
+                    setMobileMenuOpen(false);
+                  }}
+                  className="flex justify-between py-2 hover:opacity-70"
+                >
+
+                  <span>Users</span>
+                  {notificationCounts.users > 0 && (
+                    <span className="bg-red-500 text-white text-xs rounded-full px-2">
+                      {notificationCounts.users}
+                    </span>
+                  )}
+                </Link>
+              </li>
+            )}
+
+            {/* 🔍 SEARCH & 🛒 CART */}
+            <li className="flex items-center gap-6 pt-3 border-t border-gray-200">
+              <button
+                aria-label="Search"
+                onClick={() => setMobileMenuOpen(false)}
+                className="hover:opacity-70"
+              >
+                <FiSearch className="w-6 h-6" />
               </button>
 
-              {/* User Icon */}
-              <Link href="/account" aria-label="Account" className="hover:opacity-70">
-                <FiUser className="w-6 h-8" />
-              </Link>
-
-              <button aria-label="Cart" className="relative hover:opacity-70" onClick={openCart}>
-                <FiShoppingCart className="w-6 h-8" />
+              <button
+                aria-label="Cart"
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  openCart();
+                }}
+                className="relative hover:opacity-70"
+              >
+                <FiShoppingCart className="w-6 h-6" />
                 {cartItems.length > 0 && (
                   <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full px-1">
                     {cartItems.length}
@@ -163,25 +340,42 @@ export default function Navbar() {
               </button>
             </li>
 
-            {/* Account Links inside dropdown */}
+            {/* 👤 USER ACCOUNT */}
             <li className="pt-2 border-t border-gray-200">
               {!user ? (
                 <>
-                  <Link href="/account-registration" className="block py-2 hover:opacity-70">Register</Link>
-                  <Link href="/login" className="block py-2 hover:opacity-70">Login</Link>
+                  <Link
+                    href="/account-registration"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block py-2 hover:opacity-70"
+                  >
+                    Register
+                  </Link>
+                  <Link
+                    href="/login"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block py-2 hover:opacity-70"
+                  >
+                    Login
+                  </Link>
                 </>
               ) : (
                 <button
-                  onClick={handleLogout}
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    handleLogout();
+                  }}
                   className="block w-full text-left py-2 hover:opacity-70"
                 >
                   Logout
                 </button>
               )}
             </li>
+
           </ul>
         </div>
       )}
+
     </nav>
   );
 }

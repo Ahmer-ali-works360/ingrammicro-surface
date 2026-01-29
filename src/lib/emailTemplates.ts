@@ -247,6 +247,34 @@ export function getEmailTemplate(type: string, data: any): EmailTemplate {
         ),
       };
 
+    /* -------- ORDER APPROVED -------- */
+      case "ORDER_PLACED_ADMIN":
+  return {
+    subject: "New Order Placed",
+    html: baseLayout(
+      "New Order Received",
+      `
+      <p>A new order has been placed.</p>
+      <p><strong>Order ID:</strong> ${data.orderId}</p>
+      <p><strong>Seller:</strong> ${data.email}</p>
+      `
+    ),
+  };
+
+case "ORDER_PLACED_USER":
+  return {
+    subject: "Order Placed Successfully",
+    html: baseLayout(
+      "Order Placed",
+      `
+      <p>Hello <strong>${data.name}</strong>,</p>
+      <p>Your order <strong>#${data.orderId}</strong> has been placed successfully.</p>
+      <p>We’ll notify you once it’s approved.</p>
+      `
+    ),
+  };
+
+
     /* -------- SAFETY -------- */
     default:
       throw new Error("Invalid email template type");

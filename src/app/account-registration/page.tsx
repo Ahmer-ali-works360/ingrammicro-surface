@@ -1,3 +1,5 @@
+// src/app/account-registration/page.tsx
+
 "use client";
 
 import { useState } from "react";
@@ -121,6 +123,21 @@ async function sendEmail(payload: {
       alert(profileError.message);
       return;
     }
+
+// 🔔 CREATE NOTIFICATION (User Registered)
+await fetch("/api/notifications/create", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    type: "user",
+    event: "user_registered",
+    reference_id: user.id,
+  }),
+});
+
+
 
 function wait(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
