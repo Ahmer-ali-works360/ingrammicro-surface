@@ -35,6 +35,7 @@ export default function ProductPage() {
 
   // ✅ Quantity state (missing in your code)
   const [quantity, setQuantity] = useState(1);
+  const [companyName, setCompanyName] = useState("");
 
   // ✅ ZOOM STATES
   const [zoomOpen, setZoomOpen] = useState(false);
@@ -257,26 +258,59 @@ export default function ProductPage() {
             </p>
 
             {/* Add to Cart */}
-            <button
-              disabled={outOfStock}
-              onClick={() =>
-                addToCart({
-                  id: product.id,
-                  product_name: product.product_name,
-                  image_url: mainImage,
-                  sku: product.sku,
-                  slug: product.slug,
-                  quantity: 1,
-                })
-              }
-              className={`px-6 py-3 rounded font-semibold ${
-                outOfStock
-                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                  : "bg-yellow-400 hover:bg-yellow-500 cursor-pointer"
-              }`}
-            >
-              {outOfStock ? "Out of Stock" : "Add to Cart"}
-            </button>
+            {/* IN STOCK / OUT OF STOCK LOGIC */}
+{stockQty > 0 ? (
+  /* ✅ IN STOCK */
+  <button
+    className="w-xs bg-yellow-400 text-black py-3 rounded hover:bg-yellow-500 font-semibold"
+    onClick={() =>
+      addToCart({
+        id: product.id,
+        product_name: product.product_name,
+        image_url: mainImage,
+        sku: product.sku,
+        slug: product.slug,
+        quantity: quantity,
+      })
+    }
+  >
+    Add to Cart
+  </button>
+) : (
+  /* ❌ OUT OF STOCK */
+  <div className="border rounded-lg p-4 bg-gray-50 space-y-4 mt-4">
+    {/* Email */}
+    <div>
+      <label className="text-sm font-medium text-gray-600">Email</label>
+      <input
+        type="email"
+        value={user?.email || ""}
+        disabled
+        className="mt-1 w-full px-3 py-2 border rounded bg-gray-200 text-gray-600 cursor-not-allowed"
+      />
+    </div>
+
+    {/* Company Name */}
+    <div>
+      <label className="text-sm font-medium text-gray-600">
+        Company Name
+      </label>
+      <input
+        type="text"
+        value={companyName}
+        onChange={(e) => setCompanyName(e.target.value)}
+        placeholder="Enter company name"
+        className="mt-1 w-full px-3 py-2 border rounded"
+      />
+    </div>
+
+    {/* Waitlist Button */}
+    <button className="w-full bg-blue-600 text-white py-3 rounded hover:bg-blue-700 font-semibold">
+      Add to Wishlist / Waitlist
+    </button>
+  </div>
+)}
+
           </div>
         </div>
       </div>
