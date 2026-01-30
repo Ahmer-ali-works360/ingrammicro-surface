@@ -3,311 +3,391 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { useRouter, useParams } from "next/navigation";
-import { Check, X } from "lucide-react";
+import { ArrowLeft, Package, DollarSign, Layers, Calendar } from "lucide-react";
 
 /* ================= TYPES ================= */
+type OrderStatus =
+    | "pending"
+    | "approved"
+    | "rejected"
+    | "shipped"
+    | "return"
+    | "shipped_extension";
+
 type OrderRow = {
-  id: string;
-  order_number: number | null;
-  status: "pending" | "approved" | "rejected";
+    id: string;
+    order_number: number | null;
+    status: OrderStatus;
 
-  seller_name: string | null;
-  seller_email: string | null;
+    seller_name: string | null;
+    seller_email: string | null;
 
-  units: number | null;
-  budget: number | null;
-  revenue: number | null;
-  ingram_account: string | null;
-  quote: string | null;
-  segment: string | null;
-  manufacturer: string | null;
-  is_reseller: boolean | null;
+    units: number | null;
+    budget: number | null;
+    revenue: number | null;
+    ingram_account: string | null;
+    quote: string | null;
+    segment: string | null;
+    manufacturer: string | null;
+    is_reseller: boolean | null;
 
-  company_name: string | null;
-  contact_name: string | null;
-  contact_email: string | null;
-  address: string | null;
-  city: string | null;
-  state: string | null;
-  zip: string | null;
+    company_name: string | null;
+    contact_name: string | null;
+    contact_email: string | null;
+    address: string | null;
+    city: string | null;
+    state: string | null;
+    zip: string | null;
 
-  delivery_date: string | null;
-  notes: string | null;
+    delivery_date: string | null;
+    notes: string | null;
 
-  cart_items: any[];
-  created_at: string;
+    cart_items: any[];
+    created_at: string;
+
+    tracking_file?: string | null;
 };
 
+const STATUS_OPTIONS: { label: string; value: OrderStatus }[] = [
+    { label: "Pending", value: "pending" },
+    { label: "Approved", value: "approved" },
+    { label: "Rejected", value: "rejected" },
+    { label: "Shipped", value: "shipped" },
+    { label: "Return", value: "return" },
+    { label: "Shipped Extension", value: "shipped_extension" },
+];
+
 export default function AdminOrderDetailPage() {
-  const router = useRouter();
-  const { orderId } = useParams() as { orderId: string };
+    const router = useRouter();
+    const { orderId } = useParams() as { orderId: string };
 
-  console.log("🧩 ORDER ID FROM URL:", orderId);
+    const [authLoading, setAuthLoading] = useState(true);
+    const [loading, setLoading] = useState(true);
+    const [updating, setUpdating] = useState(false);
+    const [uploadingFile, setUploadingFile] = useState(false);
 
-  const [authLoading, setAuthLoading] = useState(true);
-  const [loading, setLoading] = useState(true);
-  const [updating, setUpdating] = useState(false);
-  const [order, setOrder] = useState<OrderRow | null>(null);
+    const [order, setOrder] = useState<OrderRow | null>(null);
+    const [status, setStatus] = useState<OrderStatus>("pending");
 
-  /* ================= AUTH CHECK ================= */
-  useEffect(() => {
-    const checkAccess = async () => {
-      console.log("🔐 Checking session...");
+    /* ================= AUTH ================= */
+    useEffect(() => {
+        const run = async () => {
+            const { data } = await supabase.auth.getSession();
+            if (!data.session) return router.replace("/login");
 
-      const { data } = await supabase.auth.getSession();
-      console.log("👤 Session data:", data?.session?.user);
+            const { data: profile } = await supabase
+                .from("profiles")
+                .select("role")
+                .eq("id", data.session.user.id)
+                .single();
 
-      if (!data.session) {
-        console.log("❌ No session, redirecting to login");
-        router.replace("/login");
-        return;
-      }
+            if (!profile || !["admin", "program_manager"].includes(profile.role)) {
+                return router.replace("/");
+            }
 
-      const { data: profile, error } = await supabase
-        .from("profiles")
-        .select("role")
-        .eq("id", data.session.user.id)
-        .single();
+            setAuthLoading(false);
+        };
+        run();
+    }, [router]);
 
-      console.log("👮 User profile:", profile, "Error:", error);
+    /* ================= FETCH ================= */
+    useEffect(() => {
+        if (!orderId || authLoading) return;
 
-      if (!profile || !["admin", "program_manager"].includes(profile.role)) {
-        console.log("⛔ Not admin / PM, redirecting");
-        router.replace("/");
-        return;
-      }
+        const fetchOrder = async () => {
+            setLoading(true);
+            const res = await fetch(`/api/admin-orders/${orderId}`);
+            const json = await res.json();
 
-      console.log("✅ Auth OK");
-      setAuthLoading(false);
+            if (res.ok) {
+                setOrder(json.order);
+                setStatus(json.order.status);
+            }
+
+            setLoading(false);
+        };
+
+        fetchOrder();
+    }, [orderId, authLoading]);
+
+    /* ================= UPDATE STATUS ================= */
+    const updateStatus = async () => {
+        if (!order) {
+            console.log("❌ No order found");
+            return;
+        }
+
+        console.log("🚀 Update Status Clicked");
+        console.log("📦 Order ID:", order.id);
+        console.log("🔄 Old Status:", order.status);
+        console.log("🆕 New Status:", status);
+
+        setUpdating(true);
+
+        const { data, error } = await supabase
+            .from("orders")
+            .update({ status })
+            .eq("id", order.id)
+            // .select(); // 👈 IMPORTANT for debugging
+
+        console.log("📡 Supabase response data:", data);
+        console.log("⚠️ Supabase error:", error);
+
+        setUpdating(false);
+
+        if (error) {
+            alert("Update failed: " + error.message);
+            return;
+        }
+
+        console.log("✅ Status updated successfully");
+
+        router.push("/orders");
     };
 
-    checkAccess();
-  }, [router]);
 
-  /* ================= FETCH ORDER (API BASED) ================= */
-  const fetchOrder = async () => {
-    console.log("📡 Fetching order from API...");
-    console.log("➡️ API URL:", `/api/admin-orders/${orderId}`);
+    /* ================= TRACKING UPLOAD ================= */
+    const uploadTrackingFile = async (file: File) => {
+        if (!order) return;
 
-    setLoading(true);
+        setUploadingFile(true);
 
-    try {
-      const res = await fetch(`/api/admin-orders/${orderId}`);
-      console.log("📥 API response status:", res.status);
+        const path = `tracking/${order.id}.pdf`;
 
-      const result = await res.json();
-      console.log("📦 API response body:", result);
+        const { error: uploadError } = await supabase.storage
+            .from("order-files")
+            .upload(path, file, { upsert: true });
 
-      if (res.ok && result.order) {
-        console.log("✅ Order fetched successfully");
-        setOrder(result.order);
-      } else {
-        console.log("❌ Order NOT found from API");
-        setOrder(null);
-      }
-    } catch (err) {
-      console.error("🔥 Fetch order exception:", err);
-      setOrder(null);
+        if (uploadError) {
+            alert(uploadError.message);
+            setUploadingFile(false);
+            return;
+        }
+
+        const { data } = supabase.storage
+            .from("order-files")
+            .getPublicUrl(path);
+
+        await supabase
+            .from("orders")
+            .update({ tracking_file: data.publicUrl })
+            .eq("id", order.id);
+
+        setOrder({ ...order, tracking_file: data.publicUrl });
+        setUploadingFile(false);
+    };
+
+    if (authLoading || loading) {
+        return <div className="p-12 text-center text-gray-500">Loading…</div>;
     }
 
-    setLoading(false);
-  };
-
-  useEffect(() => {
-    console.log("🔁 useEffect fired", { orderId, authLoading });
-
-    if (orderId && !authLoading) {
-      fetchOrder();
-    }
-  }, [orderId, authLoading]);
-
-  /* ================= UPDATE STATUS ================= */
-  const updateStatus = async (newStatus: "approved" | "rejected") => {
     if (!order) {
-      console.log("❌ No order in state, cannot update");
-      return;
+        return <div className="p-12 text-center">Order not found</div>;
     }
 
-    console.log("✏️ Updating order status:", {
-      orderId: order.id,
-      newStatus,
-    });
+    /* ================= UI ================= */
+    return (
+        <div className="bg-gray-100 min-h-screen py-8">
+            <div className="max-w-7xl mx-auto px-4 space-y-6">
 
-    setUpdating(true);
+                {/* ===== TOP GRID ===== */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-    const { error } = await supabase
-      .from("orders")
-      .update({ status: newStatus })
-      .eq("id", order.id);
+                    <div className="lg:col-span-2 bg-white border rounded-xl overflow-hidden">
+                        <CardHeader title="Order Details" />
+                        <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                            <Info label="Order No" value={order.order_number} />
+                            <Info
+                                label="Created At"
+                                value={new Date(order.created_at).toLocaleString()}
+                            />
+                        </div>
+                    </div>
 
-    setUpdating(false);
+                    <div className="bg-white border rounded-xl overflow-hidden">
+                        <CardHeader title="Order Status" />
+                        <div className="p-6">
+                            <select
+                                value={status}
+                                onChange={(e) => {
+                                    console.log("⬇️ Status changed to:", e.target.value);
+                                    setStatus(e.target.value as OrderStatus);
+                                }}
+                                className="border rounded px-3 py-2 w-full mb-3"
+                            >
 
-    if (error) {
-      console.error("🔥 STATUS UPDATE ERROR:", error);
-      alert(error.message);
-      return;
-    }
+                                {STATUS_OPTIONS.map((s) => (
+                                    <option key={s.value} value={s.value}>
+                                        {s.label}
+                                    </option>
+                                ))}
+                            </select>
 
-    console.log("✅ Status updated, redirecting to orders list");
-    router.push("/orders");
-  };
-
-  /* ================= STATES ================= */
-  console.log("📊 PAGE STATE:", {
-    authLoading,
-    loading,
-    hasOrder: !!order,
-  });
-
-  if (authLoading || loading) {
-    return <div className="p-8 text-center">Loading...</div>;
-  }
-
-  if (!order) {
-    console.log("🚫 Rendering: Order not found");
-    return <div className="p-8 text-center">Order not found</div>;
-  }
-
-  const statusColor =
-    order.status === "approved"
-      ? "bg-green-100 text-green-700"
-      : order.status === "rejected"
-      ? "bg-red-100 text-red-700"
-      : "bg-yellow-100 text-yellow-700";
-      
-  /* ================= UI ================= */
-  return (
-    <div className="max-w-6xl mx-auto p-4 space-y-6">
-
-      {/* ===== TOP SECTION ===== */}
-      <div className="bg-white border rounded shadow">
-        <div className="custom-blue text-white px-4 py-2 flex justify-between items-center">
-          <span className="font-semibold">
-            Order #{order.order_number ?? "-"}
-          </span>
-
-          <span
-            className={`px-3 py-1 rounded-full text-sm font-medium ${statusColor}`}
-          >
-            {order.status.toUpperCase()}
-          </span>
-        </div>
-
-        <div className="p-4 flex justify-between items-center">
-          <span className="text-sm text-gray-600">
-            Created: {new Date(order.created_at).toLocaleString()}
-          </span>
-
-          {order.status === "pending" && (
-            <div className="flex gap-2">
-              <button
-                disabled={updating}
-                onClick={() => updateStatus("approved")}
-                className="flex items-center gap-1 px-4 py-2 text-sm text-white bg-green-600 rounded hover:bg-green-700 disabled:opacity-50"
-              >
-                <Check size={16} />
-                Approve
-              </button>
-
-              <button
-                disabled={updating}
-                onClick={() => updateStatus("rejected")}
-                className="flex items-center gap-1 px-4 py-2 text-sm text-red-600 border border-red-500 rounded hover:bg-red-500 hover:text-white disabled:opacity-50"
-              >
-                <X size={16} />
-                Reject
-              </button>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* ===== DETAILS (READ ONLY, SAME AS CHECKOUT) ===== */}
-      <DetailSection title="Team Details">
-        <Field label="Seller Name" value={order.seller_name} />
-        <Field label="Seller Email" value={order.seller_email} />
-      </DetailSection>
-
-      <DetailSection title="Opportunity Details">
-        <Field label="Units" value={order.units} />
-        <Field label="Budget" value={order.budget} />
-        <Field label="Revenue" value={order.revenue} />
-        <Field label="Ingram Account" value={order.ingram_account} />
-        <Field label="Quote" value={order.quote} />
-        <Field label="Segment" value={order.segment} />
-        <Field label="Manufacturer" value={order.manufacturer} />
-        <Field label="Is Reseller" value={order.is_reseller ? "Yes" : "No"} />
-      </DetailSection>
-
-      <DetailSection title="Shipping Details">
-        <Field label="Company" value={order.company_name} />
-        <Field label="Contact Name" value={order.contact_name} />
-        <Field label="Contact Email" value={order.contact_email} />
-        <Field label="Address" value={order.address} />
-        <Field label="City" value={order.city} />
-        <Field label="State" value={order.state} />
-        <Field label="Zip" value={order.zip} />
-        <Field label="Delivery Date" value={order.delivery_date} />
-        <Field label="Notes" value={order.notes} />
-      </DetailSection>
-
-      {/* ===== ITEMS ===== */}
-      <div className="bg-white border rounded shadow p-4">
-        <h3 className="font-semibold mb-3">Order Items</h3>
-
-        {order.cart_items?.length ? (
-          order.cart_items.map((item: any, i: number) => (
-            <div key={i} className="flex gap-3 p-3 border rounded mb-2 bg-gray-50">
-              <img
-                src={item.image_url || "/placeholder.png"}
-                className="w-14 h-14 object-cover rounded"
-              />
-              <div>
-                <div className="font-medium">{item.product_name}</div>
-                <div className="text-sm text-gray-500">
-                  Qty: {item.quantity}
+                            <button
+                                onClick={() => {
+                                    console.log("🖱 Button clicked");
+                                    console.log("Updating:", updating);
+                                    console.log("Selected status:", status);
+                                    console.log("Original status:", order.status);
+                                    updateStatus();
+                                }}
+                                disabled={updating || status === order.status}
+                                className="w-full bg-black text-white py-2 rounded disabled:opacity-50"
+                            >
+                                Update Status
+                            </button>
+                        </div>
+                    </div>
                 </div>
-              </div>
+
+                {/* ===== SUMMARY + TRACKING ===== */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+                    <div className="lg:col-span-2 bg-white border rounded-xl overflow-hidden">
+                        <CardHeader title="Order Summary" />
+                        <div className="p-6 grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <Summary label="Units" value={order.units} icon={Layers} />
+                            <Summary label="Items" value={order.cart_items.length} icon={Package} />
+                            <Summary label="Budget" value={`$${order.budget}`} icon={DollarSign} />
+                            <Summary label="Revenue" value={`$${order.revenue}`} icon={DollarSign} />
+                        </div>
+                    </div>
+
+                    <div className="bg-white border rounded-xl overflow-hidden">
+                        <CardHeader title="Order Tracking" />
+                        <div className="p-6">
+                            {order.tracking_file && (
+                                <a
+                                    href={order.tracking_file}
+                                    target="_blank"
+                                    className="block text-sm text-blue-600 underline mb-3"
+                                >
+                                    View Tracking PDF
+                                </a>
+                            )}
+
+                            <label className="inline-block cursor-pointer border px-4 py-2 rounded text-sm hover:bg-gray-50">
+                                {uploadingFile ? "Uploading…" : "Upload Tracking PDF"}
+                                <input
+                                    type="file"
+                                    accept="application/pdf"
+                                    className="hidden"
+                                    onChange={(e) =>
+                                        e.target.files && uploadTrackingFile(e.target.files[0])
+                                    }
+                                />
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                {/* ===== MAIN CONTENT ===== */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+                    <div className="lg:col-span-2 space-y-6">
+                        <Section title="Reseller Details">
+                            <Read label="Seller Name" value={order.seller_name} />
+                            <Read label="Seller Email" value={order.seller_email} />
+                        </Section>
+
+                        <Section title="Opportunity">
+                            <Read label="Units" value={order.units} />
+                            <Read label="Budget" value={order.budget} />
+                            <Read label="Revenue" value={order.revenue} />
+                            <Read label="Ingram Account" value={order.ingram_account} />
+                            <Read label="Quote" value={order.quote} />
+                            <Read label="Segment" value={order.segment} />
+                            <Read label="Manufacturer" value={order.manufacturer} />
+                            <Read
+                                label="Is Reseller"
+                                value={order.is_reseller ? "Yes" : "No"}
+                            />
+                        </Section>
+                    </div>
+
+                    <div className="bg-white border rounded-xl overflow-hidden">
+                        <CardHeader title="Items" />
+                        <div className="p-6">
+                            {order.cart_items.map((item: any, i: number) => (
+                                <div key={i} className="flex gap-4 p-3 border rounded mb-3">
+                                    <img
+                                        src={item.image_url || "/placeholder.png"}
+                                        className="w-14 h-14 rounded object-cover"
+                                    />
+                                    <div>
+                                        <p className="font-medium">{item.product_name}</p>
+                                        <p className="text-sm text-gray-500">
+                                            Qty: {item.quantity}
+                                        </p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+
+                {/* ===== BACK ===== */}
+                <button
+                    onClick={() => router.push("/orders")}
+                    className="flex items-center gap-2 border px-5 py-2 rounded bg-white"
+                >
+                    <ArrowLeft size={16} />
+                    Back to Orders
+                </button>
             </div>
-          ))
-        ) : (
-          <p className="text-gray-500">No items</p>
-        )}
-      </div>
-
-      <div className="text-center">
-        <button
-          onClick={() => router.push("/orders")}
-          className="custom-blue text-white px-10 py-3 rounded"
-        >
-          Back to Orders
-        </button>
-      </div>
-    </div>
-  );
+        </div>
+    );
 }
 
-/* ================= SMALL HELPERS ================= */
-function DetailSection({ title, children }: any) {
-  return (
-    <div className="bg-white border rounded shadow">
-      <div className="custom-blue text-white px-4 py-2 font-semibold">
-        {title}
-      </div>
-      <div className="p-4 grid grid-cols-2 gap-4">{children}</div>
-    </div>
-  );
+/* ================= HELPERS ================= */
+
+function CardHeader({ title }: { title: string }) {
+    return (
+        <div className="px-5 py-3 font-semibold bg-gradient-to-t from-gray-100 via-gray-200 to-gray-300 text-gray-700 border-b rounded-t-xl">
+            {title}
+        </div>
+    );
 }
 
-function Field({ label, value }: any) {
-  return (
-    <div>
-      <label className="block mb-1 font-medium">{label}</label>
-      <input
-        disabled
-        value={value ?? ""}
-        className="w-full border p-2 rounded bg-gray-100"
-      />
-    </div>
-  );
+function Section({ title, children }: any) {
+    return (
+        <div className="bg-white border rounded-xl overflow-hidden">
+            <CardHeader title={title} />
+            <div className="p-5 grid grid-cols-1 md:grid-cols-2 gap-4">
+                {children}
+            </div>
+        </div>
+    );
+}
+
+function Read({ label, value }: any) {
+    return (
+        <div>
+            <p className="text-xs uppercase text-gray-500 mb-1">{label}</p>
+            <div className="bg-gray-50 border rounded px-3 py-2 text-sm">
+                {value || "-"}
+            </div>
+        </div>
+    );
+}
+
+function Info({ label, value }: any) {
+    return (
+        <div>
+            <p className="text-xs uppercase text-gray-400 mb-1">{label}</p>
+            <p className="font-medium">{value || "-"}</p>
+        </div>
+    );
+}
+
+function Summary({ icon: Icon, label, value }: any) {
+    return (
+        <div className="border rounded-lg p-4 flex items-center gap-3">
+            <Icon size={20} className="text-gray-400" />
+            <div>
+                <p className="text-xs text-gray-500">{label}</p>
+                <p className="text-lg font-semibold">{value ?? "-"}</p>
+            </div>
+        </div>
+    );
 }

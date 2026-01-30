@@ -207,16 +207,27 @@ export default function AdminOrdersPage() {
                   <td className="px-4 py-3">${order.revenue}</td>
                   <td className="px-4 py-3">
                     <span
-                      className={`px-3 py-1 rounded-full text-xs font-medium ${
-                        order.status === "approved"
-                          ? "bg-gray-300 text-gray-800"
-                          : order.status === "rejected"
-                          ? "text-black"
-                          : "text-gray-400"
-                      }`}
-                    >
-                      {order.status}
-                    </span>
+  className={`px-3 py-1 rounded-full text-xs font-medium capitalize
+    ${
+      order.status === "pending"
+        ? "bg-yellow-100 text-yellow-800"
+        : order.status === "approved"
+        ? "bg-gray-200 text-gray-700"
+        : order.status === "rejected"
+        ? "bg-red-100 text-red-800"
+        : order.status === "shipped"
+        ? "bg-green-100 text-green-800"
+        : order.status === "return"
+        ? "bg-orange-100 text-orange-800"
+        : order.status === "shipped_extension"
+        ? "bg-purple-100 text-purple-800"
+        : "bg-gray-100 text-gray-500"
+    }
+  `}
+>
+  {order.status.replace("_", " ")}
+</span>
+
                   </td>
                   <td className="px-4 py-3">
                     {order.delivery_date
