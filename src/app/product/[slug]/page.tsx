@@ -36,6 +36,7 @@ export default function ProductPage() {
   // ✅ Quantity state (missing in your code)
   const [quantity, setQuantity] = useState(1);
   const [companyName, setCompanyName] = useState("");
+  const [waitlistLoading, setWaitlistLoading] = useState(false);
 
   // ✅ ZOOM STATES
   const [zoomOpen, setZoomOpen] = useState(false);
@@ -128,6 +129,39 @@ export default function ProductPage() {
     setZoomImage(imageUrl);
     setZoomOpen(true);
   };
+
+const handleWaitlistSubmit = async () => {
+  if (!user?.email) {
+    alert("User email missing");
+    return;
+  }
+
+  setWaitlistLoading(true);
+
+  const { error } = await supabase
+    .from("product_waitlist")
+    .insert({
+      product_id: product.id, // bigint
+      email: user.email,
+      company_name: companyName || null,
+    });
+
+  setWaitlistLoading(false);
+
+  if (error) {
+    if (error.code === "23505") {
+      alert("You are already on the waitlist for this product.");
+    } else {
+      alert("Failed to join waitlist. Please try again.");
+    }
+    return;
+  }
+
+  alert("You have been added to the waitlist!");
+  setCompanyName("");
+};
+
+
 
   return (
     <div className="max-w-6xl mx-auto p-6">
@@ -305,9 +339,14 @@ export default function ProductPage() {
     </div>
 
     {/* Waitlist Button */}
-    <button className="w-full bg-blue-600 text-white py-3 rounded hover:bg-blue-700 font-semibold">
-      Add to Wishlist / Waitlist
-    </button>
+   <button
+  onClick={handleWaitlistSubmit}
+  disabled={waitlistLoading}
+  className="w-full bg-blue-600 text-white py-3 rounded hover:bg-blue-700 font-semibold disabled:opacity-60"
+>
+  {waitlistLoading ? "Adding..." : "Add to Wishlist / Waitlist"}
+</button>
+
   </div>
 )}
 

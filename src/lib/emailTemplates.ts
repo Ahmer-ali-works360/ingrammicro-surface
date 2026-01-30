@@ -1,4 +1,5 @@
 /* -------------------------------------------------
+   src/lib/emailTemplates.ts
    CENTRAL EMAIL TEMPLATES FILE
    All email designs live here
 -------------------------------------------------- */
