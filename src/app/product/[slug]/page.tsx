@@ -33,6 +33,9 @@ export default function ProductPage() {
   const [mainImage, setMainImage] = useState<string>(PLACEHOLDER_SVG);
   const [selectedIndex, setSelectedIndex] = useState(0);
 
+  // ✅ Quantity state (missing in your code)
+  const [quantity, setQuantity] = useState(1);
+
   // ✅ ZOOM STATES
   const [zoomOpen, setZoomOpen] = useState(false);
   const [zoomImage, setZoomImage] = useState<string | null>(null);
@@ -96,11 +99,22 @@ export default function ProductPage() {
     router.push("/create-demo-kit");
   };
 
+  const stockQty = product?.stock_quantity ?? 0;
+
+  const increaseQty = () => {
+    if (quantity < stockQty) {
+      setQuantity((q) => q + 1);
+    }
+  };
+
+  const decreaseQty = () => {
+    setQuantity((q) => (q > 1 ? q - 1 : 1));
+  };
+
   /* ⛔ SAFE RENDERS */
   if (authLoading || !user) return null;
   if (!product) return <p className="text-center mt-10">Loading...</p>;
 
-  const stockQty = product.stock_quantity ?? 0;
   const outOfStock = stockQty === 0;
 
   const gallery = [
@@ -117,7 +131,6 @@ export default function ProductPage() {
   return (
     <div className="max-w-6xl mx-auto p-6">
       <div className="flex flex-col lg:flex-row gap-10">
-
         {/* IMAGE */}
         <div className="lg:w-1/2 flex flex-col items-center">
           <div className="relative w-[300px] lg:w-[400px] h-[300px] lg:h-[400px] rounded-xl overflow-hidden shadow group">
@@ -191,38 +204,80 @@ export default function ProductPage() {
           </div>
         </div>
 
-        {/* DETAILS */}
-        <div className="lg:w-1/2 space-y-6">
-          <h1 className="text-3xl font-bold">{product.product_name}</h1>
-          <p className="text-gray-500">SKU: {product.sku}</p>
+        {/* Right: Details */}
+        <div className="lg:w-1/2 w-full flex flex-col justify-between space-y-6">
+          <div className="space-y-3">
+            <h1 className="text-3xl font-bold">{product.product_name}</h1>
+            <p className="text-gray-500">SKU: {product.sku}</p>
 
-          <p className="text-sm">
-            Stock:{" "}
-            <span className={outOfStock ? "text-red-600" : "text-green-600"}>
-              {stockQty}
-            </span>
-          </p>
+            {/* Description as Bullet Points */}
+            {product.description ? (
+              <ul className="ml-5 list-disc text-gray-700 space-y-2">
+                {product.description
+                  .split("\n")
+                  .map((line: string, idx: number) => (
+                    <li key={idx}>{line}</li>
+                  ))}
+              </ul>
+            ) : (
+              <p className="text-gray-700">No description available.</p>
+            )}
 
-          <button
-            disabled={outOfStock}
-            onClick={() =>
-              addToCart({
-                id: product.id,
-                product_name: product.product_name,
-                image_url: mainImage,
-                sku: product.sku,
-                slug: product.slug,
-                quantity: 1,
-              })
-            }
-            className={`px-6 py-3 rounded font-semibold ${
-              outOfStock
-                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                : "bg-yellow-400 hover:bg-yellow-500 cursor-pointer"
-            }`}
-          >
-            {outOfStock ? "Out of Stock" : "Add to Cart"}
-          </button>
+            {/* Quantity selector (only if stock > 0) */}
+            {stockQty > 0 && (
+              <div className="flex items-center gap-3 mt-4">
+                <span className="font-semibold">Quantity:</span>
+
+                <div className="flex items-center border rounded">
+                  <button
+                    onClick={decreaseQty}
+                    className="px-3 py-1 bg-gray-200 hover:bg-gray-300"
+                  >
+                    -
+                  </button>
+
+                  <span className="px-4">{quantity}</span>
+
+                  <button
+                    onClick={increaseQty}
+                    className="px-3 py-1 bg-gray-200 hover:bg-gray-300"
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Stock */}
+            <p className="text-sm mt-2">
+              Stock:{" "}
+              <span className={outOfStock ? "text-red-600" : "text-green-600"}>
+                {stockQty}
+              </span>
+            </p>
+
+            {/* Add to Cart */}
+            <button
+              disabled={outOfStock}
+              onClick={() =>
+                addToCart({
+                  id: product.id,
+                  product_name: product.product_name,
+                  image_url: mainImage,
+                  sku: product.sku,
+                  slug: product.slug,
+                  quantity: 1,
+                })
+              }
+              className={`px-6 py-3 rounded font-semibold ${
+                outOfStock
+                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                  : "bg-yellow-400 hover:bg-yellow-500 cursor-pointer"
+              }`}
+            >
+              {outOfStock ? "Out of Stock" : "Add to Cart"}
+            </button>
+          </div>
         </div>
       </div>
 
