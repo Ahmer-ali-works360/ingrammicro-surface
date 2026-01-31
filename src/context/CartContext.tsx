@@ -8,9 +8,12 @@ export type CartItem = {
   product_name: string;
   image_url?: string;
   sku?: string;
-  slug?: string;
+  brand?: string;
+  processor?: string;
+  memory?: string;
   quantity: number;
 };
+
 
 /* -------------------- Cart Context Type -------------------- */
 type CartContextType = {

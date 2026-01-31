@@ -3,7 +3,19 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { useRouter, useParams } from "next/navigation";
-import { ArrowLeft, Package, DollarSign, Layers, Calendar } from "lucide-react";
+import {
+  Building2,
+  User,
+  Mail,
+  Layers,
+  DollarSign,
+  TrendingUp,
+  Tag,
+  Truck,
+  Factory,
+  Package,
+  FileText,
+} from "lucide-react";
 
 /* ================= TYPES ================= */
 type OrderStatus =
@@ -21,6 +33,9 @@ type OrderRow = {
 
     seller_name: string | null;
     seller_email: string | null;
+
+    approved_by?: string | null;
+    approved_at?: string | null;
 
     units: number | null;
     budget: number | null;
@@ -48,14 +63,7 @@ type OrderRow = {
     tracking_file?: string | null;
 };
 
-const STATUS_OPTIONS: { label: string; value: OrderStatus }[] = [
-    { label: "Pending", value: "pending" },
-    { label: "Approved", value: "approved" },
-    { label: "Rejected", value: "rejected" },
-    { label: "Shipped", value: "shipped" },
-    { label: "Return", value: "return" },
-    { label: "Shipped Extension", value: "shipped_extension" },
-];
+
 
 export default function AdminOrderDetailPage() {
     const router = useRouter();
@@ -112,39 +120,70 @@ export default function AdminOrderDetailPage() {
 
     /* ================= UPDATE STATUS ================= */
     const updateStatus = async () => {
-        if (!order) {
-            console.log("❌ No order found");
-            return;
-        }
-
-        console.log("🚀 Update Status Clicked");
-        console.log("📦 Order ID:", order.id);
-        console.log("🔄 Old Status:", order.status);
-        console.log("🆕 New Status:", status);
+        if (!order) return;
 
         setUpdating(true);
 
-        const { data, error } = await supabase
-            .from("orders")
-            .update({ status })
-            .eq("id", order.id)
-            // .select(); // 👈 IMPORTANT for debugging
+        try {
+            // get current logged-in user
+            const { data: sessionData, error: sessionError } =
+                await supabase.auth.getSession();
 
-        console.log("📡 Supabase response data:", data);
-        console.log("⚠️ Supabase error:", error);
+            if (sessionError || !sessionData.session) {
+                throw new Error("User session not found");
+            }
 
-        setUpdating(false);
+            const userEmail = sessionData.session.user.email;
+            const now = new Date().toISOString(); // 👈 ADDED
 
-        if (error) {
-            alert("Update failed: " + error.message);
-            return;
+            // update order
+            const { error } = await supabase
+                .from("orders")
+                .update({
+                    status: status,
+                    approved_by: userEmail,
+                    approved_at: now, // 👈 ADDED
+                })
+                .eq("id", order.id);
+
+            if (error) {
+                throw error;
+            }
+
+            // update local state so UI reflects instantly
+            setOrder({
+                ...order,
+                status: status,
+                approved_by: userEmail,
+                approved_at: now, // 👈 ADDED
+            });
+
+            console.log("✅ Order status updated by:", userEmail);
+
+            // optional: redirect
+            router.push("/orders");
+        } catch (err: any) {
+            console.error("❌ Status update failed:", err);
+            alert(err.message || "Status update failed");
+        } finally {
+            setUpdating(false);
         }
-
-        console.log("✅ Status updated successfully");
-
-        router.push("/orders");
     };
 
+    const getStatusLabel = (status: OrderStatus) => {
+        switch (status) {
+            case "approved":
+                return "Approved on";
+            case "shipped":
+                return "Shipped on";
+            case "return":
+                return "Returned on";
+            case "shipped_extension":
+                return "Shipped Extension on";
+            default:
+                return "Updated on";
+        }
+    };
 
     /* ================= TRACKING UPLOAD ================= */
     const uploadTrackingFile = async (file: File) => {
@@ -187,207 +226,373 @@ export default function AdminOrderDetailPage() {
 
     /* ================= UI ================= */
     return (
-        <div className="bg-gray-100 min-h-screen py-8">
-            <div className="max-w-7xl mx-auto px-4 space-y-6">
+        <div className="bg-gray-50 min-h-screen py-6">
+            <div className="max-w-6xl mx-auto px-4 space-y-6">
 
-                {/* ===== TOP GRID ===== */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+{/* ================= TOP HEADER ================= */}
+<div className="bg-white border border-gray-200 rounded-lg shadow">
 
-                    <div className="lg:col-span-2 bg-white border rounded-xl overflow-hidden">
-                        <CardHeader title="Order Details" />
-                        <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                            <Info label="Order No" value={order.order_number} />
-                            <Info
-                                label="Created At"
-                                value={new Date(order.created_at).toLocaleString()}
-                            />
-                        </div>
+  {/* ===== TOP ROW ===== */}
+  <div className="px-6 py-4 flex items-start justify-between">
+    {/* LEFT */}
+    <div>
+      <div className="flex items-center gap-3">
+        <h1 className="text-xl font-semibold">
+          Order #{order.order_number}
+        </h1>
+
+        <span className="text-xs px-2 py-1 rounded-full bg-green-100 text-green-700">
+          {status.toUpperCase()}
+        </span>
+      </div>
+
+      <div className="mt-1 text-xs text-gray-500">
+        Order placed on{" "}
+        {new Date(order.created_at).toLocaleString("en-US", {
+          year: "numeric",
+          month: "short",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: true,
+          timeZone: "UTC",
+          timeZoneName: "short",
+        })}
+      </div>
+    </div>
+
+    {/* RIGHT */}
+    <div className="flex flex-col items-end gap-2">
+      <select
+        value={status}
+        onChange={(e) => setStatus(e.target.value as OrderStatus)}
+        className="border border-gray-300 text-sm px-3 py-1.5 bg-white"
+      >
+        <option value="pending">Pending</option>
+        <option value="approved">Approved</option>
+        <option value="rejected">Rejected</option>
+        <option value="shipped">Shipped</option>
+        <option value="return">Return</option>
+        <option value="shipped_extension">Shipped Extension</option>
+      </select>
+
+      <button
+        onClick={updateStatus}
+        disabled={updating || status === order.status}
+        className="
+          mt-2
+          text-xs font-medium
+          px-4 py-2
+          border border-gray-300
+          bg-blue-700
+          text-white
+          hover:bg-blue-950
+          disabled:cursor-not-allowed
+          transition
+          cursor-pointer
+          rounded-xl shadow
+        "
+      >
+        {updating ? "Updating status…" : "Save Status"}
+      </button>
+    </div>
+  </div>
+
+  {/* ===== BOTTOM ROW (APPROVAL INFO) ===== */}
+  <div className="border-t border-gray-200 px-6 py-3 grid grid-cols-2 gap-6">
+    <div>
+      <p className="text-[10px] uppercase tracking-wide text-gray-400 mb-1">
+        Approved by
+      </p>
+      <p className="text-sm text-gray-800">
+        {order.approved_by || "—"}
+      </p>
+    </div>
+
+    <div>
+      <p className="text-[10px] uppercase tracking-wide text-gray-400 mb-1">
+        {getStatusLabel(status)}
+      </p>
+      <p className="text-sm text-gray-800">
+        {order.approved_at
+          ? new Date(order.approved_at).toLocaleString("en-US", {
+              year: "numeric",
+              month: "short",
+              day: "2-digit",
+              hour: "2-digit",
+              minute: "2-digit",
+              hour12: true,
+              timeZone: "UTC",
+              timeZoneName: "short",
+            })
+          : "—"}
+      </p>
+    </div>
+  </div>
+
+</div>
+
+
+
+
+                {/* ================= TEAM DETAILS ================= */}
+                <div className="bg-white border border-gray-200 rounded-lg shadow">
+                    <div className="px-6 py-3 text-sm font-medium border-b">
+                        Team Details
                     </div>
-
-                    <div className="bg-white border rounded-xl overflow-hidden">
-                        <CardHeader title="Order Status" />
-                        <div className="p-6">
-                            <select
-                                value={status}
-                                onChange={(e) => {
-                                    console.log("⬇️ Status changed to:", e.target.value);
-                                    setStatus(e.target.value as OrderStatus);
-                                }}
-                                className="border rounded px-3 py-2 w-full mb-3"
-                            >
-
-                                {STATUS_OPTIONS.map((s) => (
-                                    <option key={s.value} value={s.value}>
-                                        {s.label}
-                                    </option>
-                                ))}
-                            </select>
-
-                            <button
-                                onClick={() => {
-                                    console.log("🖱 Button clicked");
-                                    console.log("Updating:", updating);
-                                    console.log("Selected status:", status);
-                                    console.log("Original status:", order.status);
-                                    updateStatus();
-                                }}
-                                disabled={updating || status === order.status}
-                                className="w-full bg-black text-white py-2 rounded disabled:opacity-50"
-                            >
-                                Update Status
-                            </button>
+                    <div className="grid grid-cols-4 gap-6 px-6 py-4 text-sm">
+                        <div>
+                            <p className="text-xs text-gray-500 mb-1">Account Manager</p>
+                            <p>{order.seller_name || "-"}</p>
+                        </div>
+                        <div>
+                            <p className="text-xs text-gray-500 mb-1">Account Manager Email</p>
+                            <p>{order.seller_email || "-"}</p>
+                        </div>
+                        <div>
+                            <p className="text-xs text-gray-500 mb-1">Sales Manager</p>
+                            <p>Michael Swartz</p>
+                        </div>
+                        <div>
+                            <p className="text-xs text-gray-500 mb-1">Sales Manager Email</p>
+                            <p>michsw@cdwg.com</p>
                         </div>
                     </div>
                 </div>
 
-                {/* ===== SUMMARY + TRACKING ===== */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      
+                {/* ================= CUSTOMER + OPPORTUNITY ================= */}
+<div className="grid grid-cols-2 gap-6">
 
-                    <div className="lg:col-span-2 bg-white border rounded-xl overflow-hidden">
-                        <CardHeader title="Order Summary" />
-                        <div className="p-6 grid grid-cols-2 md:grid-cols-4 gap-4">
-                            <Summary label="Units" value={order.units} icon={Layers} />
-                            <Summary label="Items" value={order.cart_items.length} icon={Package} />
-                            <Summary label="Budget" value={`$${order.budget}`} icon={DollarSign} />
-                            <Summary label="Revenue" value={`$${order.revenue}`} icon={DollarSign} />
-                        </div>
-                    </div>
+  {/* ================= CUSTOMER INFORMATION ================= */}
+  <div className="bg-white border border-gray-200 rounded-lg shadow">
+   <div className="px-6 py-6">
+  <p className="text-sm font-bold text-gray-700 flex items-center gap-2">
+    <User size={26} className="text-blue-600" />
+    Customer Information
+  </p>
+</div>
 
-                    <div className="bg-white border rounded-xl overflow-hidden">
-                        <CardHeader title="Order Tracking" />
-                        <div className="p-6">
-                            {order.tracking_file && (
-                                <a
-                                    href={order.tracking_file}
-                                    target="_blank"
-                                    className="block text-sm text-blue-600 underline mb-3"
-                                >
-                                    View Tracking PDF
-                                </a>
-                            )}
+    <div className="px-6 py-4 space-y-4">
+      <div>
+       <p className="text-[11px] uppercase tracking-wide text-gray-400 mb-1 flex items-center gap-1">
+  <Building2 size={12} className="text-blue-400"/>
+  Company
+</p>
+        <p className="text-sm text-gray-900">
+          {order.company_name || "—"}
+        </p>
+      </div>
 
-                            <label className="inline-block cursor-pointer border px-4 py-2 rounded text-sm hover:bg-gray-50">
-                                {uploadingFile ? "Uploading…" : "Upload Tracking PDF"}
-                                <input
-                                    type="file"
-                                    accept="application/pdf"
-                                    className="hidden"
-                                    onChange={(e) =>
-                                        e.target.files && uploadTrackingFile(e.target.files[0])
-                                    }
-                                />
-                            </label>
-                        </div>
+      <div>
+<p className="text-[11px] uppercase tracking-wide text-gray-400 mb-1 flex items-center gap-1">
+  <User size={12} className="text-blue-400"/>
+  Contact Name
+</p>
+        <p className="text-sm text-gray-900">
+          {order.contact_name || "—"}
+        </p>
+      </div>
+
+      <div>
+<p className="text-[11px] uppercase tracking-wide text-gray-400 mb-1 flex items-center gap-1">
+  <Mail size={12} className="text-blue-400"/>
+  Contact Email
+</p>
+        <p className="text-sm text-blue-600">
+          {order.contact_email || "—"}
+        </p>
+      </div>
+    </div>
+  </div>
+
+  {/* ================= OPPORTUNITY DETAILS ================= */}
+  <div className="bg-white border border-gray-200 rounded-lg shadow">
+    <div className="px-6 py-6 ">
+      <p className="text-sm font-bold text-gray-700 flex items-center gap-2">
+        <DollarSign size={26} className="text-blue-600"/>
+        Opportunity Details
+      </p>
+    </div>
+
+    <div className="px-6 py-4 grid grid-cols-2 gap-x-6 gap-y-4">
+      <div>
+<p className="text-[11px] uppercase tracking-wide text-gray-400 mb-1 flex items-center gap-1">
+  <Layers size={12} className="text-blue-400"/>
+  Units
+</p>
+        <p className="text-sm text-gray-900">
+          {order.units ?? "—"}
+        </p>
+      </div>
+
+      <div>
+<p className="text-[11px] uppercase tracking-wide text-gray-400 mb-1 flex items-center gap-1">
+  <DollarSign size={12} className="text-blue-400"/>
+  Budget per Device
+</p>
+        <p className="text-sm text-gray-900">
+          {order.budget ? `$${order.budget}` : "—"}
+        </p>
+      </div>
+
+      <div>
+<p className="text-[11px] uppercase tracking-wide text-gray-400 mb-1 flex items-center gap-1">
+  <TrendingUp size={12} className="text-blue-400"/>
+  Revenue Opportunity
+</p>
+        <p className="text-sm text-gray-900">
+          {order.revenue ? `$${order.revenue}` : "—"}
+        </p>
+      </div>
+
+      <div>
+<p className="text-[11px] uppercase tracking-wide text-gray-400 mb-1 flex items-center gap-1">
+  <Tag size={12} className="text-blue-400"/>
+  Segment
+</p>
+        <p className="text-sm text-gray-900">
+          {order.segment || "—"}
+        </p>
+      </div>
+
+      <div>
+<p className="text-[11px] uppercase tracking-wide text-gray-400 mb-1 flex items-center gap-1">
+  <Factory size={12} className="text-blue-400"/>
+  Manufacturer
+</p>
+        <p className="text-sm text-gray-900">
+          {order.manufacturer || "—"}
+        </p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+
+                {/* ================= SHIPPING DETAILS ================= */}
+                <div className="bg-white border border-gray-200 rounded-lg shadow">
+                     <div className="px-6 py-6">
+  <p className="text-sm font-bold text-gray-700 flex items-center gap-2">
+    <Truck size={26} className="text-blue-600" />
+    Shipping Details
+  </p>
+</div>
+                    <div className="grid grid-cols-4 gap-6 px-6 py-4 text-sm">
+                        <Info label="Address" value={order.address} />
+                        <Info label="City" value={order.city} />
+                        <Info label="State" value={order.state} />
+                        <Info label="ZIP" value={order.zip} />
                     </div>
                 </div>
 
-                {/* ===== MAIN CONTENT ===== */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-                    <div className="lg:col-span-2 space-y-6">
-                        <Section title="Reseller Details">
-                            <Read label="Seller Name" value={order.seller_name} />
-                            <Read label="Seller Email" value={order.seller_email} />
-                        </Section>
-
-                        <Section title="Opportunity">
-                            <Read label="Units" value={order.units} />
-                            <Read label="Budget" value={order.budget} />
-                            <Read label="Revenue" value={order.revenue} />
-                            <Read label="Ingram Account" value={order.ingram_account} />
-                            <Read label="Quote" value={order.quote} />
-                            <Read label="Segment" value={order.segment} />
-                            <Read label="Manufacturer" value={order.manufacturer} />
-                            <Read
-                                label="Is Reseller"
-                                value={order.is_reseller ? "Yes" : "No"}
-                            />
-                        </Section>
+                {/* ================= SHIPPING & TRACKING ================= */}
+                <div className="bg-white border border-gray-200 px-6 py-5 rounded-lg shadow">
+                    <div className="text-sm font-medium mb-4">
+                        Shipping & Tracking
                     </div>
 
-                    <div className="bg-white border rounded-xl overflow-hidden">
-                        <CardHeader title="Items" />
-                        <div className="p-6">
-                            {order.cart_items.map((item: any, i: number) => (
-                                <div key={i} className="flex gap-4 p-3 border rounded mb-3">
-                                    <img
-                                        src={item.image_url || "/placeholder.png"}
-                                        className="w-14 h-14 rounded object-cover"
-                                    />
-                                    <div>
-                                        <p className="font-medium">{item.product_name}</p>
-                                        <p className="text-sm text-gray-500">
-                                            Qty: {item.quantity}
-                                        </p>
-                                    </div>
+                    <div className="flex items-center gap-6">
+                        <TimelineDot active label="Confirmed" />
+                        <div className="flex-1 h-px bg-green-500" />
+                        <TimelineDot active={order.status === "shipped"} label="Shipped" />
+                        <div className="flex-1 h-px bg-gray-300" />
+                        <TimelineDot active={order.status === "return"} label="Returned" />
+                    </div>
+
+                    {order.tracking_file && (
+                        <div className="mt-4 text-sm">
+                            Tracking #{" "}
+                            <a
+                                href={order.tracking_file}
+                                className="text-blue-600 underline"
+                                target="_blank"
+                            >
+                                View PDF
+                            </a>
+                        </div>
+                    )}
+                </div>
+
+                {/* ================= ORDER ITEMS ================= */}
+                <div className="bg-white border border-gray-200 rounded-lg shadow">
+                    {/* <div className="px-6 py-3 text-sm font-medium border-b">
+                        Order Items ({order.cart_items.length})
+                    </div> */}
+                                    <div className="px-6 py-6">
+  <p className="text-sm font-bold text-gray-700 flex items-center gap-2">
+    <Package size={26} className="text-blue-600" />
+    Order Items
+  </p>
+</div>
+
+                    <div className="divide-y">
+                        {order.cart_items.map((item: any, i: number) => (
+                            <div key={i} className="px-6 py-4 text-sm">
+                                <p className="text-blue-600 font-medium">
+                                    {item.product_name}
+                                </p>
+                                <p className="text-xs text-gray-500 mb-2">
+                                    {item.sku}
+                                </p>
+
+                                <div className="grid grid-cols-4 gap-4 text-xs">
+                                    <span>Brand: {item.brand}</span>
+                                    <span>Processor: {item.processor}</span>
+                                    <span>Memory: {item.memory}</span>
+                                    <span>Qty: {item.quantity}</span>
                                 </div>
-                            ))}
-                        </div>
+                            </div>
+                        ))}
                     </div>
                 </div>
 
-                {/* ===== BACK ===== */}
-                <button
-                    onClick={() => router.push("/orders")}
-                    className="flex items-center gap-2 border px-5 py-2 rounded bg-white"
-                >
-                    <ArrowLeft size={16} />
-                    Back to Orders
-                </button>
+                {/* ================= NOTES ================= */}
+                {order.notes && (
+                    <div className="bg-white border border-gray-200 rounded-lg shadow">
+                        {/* <div className="px-6 py-3 text-sm font-medium border-b">
+                            Additional Notes
+                        </div> */}
+                        <div className="px-6 py-6">
+  <p className="text-sm font-bold text-gray-700 flex items-center gap-2">
+    <FileText size={26} className="text-blue-600" />
+    Additional Notes
+  </p>
+</div>
+                        <div className="px-6 py-4 text-sm">
+                            {order.notes}
+                        </div>
+                    </div>
+                )}
+
             </div>
         </div>
     );
+
 }
+
+function TimelineDot({ active, label }: any) {
+    return (
+        <div className="flex flex-col items-center">
+            <div
+                className={`w-4 h-4 rounded-full ${active ? "bg-green-500" : "bg-gray-300"
+                    }`}
+            />
+            <p className="text-xs mt-1">{label}</p>
+        </div>
+    );
+}
+
 
 /* ================= HELPERS ================= */
 
-function CardHeader({ title }: { title: string }) {
-    return (
-        <div className="px-5 py-3 font-semibold bg-gradient-to-t from-gray-100 via-gray-200 to-gray-300 text-gray-700 border-b rounded-t-xl">
-            {title}
-        </div>
-    );
-}
-
-function Section({ title, children }: any) {
-    return (
-        <div className="bg-white border rounded-xl overflow-hidden">
-            <CardHeader title={title} />
-            <div className="p-5 grid grid-cols-1 md:grid-cols-2 gap-4">
-                {children}
-            </div>
-        </div>
-    );
-}
-
-function Read({ label, value }: any) {
-    return (
-        <div>
-            <p className="text-xs uppercase text-gray-500 mb-1">{label}</p>
-            <div className="bg-gray-50 border rounded px-3 py-2 text-sm">
-                {value || "-"}
-            </div>
-        </div>
-    );
-}
 
 function Info({ label, value }: any) {
     return (
         <div>
             <p className="text-xs uppercase text-gray-400 mb-1">{label}</p>
             <p className="font-medium">{value || "-"}</p>
-        </div>
-    );
-}
-
-function Summary({ icon: Icon, label, value }: any) {
-    return (
-        <div className="border rounded-lg p-4 flex items-center gap-3">
-            <Icon size={20} className="text-gray-400" />
-            <div>
-                <p className="text-xs text-gray-500">{label}</p>
-                <p className="text-lg font-semibold">{value ?? "-"}</p>
-            </div>
         </div>
     );
 }

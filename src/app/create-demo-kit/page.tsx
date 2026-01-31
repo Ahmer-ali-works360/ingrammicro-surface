@@ -393,11 +393,13 @@ export default function CreateDemoKitPage() {
                               if (outOfStock) return;
                               addToCart({
                                 id: product.id,
-                                product_name: product.product_name,
-                                image_url: product.thumbnail_url,
-                                sku: product.sku,
-                                slug: product.slug,
-                                quantity: 1,
+  product_name: product.product_name,
+  image_url: product.thumbnail_url,
+  sku: product.sku,
+  brand: product.brand ?? "—", // 👈 IMPORTANT
+  processor: product.processor ?? "—",
+  memory: product.memory ?? "—",
+  quantity: 1,
                               });
                               openCart();
                             }}

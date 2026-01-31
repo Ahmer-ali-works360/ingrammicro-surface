@@ -132,6 +132,18 @@ export default function CheckoutPage() {
   // ---------------- SUBMIT ----------------
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const cartItemsSnapshot = cartItems.map(item => ({
+  product_id: item.id,
+  product_name: item.product_name,
+  sku: item.sku,
+  brand: item.brand,
+  processor: item.processor,
+  memory: item.memory,
+  quantity: item.quantity,
+  image_url: item.image_url,
+}));
+
+
 
     const { data } = await supabase.auth.getUser();
     const user = data?.user;
@@ -161,7 +173,7 @@ export default function CheckoutPage() {
           zip: form.zip,
           delivery_date: form.deliveryDate || null,
           notes: form.notes,
-          cart_items: cartItems,
+          cart_items: cartItemsSnapshot,
           status: "pending"
         },
       ])

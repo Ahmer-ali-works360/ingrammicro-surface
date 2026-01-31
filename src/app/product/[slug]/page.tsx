@@ -300,11 +300,13 @@ const handleWaitlistSubmit = async () => {
     onClick={() =>
       addToCart({
         id: product.id,
-        product_name: product.product_name,
-        image_url: mainImage,
-        sku: product.sku,
-        slug: product.slug,
-        quantity: quantity,
+  product_name: product.product_name,
+  image_url: mainImage,
+  sku: product.sku,
+  brand: product.brand ?? "—",
+  processor: product.processor ?? "—",
+  memory: product.memory ?? "—",
+  quantity: quantity,
       })
     }
   >

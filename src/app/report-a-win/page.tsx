@@ -5,9 +5,11 @@ import { supabase } from "@/lib/supabaseClient";
 
 export default function ReportAWinPage() {
   const [email, setEmail] = useState("");
+  const [orders, setOrders] = useState([]);
+  const [selectedOrder, setSelectedOrder] = useState(null);
   const [form, setForm] = useState({
     orderNumber: "",
-    device: "",
+    device: "",          // Device will be fetched here
     account: "",
     customerName: "",
     numberOfUnits: "",
@@ -17,17 +19,28 @@ export default function ReportAWinPage() {
     description: "",
   });
 
-  // Fetch logged-in user email
+  // Fetch logged-in user email and orders for admin/PM
   useEffect(() => {
-    const fetchUser = async () => {
+    const fetchUserAndOrders = async () => {
       const { data: { session }, error } = await supabase.auth.getSession();
       if (error) {
         console.log("Error fetching session:", error);
       } else if (session?.user?.email) {
         setEmail(session.user.email);
+
+        // Fetch all orders from the orders table
+        const { data: ordersData, error: ordersError } = await supabase
+          .from('orders')
+          .select('*');
+
+        if (ordersError) {
+          console.log("Error fetching orders:", ordersError);
+        } else {
+          setOrders(ordersData);
+        }
       }
     };
-    fetchUser();
+    fetchUserAndOrders();
   }, []);
 
   const handleChange = (
@@ -36,10 +49,61 @@ export default function ReportAWinPage() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleOrderSelect = async (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const orderId = e.target.value;
+    setSelectedOrder(orderId);
+
+    // Fetch order details based on selected order ID
+    if (orderId) {
+      const { data: orderDetails, error } = await supabase
+        .from('orders')
+        .select('*')
+        .eq('id', orderId)
+        .single();
+
+      if (error) {
+        console.log("Error fetching order details:", error);
+      } else {
+        // Set form state with fetched order details
+        setForm({
+          ...form,
+          orderNumber: orderDetails.order_number,  // Map to the correct column
+          device: orderDetails.device || "",  // Populate device correctly
+          account: orderDetails.ingram_account || "",  // Map to 'ingram_account'
+          customerName: orderDetails.contact_name || "",  // Map to 'contact_name'
+          numberOfUnits: orderDetails.units || "",  // Map to 'units'
+          totalRevenue: orderDetails.revenue || "",  // Map to 'revenue'
+        });
+      }
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Form submitted:", { submittedBy: email, ...form });
-    alert("Form submitted! Check console for data.");
+
+    // Insert form data into win_reports table
+    const { data, error } = await supabase
+      .from('win_reports')
+      .insert([
+        {
+          order_number: form.orderNumber,
+          device: form.device,
+          account: form.account,
+          customer_name: form.customerName,
+          number_of_units: form.numberOfUnits,
+          total_revenue: form.totalRevenue,
+          one_time_purchase: form.oneTimePurchase,
+          date_of_purchase: form.dateOfPurchase,
+          description: form.description,
+          submitted_by: email,
+        },
+      ]);
+
+    if (error) {
+      console.log("Error inserting into win_reports:", error);
+    } else {
+      alert("Form submitted successfully!");
+    }
   };
 
   return (
@@ -61,43 +125,45 @@ export default function ReportAWinPage() {
             />
           </div>
 
-{/* Order Number & Device (Same Row) */}
-<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-  {/* Order Number */}
-  <div>
-    <label className="block text-sm font-medium text-gray-700 mb-1">
-      Ingrammicro Surface Order #
-    </label>
-    <select
-      name="orderNumber"
-      value={form.orderNumber}
-      onChange={handleChange}
-      className="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-    >
-      <option value="">Select Your Order</option>
-      <option value="order1">Order 1</option>
-      <option value="order2">Order 2</option>
-      <option value="order3">Order 3</option>
-    </select>
-  </div>
+          {/* Order Number & Device (Same Row) */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Order Number */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Ingrammicro Surface Order #
+              </label>
+              <select
+                name="orderNumber"
+                value={form.orderNumber}
+                onChange={handleOrderSelect}
+                className="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">Select Your Order</option>
+                {orders.map((order) => (
+                  <option key={order.id} value={order.id}>
+                    {order.order_number}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-  {/* Device */}
-  <div>
-    <label className="block text-sm font-medium text-gray-700 mb-1">
-      Device
-    </label>
-    <textarea
-      name="device"
-      value={form.device}
-      onChange={handleChange}
-      placeholder="Please select device"
-      rows={6}
-      className="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
-    />
-  </div>
-</div>
+            {/* Device */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Device
+              </label>
+              <textarea
+                name="device"
+                value={form.device}  // Ensure device is populated from fetched order data
+                onChange={handleChange}
+                placeholder="Device details"
+                rows={6}
+                className="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+          </div>
 
-
+          {/* Rest of the form fields */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Account */}
             <div>
@@ -195,7 +261,7 @@ export default function ReportAWinPage() {
           <div className="pt-4">
             <button
               type="submit"
-              className="w-full rounded-lg bg-blue-600 py-2.5 text-white text-sm font-medium hover:bg-blue-700 transition"
+              className="w-sm rounded-lg bg-blue-600 py-2.5 text-white text-sm font-medium hover:bg-blue-700 transition"
             >
               Submit
             </button>
