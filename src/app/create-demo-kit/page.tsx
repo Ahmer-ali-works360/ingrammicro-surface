@@ -323,7 +323,7 @@ export default function CreateDemoKitPage() {
                 <div className="flex justify-end mb-4">
                   <button
                     onClick={() => router.push("/add-product")}
-                    className="bg-blue-600 cursor-pointer text-white px-4 py-2 rounded hover:bg-blue-700 transition text-sm"
+                    className="custom-blue cursor-pointer text-white px-4 py-2 rounded transition text-sm"
                   >
                     Add Product
                   </button>
@@ -393,21 +393,20 @@ export default function CreateDemoKitPage() {
                               if (outOfStock) return;
                               addToCart({
                                 id: product.id,
-  product_name: product.product_name,
-  image_url: product.thumbnail_url,
-  sku: product.sku,
-  brand: product.brand ?? "—", // 👈 IMPORTANT
-  processor: product.processor ?? "—",
-  memory: product.memory ?? "—",
-  quantity: 1,
+                                product_name: product.product_name,
+                                image_url: product.thumbnail_url,
+                                sku: product.sku,
+                                brand: product.brand ?? "—", // 👈 IMPORTANT
+                                processor: product.processor ?? "—",
+                                memory: product.memory ?? "—",
+                                quantity: 1,
                               });
                               openCart();
                             }}
-                            className={`mt-3 w-full py-2 rounded text-sm transition ${
-                              outOfStock
+                            className={`mt-3 w-full py-2 rounded text-sm transition ${outOfStock
                                 ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                                 : "bg-yellow-400 text-black hover:bg-yellow-500 cursor-pointer"
-                            }`}
+                              }`}
                           >
                             {outOfStock ? "Out of Stock" : "Add to Cart"}
                           </button>
@@ -492,11 +491,10 @@ function FilterGroup({
             return (
               <label
                 key={opt}
-                className={`flex items-center gap-2 text-sm px-2 py-1 rounded cursor-pointer ${
-                  isSelected
+                className={`flex items-center gap-2 text-sm px-2 py-1 rounded cursor-pointer ${isSelected
                     ? "bg-yellow-400 text-black font-semibold"
                     : "text-gray-700 hover:bg-gray-100"
-                }`}
+                  }`}
               >
                 <input
                   type="checkbox"

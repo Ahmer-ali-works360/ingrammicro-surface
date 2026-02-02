@@ -118,7 +118,7 @@ export default function CartPage() {
             {/* Clear Cart Button */}
             <button
               onClick={openClearModal}
-              className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 mt-4"
+              className="custom-blue cursor-pointer text-white px-4 py-2 rounded  mt-4"
             >
               Clear Cart
             </button>
@@ -136,7 +136,7 @@ export default function CartPage() {
 
             <button
               onClick={() => router.push("/checkout")}
-              className="w-full bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 mt-4"
+              className="w-full custom-blue text-white px-4 py-2 rounded  mt-4"
             >
               Proceed to Checkout
             </button>

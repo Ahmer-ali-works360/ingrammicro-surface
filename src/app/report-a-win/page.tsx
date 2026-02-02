@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabaseClient";
+import { useRouter } from "next/navigation";
+
 
 export default function ReportAWinPage() {
   const [email, setEmail] = useState("");
@@ -9,7 +11,7 @@ export default function ReportAWinPage() {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [form, setForm] = useState({
     orderNumber: "",
-    device: "",          // Device will be fetched here
+    product_name: "",          // Device will be fetched here
     account: "",
     customerName: "",
     numberOfUnits: "",
@@ -19,14 +21,51 @@ export default function ReportAWinPage() {
     description: "",
   });
 
+
+  const [showModal, setShowModal] = useState(false);
+  const [modalMessage, setModalMessage] = useState("");
+
+  const [orderItems, setOrderItems] = useState([]);
+  const [isOtherSelected, setIsOtherSelected] = useState(false);
+  const [otherProduct, setOtherProduct] = useState("");
+
+  const [reseller, setReseller] = useState("");
+  const router = useRouter();
+
+
   // Fetch logged-in user email and orders for admin/PM
   useEffect(() => {
     const fetchUserAndOrders = async () => {
       const { data: { session }, error } = await supabase.auth.getSession();
-      if (error) {
-        console.log("Error fetching session:", error);
-      } else if (session?.user?.email) {
+        if (error || !session) {
+      router.replace("/login"); // 👈 apna login route
+      return;
+    }
+      if (session?.user?.email) {
         setEmail(session.user.email);
+        // ✅ FETCH RESELLER FROM PROFILE
+        const { data: profile, error: profileError } = await supabase
+          .from("profiles")
+          .select("reseller")
+          .eq("id", session.user.id)
+          .single();
+
+        if (profileError) {
+          console.log("Error fetching profile:", profileError);
+        } else {
+          setReseller(profile?.reseller || "");
+        }
+
+        const { data: winReports, error: winError } = await supabase
+  .from("win_reports")
+  .select("order_id");
+
+if (winError) {
+  console.log("Error fetching win reports:", winError);
+}
+
+const reportedOrderIds =
+  winReports?.map((wr) => wr.order_id) || [];
 
         // Fetch all orders from the orders table
         const { data: ordersData, error: ordersError } = await supabase
@@ -36,7 +75,13 @@ export default function ReportAWinPage() {
         if (ordersError) {
           console.log("Error fetching orders:", ordersError);
         } else {
-          setOrders(ordersData);
+          const filteredOrders = ordersData
+  .filter(order => !reportedOrderIds.includes(order.id))
+  .sort((a, b) =>
+    Number(a.order_number) - Number(b.order_number)
+  );
+
+setOrders(filteredOrders);
         }
       }
     };
@@ -49,62 +94,129 @@ export default function ReportAWinPage() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleOrderSelect = async (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleOrderSelect = async (
+    e: React.ChangeEvent<HTMLSelectElement>
+  ) => {
     const orderId = e.target.value;
     setSelectedOrder(orderId);
 
-    // Fetch order details based on selected order ID
-    if (orderId) {
-      const { data: orderDetails, error } = await supabase
-        .from('orders')
-        .select('*')
-        .eq('id', orderId)
-        .single();
+    if (!orderId) return;
 
-      if (error) {
-        console.log("Error fetching order details:", error);
-      } else {
-        // Set form state with fetched order details
-        setForm({
-          ...form,
-          orderNumber: orderDetails.order_number,  // Map to the correct column
-          device: orderDetails.device || "",  // Populate device correctly
-          account: orderDetails.ingram_account || "",  // Map to 'ingram_account'
-          customerName: orderDetails.contact_name || "",  // Map to 'contact_name'
-          numberOfUnits: orderDetails.units || "",  // Map to 'units'
-          totalRevenue: orderDetails.revenue || "",  // Map to 'revenue'
-        });
-      }
+    const { data: orderDetails, error } = await supabase
+      .from("orders")
+      .select("*")
+      .eq("id", orderId)
+      .single();
+
+    if (error) {
+      console.log("Error fetching order details:", error);
+      return;
     }
+
+    console.log("ORDER DETAILS 👉", orderDetails);
+
+    const items = Array.isArray(orderDetails.cart_items)
+      ? orderDetails.cart_items
+      : [];
+
+    setOrderItems(items);
+    setIsOtherSelected(false);
+    setOtherProduct("");
+
+    const formattedProducts = items
+      .map(
+        (item, index) =>
+          `${index + 1}. ${item.product_name} (Qty: ${item.quantity})`
+      )
+      .join("\n");
+
+    setForm(prev => ({
+      ...prev,
+      orderNumber: orderDetails.order_number,
+      product_name: formattedProducts,
+      account: orderDetails.ingram_account || "",
+      customerName: orderDetails.contact_name || "",
+      numberOfUnits: orderDetails.units || "",
+      totalRevenue: orderDetails.revenue || "",
+    }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+
+  const productToSave = isOtherSelected
+    ? otherProduct
+    : form.product_name;
+
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Insert form data into win_reports table
-    const { data, error } = await supabase
-      .from('win_reports')
+    if (!selectedOrder) {
+      setModalMessage("Please select an order first.");
+      setShowModal(true);
+      return;
+    }
+
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    if (isOtherSelected && !otherProduct.trim()) {
+      setModalMessage("Please enter other device / SKU.");
+      setShowModal(true);
+      return;
+    }
+
+    const { error } = await supabase
+      .from("win_reports")
       .insert([
         {
-          order_number: form.orderNumber,
-          device: form.device,
-          account: form.account,
-          customer_name: form.customerName,
-          number_of_units: form.numberOfUnits,
-          total_revenue: form.totalRevenue,
-          one_time_purchase: form.oneTimePurchase,
-          date_of_purchase: form.dateOfPurchase,
-          description: form.description,
+          order_id: selectedOrder,
+          user_id: session?.user?.id,
+          product_id: productToSave,        // formatted products string
           submitted_by: email,
+          isOther: isOtherSelected,
+          otherDesc: isOtherSelected ? otherProduct : null,
+          reseller: reseller,
+          resellerAccount: form.account,
+          orderHash: form.orderNumber,
+          customerName: form.customerName,
+          units: form.numberOfUnits,
+          deal_rev: form.totalRevenue,
+          purchaseType: form.oneTimePurchase,
+          purchaseDate: form.dateOfPurchase,
+          notes: form.description,
         },
       ]);
 
+      
+
     if (error) {
       console.log("Error inserting into win_reports:", error);
+      setModalMessage("Something went wrong. Please try again.");
+      setShowModal(true);
     } else {
-      alert("Form submitted successfully!");
+      setModalMessage("Win reported successfully! 🎉");
+      setShowModal(true);
+
+        setOrders(prev => prev.filter(o => o.id !== selectedOrder));
+  setSelectedOrder("");
+  setOrderItems([]);
+  setIsOtherSelected(false);
+  setOtherProduct("");
+  setForm({
+    orderNumber: "",
+    product_name: "",
+    account: "",
+    customerName: "",
+    numberOfUnits: "",
+    totalRevenue: "",
+    oneTimePurchase: "",
+    dateOfPurchase: "",
+    description: "",
+  });
     }
   };
+
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-8">
@@ -133,8 +245,7 @@ export default function ReportAWinPage() {
                 Ingrammicro Surface Order #
               </label>
               <select
-                name="orderNumber"
-                value={form.orderNumber}
+                value={selectedOrder || ""}
                 onChange={handleOrderSelect}
                 className="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
@@ -149,17 +260,53 @@ export default function ReportAWinPage() {
 
             {/* Device */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Device
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Device(s) in this order
               </label>
-              <textarea
-                name="device"
-                value={form.device}  // Ensure device is populated from fetched order data
-                onChange={handleChange}
-                placeholder="Device details"
-                rows={6}
-                className="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
+              <div className="rounded-lg border border-gray-300 bg-white p-3 text-sm text-gray-700 min-h-[120px]">
+
+                {/* NO ORDER SELECTED */}
+                {!selectedOrder && (
+                  <div className="text-gray-400 italic">
+                    Devices will appear here once you select an order
+                  </div>
+                )}
+
+                {/* ORDER SELECTED */}
+                {selectedOrder && (
+                  <div className="space-y-2">
+
+                    {/* ORDER DEVICES */}
+                    {orderItems.map((item, index) => (
+                      <div key={index}>
+                        {index + 1}. {item.product_name} (Qty: {item.quantity})
+                      </div>
+                    ))}
+
+                    {/* OTHER DEVICE */}
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="otherDevice"
+                        checked={isOtherSelected}
+                        onChange={() => setIsOtherSelected(true)}
+                      />
+                      <span>Other device</span>
+                    </label>
+
+                    {isOtherSelected && (
+                      <input
+                        type="text"
+                        placeholder="Enter other device / SKU"
+                        value={otherProduct}
+                        onChange={(e) => setOtherProduct(e.target.value)}
+                        className="mt-2 w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    )}
+                  </div>
+                )}
+              </div>
+
             </div>
           </div>
 
@@ -222,6 +369,7 @@ export default function ReportAWinPage() {
                 name="oneTimePurchase"
                 value={form.oneTimePurchase}
                 onChange={handleChange}
+                required
                 className="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">Select Option</option>
@@ -238,6 +386,7 @@ export default function ReportAWinPage() {
                 name="dateOfPurchase"
                 value={form.dateOfPurchase}
                 onChange={handleChange}
+                 required
                 className="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
@@ -258,16 +407,42 @@ export default function ReportAWinPage() {
           </div>
 
           {/* Submit */}
-          <div className="pt-4">
-            <button
-              type="submit"
-              className="w-sm rounded-lg bg-blue-600 py-2.5 text-white text-sm font-medium hover:bg-blue-700 transition"
-            >
-              Submit
-            </button>
-          </div>
+          <div className="pt-4 flex justify-center">
+  <button
+    type="submit"
+    className="custom-blue px-10 py-2.5 rounded-lg cursor-pointer text-white text-sm font-medium transition"
+  >
+    Submit
+  </button>
+</div>
         </form>
       </div>
+
+      {/* Modal message */}
+      {showModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-md">
+            <h2 className="text-lg font-semibold text-gray-800 mb-2">
+              Success
+            </h2>
+
+            <p className="text-sm text-gray-600 mb-6">
+              {modalMessage}
+            </p>
+
+            <div className="flex justify-end">
+              <button
+                onClick={() => setShowModal(false)}
+                className="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm hover:bg-blue-700 transition"
+              >
+                OK
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+
     </div>
   );
 }

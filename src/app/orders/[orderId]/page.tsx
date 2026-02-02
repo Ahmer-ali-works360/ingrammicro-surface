@@ -283,10 +283,8 @@ export default function AdminOrderDetailPage() {
           mt-2
           text-xs font-medium
           px-4 py-2
-          border border-gray-300
-          bg-blue-700
           text-white
-          hover:bg-blue-950
+          custom-blue
           disabled:cursor-not-allowed
           transition
           cursor-pointer
@@ -551,9 +549,7 @@ export default function AdminOrderDetailPage() {
                 {/* ================= NOTES ================= */}
                 {order.notes && (
                     <div className="bg-white border border-gray-200 rounded-lg shadow">
-                        {/* <div className="px-6 py-3 text-sm font-medium border-b">
-                            Additional Notes
-                        </div> */}
+                        
                         <div className="px-6 py-6">
   <p className="text-sm font-bold text-gray-700 flex items-center gap-2">
     <FileText size={26} className="text-blue-600" />

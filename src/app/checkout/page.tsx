@@ -185,6 +185,31 @@ export default function CheckoutPage() {
       return;
     }
 
+
+
+// 🔻 UPDATE STOCK (AFTER ORDER INSERT)
+const stockRes = await fetch("/api/orders/update-stock", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    orderId: orderData.id,
+    items: cartItemsSnapshot, // product_id + quantity yahin se jayegi
+  }),
+});
+
+const stockResult = await stockRes.json();
+
+if (!stockRes.ok) {
+  setErrorModal(
+    stockResult?.message || "Stock update failed. Please try again."
+  );
+  return;
+}
+
+
+
     // 👇 YAHAN email Send hogi
 
     // 📧 EMAIL TO ADMIN (IMMEDIATE)
@@ -562,7 +587,9 @@ export default function CheckoutPage() {
 
 
         <div className="flex justify-center">
-          <button className="min-w-xs custom-blue cursor-pointer text-white py-4 rounded font-semibold">
+          
+          <button className="custom-blue px-10 py-2.5 rounded-lg cursor-pointer text-white text-sm font-medium transition">
+            
             Place order
           </button>
         </div>

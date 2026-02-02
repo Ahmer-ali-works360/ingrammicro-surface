@@ -38,3 +38,8 @@ body {
 .custom-blue {
   background-color: #4799D5;
 }
+.custom-blue:hover {
+    background-color: #3a8bc7; /* slightly darker version */
+    transform: translateY(-1px);
+    box-shadow: 0 6px 14px rgba(71, 153, 213, 0.35);
+  }

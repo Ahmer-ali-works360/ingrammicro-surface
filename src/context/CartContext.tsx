@@ -59,11 +59,13 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       const existing = prev.find((i) => i.id === item.id);
 
       // calculate new cart state (without setting it yet)
-      const newCart = existing
-        ? prev.map((i) =>
-            i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i
-          )
-        : [...prev, { ...item, quantity: 1 }];
+     const newCart = existing
+      ? prev.map((i) =>
+          i.id === item.id
+            ? { ...i, quantity: i.quantity + item.quantity }
+            : i
+        )
+      : [...prev, { ...item, quantity: item.quantity }];
 
       // validate total quantity <= 3
       const totalQty = getTotalQuantity(newCart);

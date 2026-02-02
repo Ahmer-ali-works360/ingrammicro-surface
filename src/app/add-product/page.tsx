@@ -1257,8 +1257,8 @@ setShowSuccess(true);
 
                 {/* Submit button */}
                 <div className="flex justify-center">
-                    <button className="mt-6 bg-blue-600 cursor-pointer text-white px-8 py-2 rounded" onClick={handleSubmit}>
-                        Submit
+                    <button className="mt-6 custom-blue cursor-pointer text-white px-8 py-2 rounded" onClick={handleSubmit}>
+                        Add Product
                     </button>
                 </div>
             </div>

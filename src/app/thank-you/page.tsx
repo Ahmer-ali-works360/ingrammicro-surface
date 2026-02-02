@@ -114,9 +114,9 @@ export default function ThankYouPage() {
         <h2 className="text-lg font-semibold mb-4">Ordered Products</h2>
 
         <div className="space-y-3">
-          {order.cart_items?.map((item: any) => (
+          {order.cart_items?.map((item: any, index: number) => (
             <div
-              key={item.id}
+              key={`${item.product_id}-${index}`}
               className="flex items-center gap-3 border border-gray-200 rounded p-3 bg-gray-50"
             >
               <img

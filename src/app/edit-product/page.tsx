@@ -1250,7 +1250,7 @@ export default function EditProductPage() {
         {/* Submit button */}
         <div className="flex justify-center">
           <button
-            className="mt-6 bg-blue-600 text-white px-8 py-2 cursor-pointer rounded"
+            className="custom-blue px-10 py-2.5 mt-6 rounded-lg cursor-pointer text-white text-sm font-medium transition"
             onClick={handleSubmit}
           >
             Update Product
