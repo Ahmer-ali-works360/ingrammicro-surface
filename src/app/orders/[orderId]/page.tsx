@@ -20,6 +20,8 @@ import {
   Users,
   Pencil, 
   ArrowLeft,
+  Eye, 
+  EyeOff, 
 } from "lucide-react";
 
 /* ================= TYPES ================= */
@@ -64,8 +66,16 @@ type OrderRow = {
 
   cart_items: any[];
   created_at: string;
+  tracking_number?: string | null;
+tracking_link?: string | null;
+return_tracking_number?: string | null;
+return_tracking_link?: string | null;
+case_type?: string | null;
+tracking_username?: string | null;
+tracking_password?: string | null;
+return_label?: string | null;
 
-  tracking_file?: string | null;
+  
 };
 
 /* ================= calculation ================= */
@@ -88,10 +98,11 @@ export default function AdminOrderDetailPage({
 
 
 
- 
+ const [uploadingFile, setUploadingFile] = useState(false);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
-  const [uploadingFile, setUploadingFile] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
 
   const [editingItemIndex, setEditingItemIndex] = useState<number | null>(null);
 const [itemQty, setItemQty] = useState<number>(0);
@@ -169,23 +180,44 @@ useEffect(() => {
   }, [orderId, authLoading]);
 
  /* ================= UPDATE order ================= */
-  useEffect(() => {
-  if (order) {
-    setForm({
-      company_name: order.company_name,
-      contact_name: order.contact_name,
-      contact_email: order.contact_email,
-      units: order.units,
-      budget: order.budget,
-      revenue: order.revenue,
-      segment: order.segment,
-      manufacturer: order.manufacturer,
-      address: order.address,
-      city: order.city,
-      state: order.state,
-      zip: order.zip,
-      notes: order.notes,
-    });
+useEffect(() => {
+  if (!order) return;
+  if (!isEdit) return;
+
+  // ⛔ agar form already filled hai, dobara mat bharo
+  if (Object.keys(form).length > 0) return;
+
+  setForm({
+    company_name: order.company_name,
+    contact_name: order.contact_name,
+    contact_email: order.contact_email,
+    units: order.units,
+    budget: order.budget,
+    revenue: order.revenue,
+    segment: order.segment,
+    manufacturer: order.manufacturer,
+    address: order.address,
+    city: order.city,
+    state: order.state,
+    zip: order.zip,
+    notes: order.notes,
+
+    tracking_number: order.tracking_number ?? "",
+    tracking_link: order.tracking_link ?? "",
+    return_tracking_number: order.return_tracking_number ?? "",
+    return_tracking_link: order.return_tracking_link ?? "",
+    case_type: order.case_type ?? "",
+    tracking_username: order.tracking_username ?? "",
+    tracking_password: order.tracking_password ?? "",
+  });
+}, [order, isEdit]);
+
+
+/* ================= SYNC RETURN LABEL FILE NAME ================= */
+useEffect(() => {
+  if (order?.return_label) {
+    const name = order.return_label.split("/").pop();
+    setUploadedFileName(name || null);
   }
 }, [order]);
 
@@ -297,15 +329,23 @@ const saveOrder = async () => {
     })
     .eq("id", order.id);
 
+  // ❌ agar error aaya → yahin stop
   if (error) {
     alert("Order update failed");
     console.error(error);
-  } else {
-    router.push(`/orders/${order.id}`);
+    setUpdating(false);
+    return;
   }
 
+  // ✅ sirf successful update ke baad refetch
+  const refreshed = await fetch(`/api/admin-orders/${order.id}`);
+  const refreshedJson = await refreshed.json();
+  setOrder(refreshedJson.order);
+
+  router.push(`/orders/${order.id}`);
   setUpdating(false);
 };
+
 
 /* ================= Edit order item(quantity) ================= */
 
@@ -431,36 +471,71 @@ useEffect(() => {
   console.log("ROLE DEBUG 👉", { role, isAdmin, isShopManager, isProgramManager });
 }, [role]);
 
-  /* ================= TRACKING UPLOAD ================= */
-  const uploadTrackingFile = async (file: File) => {
-    if (!order) return;
+ const uploadReturnLabel = async (file: File) => {
+  if (!order) return;
+
+  const path = `return-labels/${order.id}-${Date.now()}-${file.name}`;
+
+  setUploadingFile(true);
+
+  const { error } = await supabase.storage
+    .from("order-files")
+    .upload(path, file, { upsert: true });
+
+  if (error) {
+    alert(error.message);
+    setUploadingFile(false);
+    return;
+  }
+
+  const { data } = supabase.storage
+    .from("order-files")
+    .getPublicUrl(path);
+
+  await supabase
+    .from("orders")
+    .update({ return_label: data.publicUrl })
+    .eq("id", order.id);
+
+  setOrder({ ...order, return_label: data.publicUrl });
+   setUploadedFileName(file.name);
+  setUploadingFile(false);
+};
+
+const removeReturnLabel = async () => {
+  if (!order?.return_label) return;
+
+  try {
+    // 🔹 storage path extract
+    const urlParts = order.return_label.split("/");
+    const filePath = `return-labels/${urlParts[urlParts.length - 1]}`;
 
     setUploadingFile(true);
 
-    const path = `tracking/${order.id}.pdf`;
-
-    const { error: uploadError } = await supabase.storage
+    // 🔹 remove from storage
+    await supabase.storage
       .from("order-files")
-      .upload(path, file, { upsert: true });
+      .remove([filePath]);
 
-    if (uploadError) {
-      alert(uploadError.message);
-      setUploadingFile(false);
-      return;
-    }
-
-    const { data } = supabase.storage
-      .from("order-files")
-      .getPublicUrl(path);
-
+    // 🔹 remove from DB
     await supabase
       .from("orders")
-      .update({ tracking_file: data.publicUrl })
+      .update({ return_label: null })
       .eq("id", order.id);
 
-    setOrder({ ...order, tracking_file: data.publicUrl });
+    // 🔹 update UI
+    setOrder({ ...order, return_label: null });
+    setUploadedFileName(null);
+
+  } catch (err) {
+    console.error("Failed to remove file", err);
+    alert("Failed to remove file");
+  } finally {
     setUploadingFile(false);
-  };
+  }
+};
+
+
 
   if (authLoading || loading || !role) {
   return <div className="p-12 text-center text-gray-500">Loading…</div>;
@@ -943,6 +1018,235 @@ if (!order) {
         </div>
 
 
+{/* ================= TRACKING INFORMATION ================= */}
+<div className="bg-white border border-gray-200 rounded-lg shadow">
+  <div className="px-6 py-6">
+    <p className="text-sm font-bold text-gray-700 flex items-center gap-2">
+      <Truck size={26} className="text-blue-600" />
+      Tracking Information
+    </p>
+  </div>
+
+  <div className="grid grid-cols-2 gap-6 px-6 py-4 text-sm">
+
+    {/* Tracking Number */}
+    <div>
+      <p className="text-xs uppercase text-gray-400 mb-1">Tracking Number</p>
+      {isEdit ? (
+        <input
+          value={form.tracking_number || ""}
+          onChange={(e) =>
+            setForm({ ...form, tracking_number: e.target.value })
+          }
+          className="border px-3 py-2 rounded w-full text-sm"
+        />
+      ) : (
+        <p>{order.tracking_number || "—"}</p>
+      )}
+    </div>
+
+    {/* Tracking Link */}
+    <div>
+      <p className="text-xs uppercase text-gray-400 mb-1">Tracking Link</p>
+      {isEdit ? (
+        <input
+          value={form.tracking_link || ""}
+          onChange={(e) =>
+            setForm({ ...form, tracking_link: e.target.value })
+          }
+          className="border px-3 py-2 rounded w-full text-sm"
+        />
+      ) : order.tracking_link ? (
+        <a
+          href={order.tracking_link}
+          target="_blank"
+          className="text-blue-600 underline"
+        >
+          Open Link
+        </a>
+      ) : (
+        <p>—</p>
+      )}
+    </div>
+
+    {/* Return Tracking Number */}
+    <div>
+      <p className="text-xs uppercase text-gray-400 mb-1">
+        Return Tracking Number
+      </p>
+      {isEdit ? (
+        <input
+          value={form.return_tracking_number || ""}
+          onChange={(e) =>
+            setForm({ ...form, return_tracking_number: e.target.value })
+          }
+          className="border px-3 py-2 rounded w-full text-sm"
+        />
+      ) : (
+        <p>{order.return_tracking_number || "—"}</p>
+      )}
+    </div>
+
+    {/* Return Tracking Link */}
+    <div>
+      <p className="text-xs uppercase text-gray-400 mb-1">
+        Return Tracking Link
+      </p>
+      {isEdit ? (
+        <input
+          value={form.return_tracking_link || ""}
+          onChange={(e) =>
+            setForm({ ...form, return_tracking_link: e.target.value })
+          }
+          className="border px-3 py-2 rounded w-full text-sm"
+        />
+      ) : order.return_tracking_link ? (
+        <a
+          href={order.return_tracking_link}
+          target="_blank"
+          className="text-blue-600 underline"
+        >
+          Open Link
+        </a>
+      ) : (
+        <p>—</p>
+      )}
+    </div>
+
+    {/* Case Type */}
+    <div>
+      <p className="text-xs uppercase text-gray-400 mb-1">Case Type</p>
+      {isEdit ? (
+        <input
+          value={form.case_type || ""}
+          onChange={(e) =>
+            setForm({ ...form, case_type: e.target.value })
+          }
+          className="border px-3 py-2 rounded w-full text-sm"
+        />
+      ) : (
+        <p>{order.case_type || "—"}</p>
+      )}
+    </div>
+
+    {/* Username */}
+    <div>
+      <p className="text-xs uppercase text-gray-400 mb-1">Username</p>
+      {isEdit ? (
+        <input
+          value={form.tracking_username || ""}
+          onChange={(e) =>
+            setForm({ ...form, tracking_username: e.target.value })
+          }
+          className="border px-3 py-2 rounded w-full text-sm"
+        />
+      ) : (
+        <p>{order.tracking_username || "—"}</p>
+      )}
+    </div>
+
+    {/* Password */}
+<div>
+  <p className="text-xs uppercase text-gray-400 mb-1">Password</p>
+
+  {isEdit ? (
+    <div className="flex items-center border rounded w-full px-3 py-2">
+      <input
+        type={showPassword ? "text" : "password"}
+        value={form.tracking_password || ""}
+        onChange={(e) =>
+          setForm({ ...form, tracking_password: e.target.value })
+        }
+        className="flex-1 outline-none text-sm"
+      />
+
+      <button
+        type="button"
+        onClick={() => setShowPassword(!showPassword)}
+        className="text-gray-400 hover:text-blue-600 ml-2"
+      >
+        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+      </button>
+    </div>
+  ) : (
+    <p>{order.tracking_password ? "••••••" : "—"}</p>
+  )}
+</div>
+
+
+
+
+    {/* Return Label */}
+<div>
+  <p className="text-xs uppercase text-gray-400 mb-1">Return Label</p>
+
+  {isEdit ? (
+    <div className="space-y-1">
+      <label className="flex items-center gap-3 border rounded px-3 py-2 cursor-pointer hover:border-blue-500 text-sm">
+        <input
+          type="file"
+          accept=".pdf,.png,.jpg"
+          className="hidden"
+          onChange={(e) => {
+            if (e.target.files?.[0]) {
+              uploadReturnLabel(e.target.files[0]);
+            }
+          }}
+          disabled={uploadingFile}
+        />
+
+        <span className="px-3 py-1 text-xs bg-blue-600 text-white rounded">
+          {uploadingFile ? "Uploading..." : "Choose file"}
+        </span>
+
+        <span className="text-gray-500 text-xs truncate">
+          {uploadedFileName || "No file selected"}
+        </span>
+        {/* ❌ REMOVE BUTTON */}
+    {order.return_label && (
+      <button
+        type="button"
+        onClick={removeReturnLabel}
+        className="text-red-500 hover:text-red-700 text-xs"
+        title="Remove file"
+      >
+        ✕
+      </button>
+    )}
+      </label>
+
+      {order.return_label && (
+        <a
+          href={order.return_label}
+          target="_blank"
+          className="text-blue-600 text-xs underline"
+        >
+          View uploaded file
+        </a>
+      )}
+    </div>
+  ) : order.return_label ? (
+    <a
+      href={order.return_label}
+      target="_blank"
+      className="text-blue-600 underline text-sm"
+    >
+      View Return Label
+    </a>
+  ) : (
+    <p>—</p>
+  )}
+</div>
+
+
+
+  </div>
+</div>
+
+
+
+
+
         {/* ================= SHIPPING DETAILS ================= */}
         <div className="bg-white border border-gray-200 rounded-lg shadow">
           <div className="px-6 py-6">
@@ -1054,18 +1358,7 @@ if (!order) {
   <TimelineDot active={currentStep >= 2} label="Returned" />
 </div>
 
-          {order.tracking_file && (
-            <div className="mt-4 text-sm">
-              Tracking #{" "}
-              <a
-                href={order.tracking_file}
-                className="text-blue-600 underline"
-                target="_blank"
-              >
-                View PDF
-              </a>
-            </div>
-          )}
+          
         </div>
 
 {/* ================= ORDER ITEMS ================= */}
