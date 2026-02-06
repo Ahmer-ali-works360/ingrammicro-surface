@@ -25,18 +25,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [status, setStatus] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchProfile = async (userId: string) => {
-    const { data, error } = await supabase
-      .from("profiles")
-      .select("role, status")
-      .eq("id", userId)
-      .single();
+ const fetchProfile = async (userId: string) => {
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("role, status")
+    .eq("id", userId)
+    .single();
 
-    if (error) console.error("fetchProfile error:", error);
+  if (error) {
+    console.error("fetchProfile error:", error);
+    return;
+  }
 
-    setRole(data?.role ?? null);
-    setStatus(data?.status ?? null);
-  };
+  const normalizedRole = data?.role
+    ?.toLowerCase()
+    .replace(/\s+/g, "_");
+
+  setRole(normalizedRole ?? null);
+  setStatus(data?.status ?? null);
+};
+
 
   const syncSession = async () => {
     setLoading(true);
@@ -124,5 +132,5 @@ export const useAuthRole = (allowedRoles: string[]) => {
     .map((r) => r.toLowerCase())
     .includes(userRole);
 
-  return { userRole, loading, isAllowed };
+  return { role: userRole, loading, isAllowed };
 };

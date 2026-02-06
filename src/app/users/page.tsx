@@ -45,11 +45,14 @@ export default function AdminUsersPage() {
         .select("role")
         .eq("id", sessionData.session.user.id)
         .single();
+        console.log("ROLE FROM DB:", profileData?.role);
 
-      if (error || profileData?.role !== "admin") {
-        router.replace("/");
-        return;
-      }
+      const allowedRoles = ["admin", "program manager"];
+
+if (error || !allowedRoles.includes(profileData?.role)) {
+  router.replace("/");
+  return;
+}
 
       setAuthLoading(false);
     };

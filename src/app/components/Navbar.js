@@ -31,7 +31,7 @@ export default function Navbar() {
     total: 0,
   });
 
-  const isAdminOrPM = user && (role === "admin" || role === "program_manager");
+  const isadminOrPMOrSM = user && (role === "admin" || role === "program_manager" || role === "shop_manager");
 
   useEffect(() => {
     setMounted(true);
@@ -39,7 +39,7 @@ export default function Navbar() {
 
   // 🔔 Fetch notification counts
   useEffect(() => {
-    if (!isAdminOrPM) return;
+    if (!isadminOrPMOrSM) return;
 
     async function fetchNotificationCounts() {
       try {
@@ -52,7 +52,7 @@ export default function Navbar() {
     }
 
     fetchNotificationCounts();
-  }, [isAdminOrPM]);
+  }, [isadminOrPMOrSM]);
 
 
   const handleLogout = async () => {
@@ -105,7 +105,7 @@ export default function Navbar() {
         <div className="hidden md:flex items-center gap-6 text-xl text-[#2B3F50] relative">
 
           {/* 🔔 NOTIFICATIONS (Admin & PM only) */}
-          {isAdminOrPM && (
+          {isadminOrPMOrSM && (
             <div className="relative group">
               <button aria-label="Notifications" className="relative hover:opacity-70 flex items-center">
                 <FiBell className="w-6 h-8" />
@@ -256,7 +256,7 @@ export default function Navbar() {
             )}
 
             {/* 🔔 NOTIFICATIONS */}
-            {isAdminOrPM && (
+            {isadminOrPMOrSM && (
               <li className="pt-2 border-t border-gray-200">
                 <Link
                   href="/orders"

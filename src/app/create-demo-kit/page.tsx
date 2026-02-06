@@ -378,11 +378,14 @@ export default function CreateDemoKitPage() {
                         </div>
 
                         <div className="p-4 flex-1 flex flex-col justify-between">
-                          <div>
+                          <div className="text-center">
                             <h3 className="font-medium text-sm">
                               {product.product_name}
                             </h3>
-                            <p className="text-xs text-gray-500">
+
+                             <div className="flex-1" />
+
+                            <p className="text-xs text-gray-500 text-center mt-6 ">
                               SKU: {product.sku}
                             </p>
                           </div>
@@ -403,7 +406,7 @@ export default function CreateDemoKitPage() {
                               });
                               openCart();
                             }}
-                            className={`mt-3 w-full py-2 rounded text-sm transition ${outOfStock
+                            className={` w-full py-2 rounded text-sm transition ${outOfStock
                                 ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                                 : "bg-yellow-400 text-black hover:bg-yellow-500 cursor-pointer"
                               }`}

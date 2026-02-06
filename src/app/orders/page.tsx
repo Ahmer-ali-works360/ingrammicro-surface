@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import * as XLSX from "xlsx";
 import { useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabaseClient";
+import { useAuthRole } from "@/app/context/AuthContext";
 
 type Order = {
   id: string;
@@ -20,70 +20,44 @@ export default function AdminOrdersPage() {
 
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(false);
-  const [authLoading, setAuthLoading] = useState(true);
-
-  // Search
   const [search, setSearch] = useState("");
 
-  // ----------------------------
-  // 🔒 AUTH + ADMIN / PM CHECK
-  // ❗ UNCHANGED (as requested)
-  // ----------------------------
+  // 🔐 Auth check
+  const { loading: authLoading, isAllowed } = useAuthRole([
+    "admin",
+    "program_manager",
+    "shop_manager",
+  ]);
+
+  // 🚫 Redirect if not allowed
   useEffect(() => {
-    const checkAccess = async () => {
-      const { data: sessionData } = await supabase.auth.getSession();
+    if (!authLoading && !isAllowed) {
+      router.replace("/");
+    }
+  }, [authLoading, isAllowed, router]);
 
-      if (!sessionData?.session?.user) {
-        router.replace("/login");
-        return;
-      }
-
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("role")
-        .eq("id", sessionData.session.user.id)
-        .single();
-
-      if (!profile || !["admin", "program_manager"].includes(profile.role)) {
-        router.replace("/");
-        return;
-      }
-
-      setAuthLoading(false);
-    };
-
-    checkAccess();
-  }, [router]);
-
-  // ----------------------------
-  // ✅ Fetch Orders (ADMIN API)
-  // ----------------------------
+  // 📦 Fetch orders (ONLY after auth)
   const fetchOrders = async () => {
     setLoading(true);
-
     try {
       const res = await fetch("/api/admin-orders");
       const result = await res.json();
 
       if (res.ok && result.orders) {
         setOrders(result.orders as Order[]);
-      } else {
-        console.error("Failed to fetch orders:", result);
       }
     } catch (err) {
       console.error("Fetch orders error:", err);
     }
-
     setLoading(false);
   };
 
   useEffect(() => {
-    fetchOrders();
-  }, []);
+    if (!authLoading && isAllowed) {
+      fetchOrders();
+    }
+  }, [authLoading, isAllowed]);
 
-  // ----------------------------
-  // Search Filter
-  // ----------------------------
   const filteredOrders = useMemo(() => {
     return orders.filter((o) => {
       const text = `${o.id} ${o.seller_email}`.toLowerCase();
@@ -91,9 +65,6 @@ export default function AdminOrdersPage() {
     });
   }, [orders, search]);
 
-  // ----------------------------
-  // Download Excel
-  // ----------------------------
   const downloadExcel = () => {
     if (filteredOrders.length === 0) return;
 
@@ -133,7 +104,9 @@ export default function AdminOrdersPage() {
 
   if (authLoading) return null;
 
+  /* ================= UI ================= */
   return (
+
     <div className="p-8">
 
       {/* Download + Search */}
