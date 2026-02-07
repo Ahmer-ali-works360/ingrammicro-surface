@@ -144,7 +144,7 @@ export default function Navbar() {
                   )}
                 </Link>
 
-
+{role !== "shop_manager" && (
                 <Link
                   href="/users"
                   onClick={async () => {
@@ -168,6 +168,7 @@ export default function Navbar() {
                     </span>
                   )}
                 </Link>
+)}
 
 
               </div>
@@ -284,7 +285,7 @@ export default function Navbar() {
                     </span>
                   )}
                 </Link>
-
+{role !== "shop_manager" && (
                 <Link
                   href="/users"
                   onClick={async () => {
@@ -310,6 +311,7 @@ export default function Navbar() {
                     </span>
                   )}
                 </Link>
+                )}
               </li>
             )}
 

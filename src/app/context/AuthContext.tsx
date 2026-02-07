@@ -77,6 +77,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const { error } = await supabase.auth.signOut();
     if (error) console.error("Logout error:", error);
 
+    localStorage.removeItem("cart");
+    
     setUser(null);
     setRole(null);
     setStatus(null);
