@@ -1,7 +1,12 @@
 // src/app/api/notifications/count/route.ts
 
 import { NextResponse } from "next/server";
-import { supabase } from "@/lib/supabaseClient";
+import { createClient } from "@supabase/supabase-js";
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY! // ⚠️ server-only key
+);
 
 export async function GET() {
   try {
