@@ -7,8 +7,8 @@ import { useRouter } from "next/navigation";
 
 export default function ReportAWinPage() {
   const [email, setEmail] = useState("");
-  const [orders, setOrders] = useState([]);
-  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [orders, setOrders] = useState<any[]>([]);
+  const [selectedOrder, setSelectedOrder] = useState<string | number | null>(null);
   const [form, setForm] = useState({
     orderNumber: "",
     product_name: "",          // Device will be fetched here
@@ -25,7 +25,7 @@ export default function ReportAWinPage() {
   const [showModal, setShowModal] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
 
-  const [orderItems, setOrderItems] = useState([]);
+  const [orderItems, setOrderItems] = useState<any[]>([]);
   const [isOtherSelected, setIsOtherSelected] = useState(false);
   const [otherProduct, setOtherProduct] = useState("");
 
@@ -125,9 +125,10 @@ setOrders(filteredOrders);
 
     const formattedProducts = items
       .map(
-        (item, index) =>
-          `${index + 1}. ${item.product_name} (Qty: ${item.quantity})`
-      )
+  (item: any, index: number) =>
+    `${index + 1}. ${item.product_name} (Qty: ${item.quantity})`
+)
+
       .join("\n");
 
     setForm(prev => ({
@@ -147,7 +148,8 @@ setOrders(filteredOrders);
     : form.product_name;
 
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+
     e.preventDefault();
 
     if (!selectedOrder) {

@@ -18,6 +18,16 @@ const PLACEHOLDER_SVG =
   </text>
 </svg>`);
 
+type FilterCategory =
+  | "formFactor"
+  | "processor"
+  | "screenSize"
+  | "memory"
+  | "storage"
+  | "copilot"
+  | "fiveG";
+
+
 export default function CreateDemoKitPage() {
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -204,9 +214,9 @@ export default function CreateDemoKitPage() {
   }, []);
 
   // ✅ HANDLE FILTER CHANGE
-  const handleFilterChange = (category: string, value: string) => {
+  const handleFilterChange = (category: FilterCategory, value: string) => {
     setSelectedFilters((prev) => {
-      const list = prev[category as keyof typeof prev];
+      const list = prev[category];
       return {
         ...prev,
         [category]: list.includes(value)
@@ -215,6 +225,7 @@ export default function CreateDemoKitPage() {
       };
     });
   };
+
 
   // ✅ FILTER + SORT
   const filteredProducts = products
@@ -305,16 +316,17 @@ export default function CreateDemoKitPage() {
 
             {/* Filters for desktop */}
             <aside className="hidden lg:block bg-white rounded-2xl shadow p-5 space-y-4">
-              {Object.keys(filterOptions).map((category) => (
+              {(Object.keys(filterOptions) as FilterCategory[]).map((category) => (
                 <FilterGroup
                   key={category}
                   title={category.replace(/([A-Z])/g, " $1")}
-                  options={filterOptions[category] || []}
+                  options={filterOptions[category]}
                   category={category}
                   selectedFilters={selectedFilters}
                   onChange={handleFilterChange}
                 />
               ))}
+
             </aside>
 
             {/* Products */}
@@ -383,7 +395,7 @@ export default function CreateDemoKitPage() {
                               {product.product_name}
                             </h3>
 
-                             <div className="flex-1" />
+                            <div className="flex-1" />
 
                             <p className="text-xs text-gray-500 text-center mt-6 ">
                               SKU: {product.sku}
@@ -407,8 +419,8 @@ export default function CreateDemoKitPage() {
                               openCart();
                             }}
                             className={` w-full py-2 rounded text-sm transition ${outOfStock
-                                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                                : "bg-yellow-400 text-black hover:bg-yellow-500 cursor-pointer"
+                              ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                              : "bg-yellow-400 text-black hover:bg-yellow-500 cursor-pointer"
                               }`}
                           >
                             {outOfStock ? "Out of Stock" : "Add to Cart"}
@@ -435,16 +447,17 @@ export default function CreateDemoKitPage() {
                     ✕
                   </button>
                 </div>
-                {Object.keys(filterOptions).map((category) => (
+                {(Object.keys(filterOptions) as FilterCategory[]).map((category) => (
                   <FilterGroup
                     key={category}
                     title={category.replace(/([A-Z])/g, " $1")}
-                    options={filterOptions[category] || []}
+                    options={filterOptions[category]}
                     category={category}
                     selectedFilters={selectedFilters}
                     onChange={handleFilterChange}
                   />
                 ))}
+
               </div>
             </div>
           )}
@@ -466,9 +479,10 @@ function FilterGroup({
 }: {
   title: string;
   options: string[];
-  category: string;
-  selectedFilters: any;
-  onChange: (category: string, value: string) => void;
+  category: FilterCategory;
+  selectedFilters: Record<FilterCategory, string[]>;
+  onChange: (category: FilterCategory, value: string) => void;
+
 }) {
   const [open, setOpen] = useState(true);
 
@@ -495,8 +509,8 @@ function FilterGroup({
               <label
                 key={opt}
                 className={`flex items-center gap-2 text-sm px-2 py-1 rounded cursor-pointer ${isSelected
-                    ? "bg-yellow-400 text-black font-semibold"
-                    : "text-gray-700 hover:bg-gray-100"
+                  ? "bg-yellow-400 text-black font-semibold"
+                  : "text-gray-700 hover:bg-gray-100"
                   }`}
               >
                 <input

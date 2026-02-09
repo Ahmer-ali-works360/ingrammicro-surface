@@ -544,7 +544,7 @@ export default function EditProductPage() {
                   src={
                     thumbnail
                       ? URL.createObjectURL(thumbnail)
-                      : existingThumbnail
+                      : existingThumbnail || "/placeholder.png"
                   }
                   alt="Thumbnail"
                   className="w-20 h-20 object-cover mb-2"

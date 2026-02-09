@@ -30,5 +30,5 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
 , "src/app/components/Navbar.js"  ],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules", "supabase/functions"]
 }
