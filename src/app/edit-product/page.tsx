@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+export const dynamic = "force-dynamic";
+
+import { useState, useRef, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 import { useAuthRole } from "../context/AuthContext";
@@ -19,7 +21,7 @@ type SelectedState = {
   screen: string;
 };
 
-export default function EditProductPage() {
+function EditProductPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const productIdRaw = searchParams.get("id");
@@ -1282,5 +1284,13 @@ export default function EditProductPage() {
       )}
 
     </div>
+  );
+}
+
+export default function EditProductPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <EditProductPageContent />
+    </Suspense>
   );
 }

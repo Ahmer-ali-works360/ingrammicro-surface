@@ -299,7 +299,7 @@ export default function CreateDemoKitPage() {
               width={1600}
               height={400}
               priority
-              className="w-full h-[360px] object-cover"
+              className="w-full h-90 object-cover"
             />
           </div>
 
@@ -360,7 +360,7 @@ export default function CreateDemoKitPage() {
                         key={product.id}
                         className="bg-white rounded-2xl shadow hover:shadow-lg transition flex flex-col group"
                       >
-                        <div className="w-full h-[200px] relative rounded-t-2xl overflow-hidden">
+                        <div className="w-full h-50 relative rounded-t-2xl overflow-hidden">
                           {product.five_g && (
                             <Image
                               src="/5g-logo.png"

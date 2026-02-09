@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 import toast, { Toaster } from "react-hot-toast";
 
-export default function LoginPage() {
+function LoginPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get("redirect");
@@ -87,8 +87,8 @@ export default function LoginPage() {
       <div className="absolute inset-0 bg-white opacity-95 z-0" />
 
       {/* Card */}
-      <div className="relative z-10 w-full max-w-[420px] sm:max-w-[480px] bg-white border-[8px] sm:border-[10px] border-[#F9F9F9] p-6 sm:p-10 md:p-12 rounded-[6px] animate-slide-up">
-        <h1 className="text-[20px] sm:text-[22px] font-[600] mb-6 text-[#222] text-center">
+      <div className="relative z-10 w-full max-w-105 sm:max-w-120 bg-white border-8 sm:border-10 border-[#F9F9F9] p-6 sm:p-10 md:p-12 rounded-md animate-slide-up">
+        <h1 className="text-[20px] sm:text-[22px] font-semibold mb-6 text-[#222] text-center">
           Login
         </h1>
 
@@ -103,7 +103,7 @@ export default function LoginPage() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full border border-[#d1d1d1] px-3 py-[10px] text-[14px] rounded-[4px]"
+              className="w-full border border-[#d1d1d1] px-3 py-2.5 text-[14px] rounded-sm"
             />
           </div>
 
@@ -117,7 +117,7 @@ export default function LoginPage() {
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full border border-[#d1d1d1] px-3 py-[10px] text-[14px] rounded-[4px]"
+              className="w-full border border-[#d1d1d1] px-3 py-2.5 text-[14px] rounded-sm"
             />
           </div>
 
@@ -136,14 +136,14 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-[#3ba1da] text-white py-[11px] text-[14px] font-[500] rounded-[4px] hover:bg-[#44b0ec]"
+              className="w-full bg-[#3ba1da] text-white py-2.75 text-[14px] font-medium rounded-sm hover:bg-[#44b0ec]"
             >
               {loading ? "Logging in..." : "LOGIN"}
             </button>
 
             <a
               href="/account-registration"
-              className="w-full text-center bg-[#e5e5e5] text-[#333] py-[11px] text-[14px] font-[500] rounded-[4px] hover:bg-[#dcdcdc]"
+              className="w-full text-center bg-[#e5e5e5] text-[#333] py-2.75 text-[14px] font-medium rounded-sm hover:bg-[#dcdcdc]"
             >
               REGISTER
             </a>
@@ -159,4 +159,12 @@ export default function LoginPage() {
     </div>
   </>
 );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <LoginPageContent />
+    </Suspense>
+  );
 }

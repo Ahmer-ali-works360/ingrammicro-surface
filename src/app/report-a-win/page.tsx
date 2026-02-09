@@ -265,7 +265,7 @@ setOrders(filteredOrders);
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Device(s) in this order
               </label>
-              <div className="rounded-lg border border-gray-300 bg-white p-3 text-sm text-gray-700 min-h-[120px]">
+              <div className="rounded-lg border border-gray-300 bg-white p-3 text-sm text-gray-700 min-h-30">
 
                 {/* NO ORDER SELECTED */}
                 {!selectedOrder && (
