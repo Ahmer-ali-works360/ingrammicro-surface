@@ -1,3 +1,5 @@
+//src/app/context/AuthContext.tsx 
+
 "use client";
 
 import {
@@ -15,6 +17,7 @@ interface AuthContextType {
   status: string | null;
   loading: boolean;
   logout: () => Promise<void>;
+  syncSession: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -110,7 +113,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, role, status, loading, logout }}>
+    <AuthContext.Provider value={{ user, role, status, loading, logout, syncSession}}>
       {children}
     </AuthContext.Provider>
   );

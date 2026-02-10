@@ -1,12 +1,16 @@
+//src/app/login/page.tsx
+
 "use client";
 
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 import toast, { Toaster } from "react-hot-toast";
+import { useAuth } from "@/app/context/AuthContext";
 
 function LoginPageContent() {
   const router = useRouter();
+  const { syncSession } = useAuth();
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get("redirect");
 
@@ -26,51 +30,38 @@ function LoginPageContent() {
 
   // Handle login
   async function handleLogin(e: React.FormEvent) {
-    e.preventDefault();
-    setLoading(true);
+  e.preventDefault();
+  setLoading(true);
 
-    try {
-      // Sign in user
-      const { data, error } = await supabase.auth.signInWithPassword({
+  try {
+    const res = await fetch("/api/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
         email: email.trim(),
         password,
-      });
+      }),
+    });
 
-      setLoading(false);
+    const result = await res.json();
 
-      if (error) {
-        toast.error(error.message);
-        return;
-      }
+    setLoading(false);
 
-      if (data.user) {
-        // Fetch user role & status
-        const { data: profileData, error: profileError } = await supabase
-          .from("profiles")
-          .select("status, role")
-          .eq("id", data.user.id)
-          .single();
-
-        if (profileError) {
-          console.error("Error fetching profile:", profileError.message);
-          toast.error("Unable to fetch user role.");
-          return;
-        }
-
-        if (profileData?.status !== "approved") {
-          toast.error("Your account is not approved yet.");
-          await supabase.auth.signOut();
-          return;
-        }
-
-        // Redirect approved user
-        router.push(redirectTo || "/");
-      }
-    } catch (err: any) {
-      setLoading(false);
-      toast.error("Something went wrong. Please try again.");
+    if (!res.ok) {
+      toast.error(result.error || "Login failed");
+      return;
     }
+    await syncSession();
+    // ✅ login successful → session already set
+    router.push(redirectTo || "/");
+  } catch (err) {
+    setLoading(false);
+    toast.error("Something went wrong. Please try again.");
   }
+}
+
 
   return (
   <>
