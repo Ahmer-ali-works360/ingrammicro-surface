@@ -7,6 +7,11 @@ export async function proxy(req: NextRequest) {
 
   console.log("PROXY RUNNING:", pathname);
 
+  // 🚫 Skip API routes
+  if (pathname.startsWith("/api")) {
+    return NextResponse.next();
+  }
+
   const res = NextResponse.next();
 
   // ✅ Create Supabase server client (Edge-safe)
@@ -41,23 +46,25 @@ export async function proxy(req: NextRequest) {
     pathname.startsWith(route)
   );
 
-  // 🔐 Not logged in → redirect to login
+  // 🔐 If NOT logged in → redirect to login
   if (!session && !isPublicRoute) {
     return NextResponse.redirect(new URL("/login", req.url));
   }
 
-  // 🚨 If recovery session → allow ONLY reset-password page
-  if (
-    session?.user?.recovery_sent_at &&
-    !pathname.startsWith("/reset-password")
-  ) {
+  // 🔒 If user came from recovery link (temporary login)
+  const isRecovery =
+    req.nextUrl.searchParams.get("type") === "recovery";
+
+  if (isRecovery && !pathname.startsWith("/reset-password")) {
     return NextResponse.redirect(new URL("/reset-password", req.url));
   }
 
   return res;
 }
 
-// ✅ Prevent proxy running on static files
+// ✅ Prevent proxy running on static files & API
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
+  matcher: [
+    "/((?!api|_next/static|_next/image|favicon.ico).*)",
+  ],
 };
