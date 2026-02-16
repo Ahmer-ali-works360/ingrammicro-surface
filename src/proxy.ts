@@ -29,22 +29,34 @@ export async function proxy(req: NextRequest) {
       cookies: {
         get: (name: string) => req.cookies.get(name)?.value,
         set: (name: string, value: string, options) => {
-          req.cookies.set({ name, value, ...options });
+          const cookieOptions = {
+            ...options,
+            sameSite: 'lax' as const,
+            secure: true,
+            path: '/',
+          };
+          req.cookies.set({ name, value, ...cookieOptions });
           res = NextResponse.next({
             request: {
               headers: req.headers,
             },
           });
-          res.cookies.set({ name, value, ...options });
+          res.cookies.set({ name, value, ...cookieOptions });
         },
         remove: (name: string, options) => {
-          req.cookies.set({ name, value: "", ...options });
+          const cookieOptions = {
+            ...options,
+            sameSite: 'lax' as const,
+            secure: true,
+            path: '/',
+          };
+          req.cookies.set({ name, value: "", ...cookieOptions });
           res = NextResponse.next({
             request: {
               headers: req.headers,
             },
           });
-          res.cookies.set({ name, value: "", ...options });
+          res.cookies.set({ name, value: "", ...cookieOptions });
         },
       },
     }
@@ -53,6 +65,14 @@ export async function proxy(req: NextRequest) {
   const {
     data: { session },
   } = await supabase.auth.getSession();
+
+
+  // 🐛 DEBUG LOGS - YEH ADD KARO
+  console.log("=== DEBUG INFO ===");
+  console.log("Session exists:", !!session);
+  console.log("User email:", session?.user?.email || "NO SESSION");
+  console.log("Pathname:", pathname);
+  console.log("==================");
 
   // ✅ Public routes (no auth required)
   const publicRoutes = ["/login", "/forgot-password", "/reset-password"];
@@ -72,8 +92,10 @@ export async function proxy(req: NextRequest) {
   // 🔐 Redirect to login if NOT authenticated and NOT on public route
   if (!session && !isPublicRoute) {
     const loginUrl = new URL("/login", req.url);
-    // ✅ PRESERVE REDIRECT PARAMETER
-    loginUrl.searchParams.set("redirect", pathname);
+    // ✅ Only add redirect if NOT already on login and NOT root path
+    if (pathname !== "/" && pathname !== "/login") {
+      loginUrl.searchParams.set("redirect", pathname);
+    }
     return NextResponse.redirect(loginUrl);
   }
 
@@ -81,7 +103,7 @@ export async function proxy(req: NextRequest) {
   if (session && isPublicRoute && !isRecovery) {
     // ✅ CHECK FOR REDIRECT PARAMETER
     const redirectTo = req.nextUrl.searchParams.get("redirect");
-    const destination = redirectTo || "/";
+    const destination = redirectTo && redirectTo !== "/" ? redirectTo : "/";
     return NextResponse.redirect(new URL(destination, req.url));
   }
 
