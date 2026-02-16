@@ -35,7 +35,7 @@ export async function proxy(req: NextRequest) {
             sameSite: 'lax' as const,
             secure: process.env.NODE_ENV === 'production',
             path: '/',
-            maxAge: 60 * 60 * 24 * 7, // 7 days
+            maxAge: 60 * 60 * 24 * 7,
           };
           req.cookies.set({ name, value, ...cookieOptions });
           res = NextResponse.next({
@@ -64,21 +64,24 @@ export async function proxy(req: NextRequest) {
     }
   );
 
- // 🔒 CRITICAL: Check for recovery link FIRST before getting session
+  // 🔒 CRITICAL: Check for recovery link FIRST
   const isRecovery = req.nextUrl.searchParams.get("type") === "recovery";
+  const recoveryToken = req.nextUrl.searchParams.get("token");
 
-  // ✅ If recovery link, ALWAYS allow through to reset-password page
-  if (isRecovery) {
-    console.log("🔑 Recovery link detected - allowing access to reset-password");
+  // ✅ If recovery link, FORCE redirect to reset-password and block everything else
+  if (isRecovery || recoveryToken) {
+    console.log("🔑 Recovery link detected - blocking all pages except reset-password");
     
-    // Redirect to reset-password if not already there
+    // Only allow /reset-password page during recovery
     if (!pathname.startsWith("/reset-password")) {
+      console.log("⚠️ Recovery token present but not on reset-password - FORCING redirect");
       const url = new URL("/reset-password", req.url);
-      url.search = req.nextUrl.search; // Preserve all query params
+      url.search = req.nextUrl.search; // Preserve query params
       return NextResponse.redirect(url);
     }
     
-    // Already on reset-password page with recovery token - allow through
+    // On reset-password page with recovery token - allow through
+    console.log("✅ Allowing access to reset-password page with recovery token");
     return res;
   }
 
@@ -106,7 +109,6 @@ export async function proxy(req: NextRequest) {
     console.log("❌ No session - redirecting to login");
     const loginUrl = new URL("/login", req.url);
     
-    // Save original destination for redirect after login
     if (pathname !== "/login") {
       loginUrl.searchParams.set("redirect", pathname);
       console.log("💾 Saving redirect path:", pathname);
@@ -115,20 +117,19 @@ export async function proxy(req: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  // ✅ Redirect authenticated users away from login pages (but NOT reset-password)
-  if (session && isPublicRoute && !isRecovery) {
-    console.log("✅ Has session - redirecting away from login");
+  // ✅ Redirect authenticated users away from public pages
+  if (session && isPublicRoute) {
+    console.log("✅ Has session - checking if should redirect from public route");
     
-    // ✅ CRITICAL: Don't redirect from reset-password without recovery param
+    // Allow reset-password without recovery token (user wants to change password while logged in)
     if (pathname.startsWith("/reset-password")) {
-      console.log("⚠️ On reset-password without recovery token - redirect to home");
-      return NextResponse.redirect(new URL("/", req.url));
+      console.log("⚠️ Authenticated user on reset-password without recovery - allowing");
+      return res;
     }
     
     const redirectTo = req.nextUrl.searchParams.get("redirect");
     let destination = "/";
     
-    // Use redirect parameter if valid
     if (redirectTo && redirectTo !== "/login" && !publicRoutes.includes(redirectTo)) {
       destination = redirectTo;
     }
@@ -147,13 +148,6 @@ export async function proxy(req: NextRequest) {
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - public files (images, etc)
-     */
     "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:png|jpg|jpeg|gif|webp|svg|ico)$).*)",
   ],
 };
