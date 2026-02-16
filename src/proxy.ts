@@ -72,18 +72,22 @@ export async function proxy(req: NextRequest) {
   // 🔐 Redirect to login if NOT authenticated and NOT on public route
   if (!session && !isPublicRoute) {
     const loginUrl = new URL("/login", req.url);
+    // ✅ PRESERVE REDIRECT PARAMETER
+    loginUrl.searchParams.set("redirect", pathname);
     return NextResponse.redirect(loginUrl);
   }
 
   // ✅ Redirect authenticated users away from login pages
   if (session && isPublicRoute && !isRecovery) {
-    return NextResponse.redirect(new URL("/", req.url));
+    // ✅ CHECK FOR REDIRECT PARAMETER
+    const redirectTo = req.nextUrl.searchParams.get("redirect");
+    const destination = redirectTo || "/";
+    return NextResponse.redirect(new URL(destination, req.url));
   }
 
   return res;
 }
 
-// ✅ Matcher: Exclude static files, images, and API routes
 export const config = {
   matcher: [
     "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:png|jpg|jpeg|gif|webp|svg|ico)$).*)",
