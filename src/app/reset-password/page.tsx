@@ -115,7 +115,7 @@ function ResetPasswordContent() {
             {error}
           </div>
 
-          
+          <a
             href="/forgot-password"
             className="block w-full bg-blue-500 text-white py-2 rounded text-center hover:bg-blue-600"
           >
