@@ -64,6 +64,24 @@ export async function proxy(req: NextRequest) {
     }
   );
 
+ // 🔒 CRITICAL: Check for recovery link FIRST before getting session
+  const isRecovery = req.nextUrl.searchParams.get("type") === "recovery";
+
+  // ✅ If recovery link, ALWAYS allow through to reset-password page
+  if (isRecovery) {
+    console.log("🔑 Recovery link detected - allowing access to reset-password");
+    
+    // Redirect to reset-password if not already there
+    if (!pathname.startsWith("/reset-password")) {
+      const url = new URL("/reset-password", req.url);
+      url.search = req.nextUrl.search; // Preserve all query params
+      return NextResponse.redirect(url);
+    }
+    
+    // Already on reset-password page with recovery token - allow through
+    return res;
+  }
+
   const {
     data: { session },
   } = await supabase.auth.getSession();
@@ -74,6 +92,7 @@ export async function proxy(req: NextRequest) {
   console.log("🔐 Session exists:", !!session);
   console.log("👤 User email:", session?.user?.email || "NO SESSION");
   console.log("🍪 Cookies count:", req.cookies.getAll().length);
+  console.log("🔑 Is Recovery:", isRecovery);
   console.log("==================");
 
   // ✅ Public routes (no auth required)
@@ -81,16 +100,6 @@ export async function proxy(req: NextRequest) {
   const isPublicRoute = publicRoutes.some((route) =>
     pathname.startsWith(route)
   );
-
-  // 🔒 Recovery link handling
-  const isRecovery = req.nextUrl.searchParams.get("type") === "recovery";
-
-  if (isRecovery && !pathname.startsWith("/reset-password")) {
-    console.log("🔄 Redirecting to reset-password (recovery link)");
-    const url = new URL("/reset-password", req.url);
-    url.search = req.nextUrl.search;
-    return NextResponse.redirect(url);
-  }
 
   // 🔐 Redirect to login if NOT authenticated and NOT on public route
   if (!session && !isPublicRoute) {
@@ -106,9 +115,15 @@ export async function proxy(req: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  // ✅ Redirect authenticated users away from login pages
+  // ✅ Redirect authenticated users away from login pages (but NOT reset-password)
   if (session && isPublicRoute && !isRecovery) {
     console.log("✅ Has session - redirecting away from login");
+    
+    // ✅ CRITICAL: Don't redirect from reset-password without recovery param
+    if (pathname.startsWith("/reset-password")) {
+      console.log("⚠️ On reset-password without recovery token - redirect to home");
+      return NextResponse.redirect(new URL("/", req.url));
+    }
     
     const redirectTo = req.nextUrl.searchParams.get("redirect");
     let destination = "/";

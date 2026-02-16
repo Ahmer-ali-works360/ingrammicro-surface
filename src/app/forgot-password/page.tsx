@@ -15,9 +15,17 @@ export default function ForgotPasswordPage() {
     setLoading(true);
     setMessage("");
 
+
+  // ✅ Dynamic redirect URL - production ya local automatically detect karega
+  const resetUrl = process.env.NEXT_PUBLIC_SITE_URL 
+    ? `${process.env.NEXT_PUBLIC_SITE_URL}/reset-password`
+    : `${window.location.origin}/reset-password`;
+    
+    
     // Supabase reset link
-    const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${window.location.origin}/reset-password`,
+ 
+  const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: resetUrl,
   });
 
     console.log("Supabase Response:", { data, error }); 
