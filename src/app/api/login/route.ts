@@ -30,7 +30,7 @@ async function createSupabaseServerClient() {
 // Simple in-memory rate limiter (consider using Redis for production)
 const loginAttempts = new Map<string, { count: number; resetTime: number }>();
 
-function checkRateLimit(ip: string, maxAttempts = 5, windowMs = 15 * 60 * 1000) {
+function checkRateLimit(ip: string, maxAttempts = 10, windowMs = 15 * 60 * 1000) {
   const now = Date.now();
   const attempt = loginAttempts.get(ip);
 
@@ -125,8 +125,32 @@ export async function POST(req: Request) {
     // 🟢 Successful login
     logger.info(
       { userId: data.user.id, ip },
-      "Login successful"
+      "Login successful"    
     );
+
+// Check if the user's status is 'approved' in the 'profiles' table
+const { data: profileData, error: profileError } = await supabase
+  .from('profiles') // Correct table name is 'profiles'
+  .select('status')
+  .eq('id', data.user.id) 
+  .single();
+
+// Log the profile data and status for debugging
+logger.info({ profileData, status: profileData?.status }, "Profile Data and Status Check");
+
+if (profileError || profileData?.status !== 'approved') {
+  // If the user is not approved, log them out and return an error response
+  await supabase.auth.signOut();
+  logger.warn(
+    { userId: data.user.id, ip },
+    "User not approved, logged out"
+  );
+  return NextResponse.json(
+    { error: "Your account is not approved yet." },
+    { status: 403 } // Forbidden
+  );
+}
+    
 
     return NextResponse.json({
       success: true,

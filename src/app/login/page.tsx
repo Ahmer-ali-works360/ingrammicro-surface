@@ -8,6 +8,46 @@ import { supabase } from "@/lib/supabaseClient";
 import toast, { Toaster } from "react-hot-toast";
 import { useAuth } from "@/app/context/AuthContext";
 
+ // Custom toast styles
+const toastOptions = {
+  success: {
+    duration: 7000,
+    style: {
+      background: '#54c500',
+      color: '#fff',
+      borderRadius: '8px',
+      fontSize: '12px',
+      fontWeight: '400',
+      minWidth: '320px',    // Minimum 320px width
+      maxWidth: '500px',    // Maximum 500px tak expand ho sakta
+      padding: '16px 20px', // Horizontal padding increase
+      boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
+    },
+    iconTheme: {
+      primary: '#fff',
+      secondary: '#10b981',
+    },
+  },
+  error: {
+    duration: 4000,
+    style: {
+      background: '#ef4444',
+      color: '#fff',
+      minWidth: '320px',    // Minimum 320px width
+      maxWidth: '500px',    // Maximum 500px tak expand ho sakta
+      padding: '16px 20px', // Horizontal padding increase
+      borderRadius: '8px',
+      fontSize: '12px',
+      fontWeight: '400',
+      boxShadow: '0 4px 12px rgba(239, 68, 68, 0.3)',
+    },
+    iconTheme: {
+      primary: '#fff',
+      secondary: '#ef4444',
+    },
+  },
+};
+
 function LoginPageContent() {
   const router = useRouter();
   const { syncSession } = useAuth();
@@ -49,23 +89,44 @@ function LoginPageContent() {
 
     setLoading(false);
 
-    if (!res.ok) {
-      toast.error(result.error || "Login failed");
-      return;
-    }
-    await syncSession();
-    // ✅ login successful → session already set
-    router.push(redirectTo || "/");
+   
+
+   if (!res.ok) {
+  toast.error(result.error || "Login failed", toastOptions.error);
+  return;
+}
+
+// ✅ Login successful
+toast.success("Login successful! Redirecting...", toastOptions.success);
+
+await syncSession();
+
+// Small delay to show the success toast before redirecting
+setTimeout(() => {
+  router.push(redirectTo || "/");
+}, 500);
+
+  
   } catch (err) {
     setLoading(false);
-    toast.error("Something went wrong. Please try again.");
+    toast.error("Something went wrong. Please try again.", toastOptions.error);
   }
 }
 
 
   return (
   <>
-    <Toaster position="top-right" />
+    <Toaster 
+  position="top-right"
+  containerStyle={{
+    top: 60,  // Page ke top se 60px neeche
+  }}
+  toastOptions={{
+    style: {
+      marginRight: '20px',  // Right side se 20px spacing
+    },
+  }}
+/>
 
     <div className="relative min-h-screen flex items-start sm:items-center justify-center px-4 py-16 sm:py-24 overflow-hidden">
       {/* Background image */}
@@ -127,16 +188,16 @@ function LoginPageContent() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-[#3ba1da] text-white py-2.75 text-[14px] font-medium rounded-sm hover:bg-[#44b0ec]"
+              className="w-full bg-[#3ba1da] cursor-pointer text-white py-2.75 text-[14px] font-medium rounded-sm hover:bg-[#44b0ec]"
             >
-              {loading ? "Logging in..." : "LOGIN"}
+              {loading ? "Logging in..." : "Login"}
             </button>
 
             <a
               href="/account-registration"
-              className="w-full text-center bg-[#e5e5e5] text-[#333] py-2.75 text-[14px] font-medium rounded-sm hover:bg-[#dcdcdc]"
+              className="w-full text-center cursor-pointer bg-[#e5e5e5] text-[#333] py-2.75 text-[14px] font-medium rounded-sm hover:bg-[#dcdcdc]"
             >
-              REGISTER
+              Register
             </a>
           </div>
         </form>

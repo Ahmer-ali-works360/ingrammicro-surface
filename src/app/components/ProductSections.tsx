@@ -37,7 +37,7 @@ export default function ProductSections() {
                             </p>
 
                             <a
-                                href="#"
+                                href="/create-demo-kit"
                                 className="inline-flex items-center justify-center gap-1 text-m font-largr text-blue-600 hover:underline mb-6"
                             >
                                 Explore Surface 2-in-1 PCs
@@ -80,7 +80,7 @@ export default function ProductSections() {
                             />
 
                             <a
-                                href="#"
+                                href="/create-demo-kit"
                                 className="inline-flex items-center justify-center gap-1 text-m font-largr text-blue-600 hover:underline mb-6"
                             >
                                 All Devices

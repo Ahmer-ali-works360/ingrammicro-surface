@@ -299,7 +299,7 @@ export default function CreateDemoKitPage() {
               width={1600}
               height={400}
               priority
-              className="w-full h-90 object-cover"
+              className="w-full h-[360px] object-cover"
             />
           </div>
 
@@ -356,77 +356,83 @@ export default function CreateDemoKitPage() {
                       product.stock_quantity == null;
 
                     return (
-                      <div
-                        key={product.id}
-                        className="bg-white rounded-2xl shadow hover:shadow-lg transition flex flex-col group"
-                      >
-                        <div className="w-full h-50 relative rounded-t-2xl overflow-hidden">
-                          {product.five_g && (
-                            <Image
-                              src="/5g-logo.png"
-                              alt="5G Badge"
-                              width={40}
-                              height={40}
-                              className="absolute top-2 right-2 z-10"
-                            />
-                          )}
+<div
+  key={product.id}
+  className="bg-white rounded-2xl shadow hover:shadow-lg transition flex flex-col group relative"
+> <div className="relative left-0 w-full h-[35px] p-2 pointer-events-none">
+    {outOfStock && (
+      <div className="absolute top-2 left-2 bg-red-600 text-white text-xs font-semibold px-2 py-1 rounded">
+        Out of Stock
+      </div>
+    )}
+    {product.five_g && (
+      <Image
+        src="/5g-logo.png"
+        alt="5G Badge"
+        width={30}
+        height={30}
+        className="absolute top-2 right-2 z-10"
+      />
+    )}
+  </div>
+  
+  {/* Image div */}
+  <div className="w-full h-[200px] relative rounded-t-2xl overflow-hidden">
+    <Image
+      src={product.thumbnail_url || PLACEHOLDER_SVG}
+      alt={product.product_name}
+      fill
+      className="object-cover cursor-pointer transition-transform duration-300 group-hover:scale-105"
+      onClick={() => {
+        if (!product.slug) return;
+        router.push(`/product/${product.slug}`);
+      }}
+    />
+  </div>
 
-                          {outOfStock && (
-                            <div className="absolute top-2 left-2 z-10 bg-red-600 text-white text-xs font-semibold px-2 py-1 rounded">
-                              Out of Stock
-                            </div>
-                          )}
+  {/* Separate div for 5G icon and Out of Stock, overlaid on the image */}
+ 
 
-                          <Image
-                            src={product.thumbnail_url || PLACEHOLDER_SVG}
-                            alt={product.product_name}
-                            fill
-                            className="object-cover cursor-pointer transition-transform duration-300 group-hover:scale-105"
-                            onClick={() => {
-                              if (!product.slug) return;
-                              router.push(`/product/${product.slug}`);
-                            }}
-                          />
-                        </div>
+  <div className="p-4 flex-1 flex flex-col justify-between">
+    <div className="text-center">
+      <h3 className="font-semibold  text-sm">
+        {product.product_name}
+      </h3>
 
-                        <div className="p-4 flex-1 flex flex-col justify-between">
-                          <div className="text-center">
-                            <h3 className="font-medium text-sm">
-                              {product.product_name}
-                            </h3>
+      <div className="flex-1" />
 
-                            <div className="flex-1" />
-
-                            <p className="text-xs text-gray-500 text-center mt-6 ">
-                              SKU: {product.sku}
-                            </p>
-                          </div>
-
-                          <button
-                            disabled={outOfStock}
-                            onClick={() => {
-                              if (outOfStock) return;
-                              addToCart({
-                                id: product.id,
-                                product_name: product.product_name,
-                                image_url: product.thumbnail_url,
-                                sku: product.sku,
-                                brand: product.brand ?? "—", // 👈 IMPORTANT
-                                processor: product.processor ?? "—",
-                                memory: product.memory ?? "—",
-                                quantity: 1,
-                              });
-                              openCart();
-                            }}
-                            className={` w-full py-2 rounded text-sm transition ${outOfStock
-                              ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                              : "bg-yellow-400 text-black hover:bg-yellow-500 cursor-pointer"
-                              }`}
-                          >
-                            {outOfStock ? "Out of Stock" : "Add to Cart"}
-                          </button>
-                        </div>
-                      </div>
+      <p className="text-xs text-gray-500 text-center mt-6">
+        SKU: {product.sku}
+      </p>
+    </div>
+<div className="flex justify-center mt-1" >
+    <button
+      disabled={outOfStock}
+      onClick={() => {
+        if (outOfStock) return;
+        addToCart({
+          id: product.id,
+          product_name: product.product_name,
+          image_url: product.thumbnail_url,
+          sku: product.sku,
+          brand: product.brand ?? "—", // 👈 IMPORTANT
+          processor: product.processor ?? "—",
+          memory: product.memory ?? "—",
+          quantity: 1,
+        });
+        openCart();
+      }}
+      className={` w-32 py-2 px-4 rounded text-sm transition ${
+        outOfStock
+          ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+          : "bg-yellow-400 text-black hover:bg-yellow-500 cursor-pointer"
+      }`}
+    >
+      {outOfStock ? "Out of Stock" : "Add to Cart"}
+    </button>
+    </div>
+  </div>
+</div>
                     );
                   })}
                 </div>

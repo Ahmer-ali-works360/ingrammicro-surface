@@ -40,6 +40,57 @@ export async function GET(
 }
 
 /* =========================
+   PUT: update order details (tracking etc)
+========================= */
+export async function PUT(
+  req: Request,
+  context: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await context.params;
+    const body = await req.json();
+const data = body.data;
+
+    if ("return_label" in data && !data.return_label) {
+  delete data.return_label;
+}
+
+    const authHeader = req.headers.get("authorization");
+    if (!authHeader) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const supabaseAdmin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+
+    const { error } = await supabaseAdmin
+      .from("orders")
+      .update(data)
+      .eq("id", id);
+
+    if (error) {
+      console.error("PUT order update error:", error);
+      return NextResponse.json(
+        { error: "Failed to update order" },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({ success: true });
+  } catch (err) {
+    console.error("PUT admin order error:", err);
+    return NextResponse.json(
+      { error: "Server error" },
+      { status: 500 }
+    );
+  }
+}
+
+
+
+/* =========================
    PATCH: update order status
 ========================= */
 export async function PATCH(
@@ -78,6 +129,8 @@ export async function PATCH(
     } = await supabaseAuth.auth.getUser();
 
     const approverEmail = user?.email ?? null;
+    const performedBy = user?.id ?? null;
+
 
     /* ================= ADMIN CLIENT ================= */
     const supabaseAdmin = createClient(
@@ -88,7 +141,7 @@ export async function PATCH(
     /* ================= CURRENT STATUS ================= */
     const { data: order, error } = await supabaseAdmin
       .from("orders")
-      .select("status")
+      .select("id, status, order_number")
       .eq("id", id)
       .single();
 
@@ -136,6 +189,28 @@ export async function PATCH(
         { status: 500 }
       );
     }
+
+    /* 👇 YAHAN LOG INSERT AAYEGA */
+
+    // ================= INSERT AUDIT LOG =================
+const { error: logError } = await supabaseAdmin
+  .from("order_status_logs")
+  .insert({
+    order_id: order.id,
+    order_number: order.order_number,
+    old_status: order.status,
+    new_status: status,
+    performed_by: performedBy,
+    performed_role: normalizedRole ?? approverEmail,
+    performed_email: approverEmail,
+  });
+
+if (logError) {
+  console.error("❌ Failed to insert order status log:", logError);
+  // intentionally NOT blocking main flow
+}
+
+
 
     return NextResponse.json({ success: true });
   } catch (err) {

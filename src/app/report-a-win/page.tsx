@@ -222,7 +222,7 @@ setOrders(filteredOrders);
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-8">
-      <div className="w-full max-w-4xl bg-white rounded-xl shadow-md p-6 md:p-8">
+      <div className="w-full max-w-6xl bg-white rounded-xl shadow-md p-6 md:p-8">
         <h1 className="text-2xl font-semibold text-gray-800 mb-6 text-center">Report a Win</h1>
 
         <form className="space-y-5" onSubmit={handleSubmit}>
@@ -244,7 +244,7 @@ setOrders(filteredOrders);
             {/* Order Number */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Ingrammicro Surface Order #
+                Ingram micro Surface Order #
               </label>
               <select
                 value={selectedOrder || ""}
@@ -412,7 +412,7 @@ setOrders(filteredOrders);
           <div className="pt-4 flex justify-center">
   <button
     type="submit"
-    className="custom-blue px-10 py-2.5 rounded-lg cursor-pointer text-white text-sm font-medium transition"
+    className="custom-blue w-36 py-3 px-8  rounded-lg cursor-pointer text-white text-sm font-medium transition"
   >
     Submit
   </button>

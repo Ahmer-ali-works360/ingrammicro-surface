@@ -55,7 +55,7 @@ export default function Hero() {
                     </div>
 
                     <a
-                        href="#create-demo"
+                        href="/create-demo-kit"
                         className="
                             inline-flex
                             items-center

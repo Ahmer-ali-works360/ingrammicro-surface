@@ -16,6 +16,7 @@ import {
 } from "react-icons/fi";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/app/context/AuthContext";
+import { supabase } from "@/lib/supabaseClient";
 
 export default function Navbar() {
   const { cartItems, openCart } = useCart();
@@ -53,6 +54,54 @@ export default function Navbar() {
 
     fetchNotificationCounts();
   }, [isadminOrPMOrSM]);
+
+  const [searchVisible, setSearchVisible] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [suggestions, setSuggestions] = useState([]);
+  const [selectedProductSlug, setSelectedProductSlug] = useState(null);
+  const [allProducts, setAllProducts] = useState([]);
+
+  const handleSearchClick = () => {
+    setSearchVisible(!searchVisible);
+  };
+
+  // Fetch products from Supabase
+  useEffect(() => {
+    const fetchProducts = async () => {
+      const { data, error } = await supabase.from("products").select("*");
+      if (error) {
+        console.error("Error fetching products:", error);
+      } else {
+        console.log("All products loaded, count:", data.length);
+        setAllProducts(data);
+      }
+    };
+    fetchProducts();
+  }, []);
+
+  const handleSearchChange = async (e) => {
+    const query = e.target.value;
+    setSearchQuery(query);
+
+    if (query.length > 2) {
+      // Products ko filter karein, ab product_name use karein
+      const filteredSuggestions = allProducts.filter(product =>
+        product.product_name && typeof product.product_name === 'string' && product.product_name.toLowerCase().includes(query.toLowerCase())
+      );
+      console.log("Filtered suggestions:", filteredSuggestions); // Debug ke liye
+      setSuggestions(filteredSuggestions);
+    } else {
+      setSuggestions([]);
+    }
+  };
+
+
+  const handleSearchSelect = (slug) => {
+    setSelectedProductSlug(slug);
+    // Redirect to the product page using the slug
+    window.location.href = `/product/${slug}`;
+  };
+
 
 
   const handleLogout = async () => {
@@ -128,11 +177,11 @@ export default function Navbar() {
                       body: JSON.stringify({ type: "order" }),
                     });
                     // 🔥 YEH LINE REAL-TIME UPDATE KARTI HAI
-    setNotificationCounts(prev => ({
-      ...prev,
-      orders: 0,
-      total: prev.total - prev.orders,
-    }));
+                    setNotificationCounts(prev => ({
+                      ...prev,
+                      orders: 0,
+                      total: prev.total - prev.orders,
+                    }));
                   }}
                   className="flex items-center justify-between w-full px-3 py-3 rounded-t hover:bg-[#2B3F50] hover:text-white"
                 >
@@ -144,46 +193,79 @@ export default function Navbar() {
                   )}
                 </Link>
 
-{role !== "shop_manager" && (
-                <Link
-                  href="/users"
-                  onClick={async () => {
-                    await fetch("/api/notifications/mark-read", {
-                      method: "POST",
-                      headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({ type: "user" }),
-                    });
-                    setNotificationCounts(prev => ({
-  ...prev,
-  users: 0,
-  total: prev.total - prev.users,
-}));
-                  }}
-                  className="flex items-center justify-between w-full px-3 py-3 rounded-b hover:bg-[#2B3F50] hover:text-white"
-                >
-                  <span>Users</span>
-                  {notificationCounts.users > 0 && (
-                    <span className="bg-red-500 text-white text-xs rounded-full px-2">
-                      {notificationCounts.users}
-                    </span>
-                  )}
-                </Link>
-)}
+                {role !== "shop_manager" && (
+                  <Link
+                    href="/users"
+                    onClick={async () => {
+                      await fetch("/api/notifications/mark-read", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ type: "user" }),
+                      });
+                      setNotificationCounts(prev => ({
+                        ...prev,
+                        users: 0,
+                        total: prev.total - prev.users,
+                      }));
+                    }}
+                    className="flex items-center justify-between w-full px-3 py-3 rounded-b hover:bg-[#2B3F50] hover:text-white"
+                  >
+                    <span>Users</span>
+                    {notificationCounts.users > 0 && (
+                      <span className="bg-red-500 text-white text-xs rounded-full px-2">
+                        {notificationCounts.users}
+                      </span>
+                    )}
+                  </Link>
+                )}
 
 
               </div>
             </div>
           )}
 
-          {/* SEARCH */}
-          <button aria-label="Search" className="hover:opacity-70">
-            <FiSearch className="w-6 h-8" />
-          </button>
+{/* SEARCH */}
+<button 
+  aria-label="Search" 
+  className="relative hover:opacity-70" 
+  onClick={handleSearchClick}
+>
+  <FiSearch className="w-6 h-8" />
+</button>
+
+{/* SEARCH INPUT FIELD */}
+{searchVisible && (
+  <div className="absolute top-full left-0 right-0 mt-2 w-full max-w-lg mx-auto bg-white shadow-lg rounded-md border border-gray-300">
+    <input
+      type="text"
+      placeholder="Search for products..."
+      value={searchQuery}
+      onChange={handleSearchChange}
+      className="w-full p-1.5 text-sm rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400"
+    />
+    {/* Suggestions Dropdown */}
+    {suggestions.length > 0 && (
+      <div className="absolute top-full left-0 right-0 bg-white shadow-md mt-1 rounded-b-md border border-gray-300 z-50">
+        {suggestions.map((product) => (
+          <div
+            key={product.id}
+            onClick={() => handleSearchSelect(product.slug)}
+            className="p-2 cursor-pointer hover:bg-gray-100 text-sm"
+          >
+            {product.product_name}
+          </div>
+        ))}
+      </div>
+    )}
+  </div>
+)}
+
+
 
           {/* USER ACCOUNT */}
           <div className="relative group">
             <Link href="/account" aria-label="Account" className="flex items-center gap-1 hover:opacity-70">
-              <FiUser size={22} />
+              <FiUser className="w-6 h-8" />
               <FiChevronDown size={16} className="transition-transform group-hover:rotate-180" />
             </Link>
 
@@ -268,11 +350,11 @@ export default function Navbar() {
                       body: JSON.stringify({ type: "order" }),
                     });
                     // 🔥 YEH LINE REAL-TIME UPDATE KARTI HAI
-    setNotificationCounts(prev => ({
-      ...prev,
-      orders: 0,
-      total: prev.total - prev.orders,
-    }));
+                    setNotificationCounts(prev => ({
+                      ...prev,
+                      orders: 0,
+                      total: prev.total - prev.orders,
+                    }));
                     setMobileMenuOpen(false);
                   }}
                   className="flex justify-between py-2 hover:opacity-70"
@@ -285,32 +367,32 @@ export default function Navbar() {
                     </span>
                   )}
                 </Link>
-{role !== "shop_manager" && (
-                <Link
-                  href="/users"
-                  onClick={async () => {
-                    await fetch("/api/notifications/mark-read", {
-                      method: "POST",
-                      headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({ type: "user" }),
-                    });
-                    setNotificationCounts(prev => ({
-  ...prev,
-  users: 0,
-  total: prev.total - prev.users,
-}));
-                    setMobileMenuOpen(false);
-                  }}
-                  className="flex justify-between py-2 hover:opacity-70"
-                >
+                {role !== "shop_manager" && (
+                  <Link
+                    href="/users"
+                    onClick={async () => {
+                      await fetch("/api/notifications/mark-read", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ type: "user" }),
+                      });
+                      setNotificationCounts(prev => ({
+                        ...prev,
+                        users: 0,
+                        total: prev.total - prev.users,
+                      }));
+                      setMobileMenuOpen(false);
+                    }}
+                    className="flex justify-between py-2 hover:opacity-70"
+                  >
 
-                  <span>Users</span>
-                  {notificationCounts.users > 0 && (
-                    <span className="bg-red-500 text-white text-xs rounded-full px-2">
-                      {notificationCounts.users}
-                    </span>
-                  )}
-                </Link>
+                    <span>Users</span>
+                    {notificationCounts.users > 0 && (
+                      <span className="bg-red-500 text-white text-xs rounded-full px-2">
+                        {notificationCounts.users}
+                      </span>
+                    )}
+                  </Link>
                 )}
               </li>
             )}
@@ -342,7 +424,7 @@ export default function Navbar() {
               </button>
             </li>
 
-            {/* 👤 USER ACCOUNT */}
+            {/* USER ACCOUNT */}
             <li className="pt-2 border-t border-gray-200">
               {!user ? (
                 <>

@@ -36,7 +36,7 @@ export default function AdminUsersPage() {
       const { data: sessionData } = await supabase.auth.getSession();
 
       if (!sessionData?.session?.user) {
-        router.replace("/login");
+        router.replace("/login?redirect=/users");
         return;
       }
 
@@ -71,6 +71,7 @@ if (error || !allowedRoles.includes(profileData?.role)) {
       .select(
         "id, first_name, last_name, email, reseller, role, status, created_at"
       )
+      .eq("status", "pending")
       .order("created_at", { ascending: false });
 
     if (!error && data) {
@@ -87,45 +88,60 @@ if (error || !allowedRoles.includes(profileData?.role)) {
   // ----------------------------
   // Approve / Reject
   // ----------------------------
-  const updateStatus = async (
-    user: Profile,
-    status: "approved" | "rejected"
-  ) => {
-    setUpdatingId(user.id);
+const updateStatus = async (
+  user: Profile,
+  status: "approved" | "rejected"
+) => {
+  setUpdatingId(user.id);
 
-    const { error } = await supabase
-      .from("profiles")
-      .update({ status })
-      .eq("id", user.id);
+  const { error } = await supabase
+    .from("profiles")
+    .update({ status })
+    .eq("id", user.id);
 
-    if (!error) {
-      // ----------------------------
-      // ✅ SEND EMAIL (APPROVED / REJECTED)
-      // ----------------------------
-      const emailType =
-        status === "approved" ? "USER_APPROVED" : "USER_REJECTED";
+  if (!error) {
+    const userData = {
+      name: `${user.first_name} ${user.last_name}`,
+      email: user.email,
+      reseller: user.reseller,
+      loginUrl: `${window.location.origin}/login`,
+    };
 
-      await fetch("/api/send-email", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          to: user.email,
-          type: emailType,
-          data: {
-            name: `${user.first_name} ${user.last_name}`,
-            loginUrl: `${window.location.origin}/login`,
-          },
-        }),
-      });
+    // 1️⃣ USER KO EMAIL
+    const userEmailType =
+      status === "approved" ? "USER_APPROVED" : "USER_REJECTED";
 
-      fetchUsers();
-    }
+    await fetch("/api/send-email", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        to: user.email,
+        bcc: process.env.SMTP_BCC_EMAIL,
+        type: userEmailType,
+        data: userData,
+      }),
+    });
 
-    setUpdatingId(null);
-  };
+    // 2️⃣ ADMIN/PM KO EMAIL
+    const adminEmailType =
+      status === "approved" ? "ADMIN_USER_APPROVED" : "ADMIN_USER_REJECTED";
 
+    await fetch("/api/send-email", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        to: "ahmer.ali.works360@gmail.com",
+         bcc: process.env.SMTP_BCC_EMAIL, 
+        type: adminEmailType,
+        data: userData,
+      }),
+    });
+
+    fetchUsers();
+  }
+
+  setUpdatingId(null);
+};
   // ----------------------------
   // Search Filter
   // ----------------------------
@@ -143,14 +159,28 @@ if (error || !allowedRoles.includes(profileData?.role)) {
   const downloadExcel = () => {
     if (filteredUsers.length === 0) return;
 
-    const data = filteredUsers.map((u) => ({
-      Name: `${u.first_name} ${u.last_name}`,
-      Email: u.email,
-      Reseller: u.reseller,
-      Role: u.role,
-      Status: u.status,
-      "Registered At": new Date(u.created_at).toLocaleString(),
-    }));
+        const data = filteredUsers.map((u) => {
+      const date = new Date(u.created_at);
+      const formattedDate = date.toLocaleDateString('en-GB', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric'
+      });
+      const formattedTime = date.toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true
+      });
+
+      return {
+        Name: `${u.first_name} ${u.last_name}`,
+        Email: u.email,
+        Reseller: u.reseller,
+        Role: u.role,
+        Status: u.status,
+        "Registered At": `${formattedDate}, ${formattedTime}`,
+      };
+    });
 
     const worksheet = XLSX.utils.json_to_sheet(data);
     const workbook = XLSX.utils.book_new();
@@ -205,7 +235,7 @@ if (error || !allowedRoles.includes(profileData?.role)) {
       {/* Table */}
       <div className="overflow-x-auto rounded-lg shadow border border-gray-200 bg-white">
         <table className="w-full text-sm">
-          <thead className="bg-gradient-to-t from-gray-100 via-gray-200 to-gray-300 text-gray-700 border-b">
+          <thead className="bg-[#3a8bc7] text-white border-b">
 
             <tr>
               <th colSpan={6} className="px-4 py-4 text-center text-3xl font-semibold">
@@ -213,7 +243,7 @@ if (error || !allowedRoles.includes(profileData?.role)) {
               </th>
             </tr>
           </thead>
-          <thead className="bg-gradient-to-t from-gray-100 via-gray-200 to-gray-300 text-gray-700 border-b">
+          <thead className="bg-blue-50 text-blue-900 border-b border-gray-200">
             <tr>
               <th className="px-4 py-3 text-left">Name</th>
               <th className="px-4 py-3 text-left">Email</th>
@@ -238,59 +268,61 @@ if (error || !allowedRoles.includes(profileData?.role)) {
                 </td>
               </tr>
             ) : (
-              filteredUsers.map((user, index) => (
-                <tr
-                  key={user.id}
-                  className={`hover:bg-blue-50/40 ${index % 2 === 0 ? "bg-white" : "bg-gray-50"
-                    }`}
-                >
-                  <td className="px-4 py-3 font-medium">
-                    {user.first_name} {user.last_name}
-                  </td>
-                  <td className="px-4 py-3">{user.email}</td>
-                  <td className="px-4 py-3">{user.reseller}</td>
-                  <td className="px-4 py-3">
-                    <span
-                      className={`px-3 py-1 rounded-full text-xs font-medium ${user.status === "approved"
-                        ? "bg-gray-300 text-gray-800"
-                        : user.status === "rejected"
-                          ? " text-black"
-                          : "text-gray-400"
-                        }`}
-                    >
-                      {user.status}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3">
-                    {new Date(user.created_at).toLocaleString()}
-                  </td>
+              filteredUsers.map((user, index) => {
+                const date = new Date(user.created_at);
+                const formattedDate = date.toLocaleDateString('en-GB', {
+                  day: '2-digit',
+                  month: 'short',
+                  year: 'numeric'
+                });
+                const formattedTime = date.toLocaleTimeString('en-US', {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                  hour12: true
+                });
 
-                  <td className="px-4 py-3 text-center">
-                    {user.status === "pending" ? (
-                      <div className="flex justify-center gap-2">
-                        <button
-                          disabled={updatingId === user.id}
-                          onClick={() =>
-                            updateStatus(user, "approved")
-                          }
-                          className="
+                return (
+                  <tr
+                    key={user.id}
+                    className={`hover:bg-blue-50/40 ${index % 2 === 0 ? "bg-white" : "bg-gray-50"
+                      }`}
+                  >
+                    <td className="px-4 py-3 font-medium">
+                      {user.first_name} {user.last_name}
+                    </td>
+                    <td className="px-4 py-3">{user.email}</td>
+                    <td className="px-4 py-3">{user.reseller}</td>
+                    <td className="px-4 py-3">{user.status}</td>
+                    <td className="px-4 py-3">
+                      {formattedDate}, {formattedTime}
+                    </td>
+
+                    <td className="px-4 py-3 text-center">
+                      {user.status === "pending" ? (
+                        <div className="flex justify-center gap-2">
+                          <button
+                            disabled={updatingId === user.id}
+                            onClick={() =>
+                              updateStatus(user, "approved")
+                            }
+                            className="
                             cursor-pointer
                             flex items-center gap-1.5
                             rounded-md px-3 py-1.5 text-xs font-medium
-                            bg-gradient-to-r from-green-500 to-green-600
+                            bg-green-600
                             text-white
-                            hover:from-green-600 hover:to-green-700
+                            hover:bg-green-800
                             disabled:opacity-50
                           "
-                        >
-                          <Check size={14} />
-                          Approve
-                        </button>
+                          >
+                            <Check size={14} />
+                            Approve
+                          </button>
 
-                        <button
-                          disabled={updatingId === user.id}
-                          onClick={() => updateStatus(user, "rejected")}
-                          className="cursor-pointer
+                          <button
+                            disabled={updatingId === user.id}
+                            onClick={() => updateStatus(user, "rejected")}
+                            className="cursor-pointer
                           flex items-center gap-1.5
                           rounded-md px-3 py-1.5 text-xs font-medium
                           border border-red-500
@@ -300,18 +332,19 @@ if (error || !allowedRoles.includes(profileData?.role)) {
                           hover:text-white
                           disabled:opacity-50
                         "
-                        >
-                          <X size={14} />
-                          Reject
-                        </button>
+                          >
+                            <X size={14} />
+                            Reject
+                          </button>
 
-                      </div>
-                    ) : (
-                      <span className="text-xs text-gray-400">—</span>
-                    )}
-                  </td>
-                </tr>
-              ))
+                        </div>
+                      ) : (
+                        <span className="text-xs text-gray-400">—</span>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })
             )}
           </tbody>
         </table>

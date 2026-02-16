@@ -212,200 +212,241 @@ const handleWaitlistSubmit = async () => {
               </div>
             )}
           </div>
-
-          {/* GALLERY */}
-          <div className="mt-6 flex gap-3 flex-wrap justify-center">
-            {gallery.map((url: string, idx: number) => (
-              <div
-                key={idx}
-                className={`relative w-[80px] h-[80px] rounded border cursor-pointer ${
-                  selectedIndex === idx ? "border-blue-500" : ""
-                }`}
-                onClick={() => {
-                  setMainImage(url);
-                  setSelectedIndex(idx);
-                }}
-              >
-                <Image
-                  src={url}
-                  alt=""
-                  fill
-                  className="object-cover"
-                  unoptimized
-                  onClick={() => handleZoomImage(url)} // Enable zoom
-                />
-              </div>
-            ))}
-          </div>
+{/* GALLERY */}
+<div className="mt-6 flex gap-3 flex-wrap justify-center">
+  {gallery.map((url: string, idx: number) => (
+    <div
+      key={idx}
+      className={`relative w-[80px] h-[80px] rounded border cursor-pointer ${
+        selectedIndex === idx ? "border-blue-500" : ""
+      }`}
+      onClick={() => {
+        setMainImage(url);
+        setSelectedIndex(idx);
+      }}
+    >
+      <Image
+        src={url}
+        alt=""
+        fill
+        className="object-cover"
+        unoptimized
+      />
+    </div>
+  ))}
+</div>
         </div>
 
-        {/* Right: Details */}
-        <div className="lg:w-1/2 w-full flex flex-col justify-between space-y-6">
-          <div className="space-y-3">
-            <h1 className="text-3xl font-bold">{product.product_name}</h1>
-            <p className="text-gray-500">SKU: {product.sku}</p>
+{/* Right: Details */}
+<div className="lg:w-1/2 w-full flex flex-col justify-between space-y-6">
+  <div className="space-y-3">
+    <h1 className="text-2xl font-bold">{product.product_name}</h1>
+    <p className="text-gray-500">SKU: {product.sku}</p>
+    
+    {/* Separator line */}
+    <hr className="border-gray-300" />
 
-            {/* Description as Bullet Points */}
-            {product.description ? (
-              <ul className="ml-5 list-disc text-gray-700 space-y-2">
-                {product.description
-                  .split("\n")
-                  .map((line: string, idx: number) => (
-                    <li key={idx}>{line}</li>
-                  ))}
-              </ul>
-            ) : (
-              <p className="text-gray-700">No description available.</p>
-            )}
+    {/* Description as Bullet Points */}
+    {product.description ? (
+      <ul className="ml-5 list-disc text-gray-700 space-y-2">
+        {product.description
+          .split("\n")
+          .map((line: string, idx: number) => (
+            <li key={idx}>{line}</li>
+          ))}
+      </ul>
+    ) : (
+      <p className="text-gray-700">No description available.</p>
+    )}
 
-            {/* Quantity selector (only if stock > 0) */}
-            {stockQty > 0 && (
-              <div className="flex items-center gap-3 mt-4">
-                <span className="font-semibold">Quantity:</span>
+    {/* Quantity selector (only if stock > 0) */}
+    {stockQty > 0 && (
+      <div className="flex items-center gap-3 mt-4">
+        <span className="font-semibold">Quantity:</span>
 
-                <div className="flex items-center border rounded">
-                  <button
-                    onClick={decreaseQty}
-                    className="px-3 py-1 bg-gray-200 hover:bg-gray-300"
-                  >
-                    -
-                  </button>
+        <div className="flex items-center border rounded">
+          <button
+            onClick={decreaseQty}
+            className="px-3 py-1 bg-gray-200 hover:bg-gray-300"
+          >
+            -
+          </button>
 
-                  <span className="px-4">{quantity}</span>
+          <span className="px-4">{quantity}</span>
 
-                  <button
-                    onClick={increaseQty}
-                    className="px-3 py-1 bg-gray-200 hover:bg-gray-300"
-                  >
-                    +
-                  </button>
-                </div>
-              </div>
-            )}
+          <button
+            onClick={increaseQty}
+            className="px-3 py-1 bg-gray-200 hover:bg-gray-300"
+          >
+            +
+          </button>
+        </div>
+      </div>
+    )}
 
-            {/* Stock */}
-            <p className="text-sm mt-2">
-              Stock:{" "}
-              <span className={outOfStock ? "text-red-600" : "text-green-600"}>
-                {stockQty}
-              </span>
-            </p>
+    {/* Stock */}
+    <p className="text-sm mt-2">
+      Stock:{" "}
+      <span className={outOfStock ? "text-red-600" : "text-green-600"}>
+        {stockQty}
+      </span>
+    </p>
 
-            {/* Add to Cart */}
-            {/* IN STOCK / OUT OF STOCK LOGIC */}
-{stockQty > 0 ? (
-  /* ✅ IN STOCK */
-  <button
-    className="w-xs bg-yellow-400 text-black py-3 rounded hover:bg-yellow-500 font-semibold"
-    onClick={() =>
-      addToCart({
-        id: product.id,
-  product_name: product.product_name,
-  image_url: mainImage,
-  sku: product.sku,
-  brand: product.brand ?? "—",
-  processor: product.processor ?? "—",
-  memory: product.memory ?? "—",
-  quantity: quantity,
-      })
-    }
-  >
-    Add to Cart
-  </button>
-) : (
-  /* ❌ OUT OF STOCK */
-  <div className="border rounded-lg p-4 bg-gray-50 space-y-4 mt-4">
-    {/* Email */}
-    <div>
-      <label className="text-sm font-medium text-gray-600">Email</label>
-      <input
-        type="email"
-        value={user?.email || ""}
-        disabled
-        className="mt-1 w-full px-3 py-2 border rounded bg-gray-200 text-gray-600 cursor-not-allowed"
-      />
-    </div>
+   
 
-    {/* Company Name */}
-    <div>
-      <label className="text-sm font-medium text-gray-600">
-        Company Name
-      </label>
-      <input
-        type="text"
-        value={companyName}
-        onChange={(e) => setCompanyName(e.target.value)}
-        placeholder="Enter company name"
-        className="mt-1 w-full px-3 py-2 border rounded"
-      />
-    </div>
+    {/* Add to Cart */}
+    {stockQty > 0 ? (
+      /* ✅ IN STOCK */
+      <button
+        className="w-xs bg-yellow-400 text-black py-3 rounded hover:bg-yellow-500 font-semibold"
+        onClick={() =>
+          addToCart({
+            id: product.id,
+            product_name: product.product_name,
+            image_url: mainImage,
+            sku: product.sku,
+            brand: product.brand ?? "—",
+            processor: product.processor ?? "—",
+            memory: product.memory ?? "—",
+            quantity: quantity,
+          })
+        }
+      >
+        Add to Cart
+      </button>
+    ) : (
+      /* ❌ OUT OF STOCK */
+      <div className="border rounded-lg p-4 bg-gray-50 space-y-4 mt-4">
+        {/* Email */}
+        <div>
+          <label className="text-sm font-medium text-gray-600">Email</label>
+          <input
+            type="email"
+            value={user?.email || ""}
+            disabled
+            className="mt-1 w-full px-3 py-2 border rounded bg-gray-200 text-gray-600 cursor-not-allowed"
+          />
+        </div>
 
-    {/* Waitlist Button */}
-   <button
-  onClick={handleWaitlistSubmit}
-  disabled={waitlistLoading}
-  className="w-full bg-blue-600 text-white py-3 rounded hover:bg-blue-700 font-semibold disabled:opacity-60"
->
-  {waitlistLoading ? "Adding..." : "Add to Wishlist / Waitlist"}
-</button>
+        {/* Company Name */}
+        <div>
+          <label className="text-sm font-medium text-gray-600">
+            Company Name
+          </label>
+          <input
+            type="text"
+            value={companyName}
+            onChange={(e) => setCompanyName(e.target.value)}
+            placeholder="Enter company name"
+            className="mt-1 w-full px-3 py-2 border rounded"
+          />
+        </div>
 
+        {/* Waitlist Button */}
+        <button
+          onClick={handleWaitlistSubmit}
+          disabled={waitlistLoading}
+          className="w-full bg-blue-600 text-white py-3 rounded hover:bg-blue-700 font-semibold disabled:opacity-60"
+        >
+          {waitlistLoading ? "Adding..." : "Add to Wishlist / Waitlist"}
+        </button>
+      </div>
+    )}
+     {/* Separator line before Add to Cart */}
+    <hr className="border-gray-300" />
   </div>
-)}
-
-          </div>
-        </div>
+</div>
       </div>
 
       {/* RELATED */}
-      {relatedProducts.length > 0 && (
-        <div className="mt-20">
-          <h2 className="text-2xl font-bold mb-6">Related Products</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {relatedProducts.map((item) => {
-              const out =
-                item.stock_quantity === 0 || item.stock_quantity == null;
+{relatedProducts.length > 0 && (
+  <div className="mt-20">
+    <h2 className="text-2xl font-bold mb-6">Related Products</h2>
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+      {relatedProducts.map((item) => {
+        const out = item.stock_quantity === 0 || item.stock_quantity == null;
 
-              return (
-                <Link
-                  key={item.id}
-                  href={`/product/${item.slug}`}
-                  className="border rounded p-3 hover:shadow"
+        return (
+          <div
+            key={item.id}
+            className="bg-white rounded-2xl shadow hover:shadow-lg transition flex flex-col group relative"
+          >
+            <div className="relative left-0 w-full h-[35px] p-2 pointer-events-none">
+              {out && (
+                <div className="absolute top-2 left-2 bg-red-600 text-white text-xs font-semibold px-2 py-1 rounded">
+                  Out of Stock
+                </div>
+              )}
+              {item.five_g && (
+                <Image
+                  src="/5g-logo.png"
+                  alt="5G Badge"
+                  width={30}
+                  height={30}
+                  className="absolute top-2 right-2 z-10"
+                />
+              )}
+            </div>
+
+            {/* Image div */}
+            <div className="w-full h-[200px] relative rounded-t-2xl overflow-hidden">
+              <Image
+                src={item.thumbnail_url || PLACEHOLDER_SVG}
+                alt={item.product_name}
+                fill
+                className="object-cover cursor-pointer transition-transform duration-300 group-hover:scale-105"
+                onClick={() => {
+                  if (!item.slug) return;
+                  router.push(`/product/${item.slug}`);
+                }}
+              />
+            </div>
+
+            <div className="p-4 flex-1 flex flex-col justify-between">
+              <div className="text-center">
+                <h3 className="font-semibold text-sm">
+                  {item.product_name}
+                </h3>
+
+                <div className="flex-1" />
+
+                <p className="text-xs text-gray-500 text-center mt-6">
+                  SKU: {item.sku}
+                </p>
+              </div>
+
+              <div className="flex justify-center mt-1">
+                <button
+                  disabled={out}
+                  onClick={() => {
+                    if (out) return;
+                    addToCart({
+                      id: item.id,
+                      product_name: item.product_name,
+                      image_url: item.thumbnail_url,
+                      sku: item.sku,
+                      brand: item.brand ?? "—",
+                      processor: item.processor ?? "—",
+                      memory: item.memory ?? "—",
+                      quantity: 1,
+                    });
+                  }}
+                  className={`w-32 py-2 px-4 rounded text-sm transition ${
+                    out
+                      ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                      : "bg-yellow-400 text-black hover:bg-yellow-500 cursor-pointer"
+                  }`}
                 >
-                  <div className="relative h-[160px] mb-2 overflow-hidden">
-                    {item.five_g && (
-                      <Image
-                        src="/5g-logo.png"
-                        alt="5G"
-                        width={30}
-                        height={30}
-                        className="absolute top-2 right-2 z-10"
-                      />
-                    )}
-
-                    {out && (
-                      <div className="absolute top-2 left-2 z-10 bg-red-600 text-white text-xs px-2 py-1 rounded">
-                        Out of Stock
-                      </div>
-                    )}
-
-                    <Image
-                      src={item.thumbnail_url || PLACEHOLDER_SVG}
-                      alt={item.product_name}
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-
-                  <p className="text-sm font-semibold line-clamp-2">
-                    {item.product_name}
-                  </p>
-                </Link>
-              );
-            })}
+                  {out ? "Out of Stock" : "Add to Cart"}
+                </button>
+              </div>
+            </div>
           </div>
-        </div>
-      )}
-
+        );
+      })}
+    </div>
+  </div>
+)}
       {/* DELETE MODAL */}
       {showDeleteModal && product && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">

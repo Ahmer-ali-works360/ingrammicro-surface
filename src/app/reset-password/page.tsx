@@ -1,3 +1,5 @@
+//src/app/reset-password/page.tsx
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -13,20 +15,30 @@ export default function ResetPasswordPage() {
   const [message, setMessage] = useState("");
   const [sessionReady, setSessionReady] = useState(false);
 
-  // ✅ Check session created from recovery link
+  // ✅ Ensure recovery session is properly detected
   useEffect(() => {
-    const checkSession = async () => {
+    // 1️⃣ Check if session already exists (page reload case)
+    const checkExistingSession = async () => {
       const { data } = await supabase.auth.getSession();
-
-      if (!data.session) {
-        setMessage("Invalid or expired reset link.");
-        return;
+      if (data.session) {
+        setSessionReady(true);
       }
-
-      setSessionReady(true);
     };
 
-    checkSession();
+    checkExistingSession();
+
+    // 2️⃣ Listen for PASSWORD_RECOVERY event
+    const { data: listener } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        if (event === "PASSWORD_RECOVERY" && session) {
+          setSessionReady(true);
+        }
+      }
+    );
+
+    return () => {
+      listener.subscription.unsubscribe();
+    };
   }, []);
 
   async function handleResetPassword(e: React.FormEvent) {
@@ -59,7 +71,9 @@ export default function ResetPasswordPage() {
 
     setMessage("Password updated successfully! Redirecting...");
 
-    setTimeout(() => {
+    // ✅ Important: Logout after password reset (security fix)
+    setTimeout(async () => {
+      await supabase.auth.signOut();
       router.push("/login");
     }, 2000);
   }

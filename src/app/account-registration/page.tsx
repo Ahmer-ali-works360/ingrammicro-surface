@@ -137,12 +137,6 @@ await fetch("/api/notifications/create", {
   }),
 });
 
-
-
-function wait(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
     /**
      * 3️⃣ SEND EMAILS
      */
@@ -158,9 +152,6 @@ function wait(ms: number) {
       },
     });
 
-
-    // ⏳ WAIT 15 seconds (Mailtrap free limit)
-await wait(15000);
     // 👉 User confirmation (registration received)
     await sendEmail({
       to:email.trim(),
@@ -196,7 +187,7 @@ await wait(15000);
       <form onSubmit={handleSubmit} className="space-y-5">
         <div>
           <label className="block text-sm text-gray-700 mb-1">
-            Email (Username)
+            Email (Username)<span className="text-red-500"> *</span>
           </label>
           <input
             type="email"
@@ -209,7 +200,7 @@ await wait(15000);
 
         <div>
           <label className="block text-sm text-gray-700 mb-1">
-            First Name
+            First Name<span className="text-red-500"> *</span>
           </label>
           <input
             type="text"
@@ -222,7 +213,7 @@ await wait(15000);
 
         <div>
           <label className="block text-sm text-gray-700 mb-1">
-            Last Name
+            Last Name<span className="text-red-500"> *</span>
           </label>
           <input
             type="text"
@@ -235,7 +226,7 @@ await wait(15000);
 
         <div>
           <label className="block text-sm text-gray-700 mb-1">
-            Password
+            Password <span className="text-red-500"> *</span>
           </label>
           <input
             type="password"
@@ -248,7 +239,7 @@ await wait(15000);
 
         <div>
           <label className="block text-sm text-gray-700 mb-1">
-            Confirm Password
+            Confirm Password <span className="text-red-500"> *</span>
           </label>
           <input
             type="password"
@@ -261,7 +252,7 @@ await wait(15000);
 
         <div>
           <label className="block text-sm text-gray-700 mb-1">
-            Reseller
+            Reseller <span className="text-red-500"> *</span>
           </label>
           <input
             type="text"
@@ -276,7 +267,7 @@ await wait(15000);
           <button
             type="submit"
             disabled={loading}
-            className="w-full sm:w-auto bg-[#3ba1da] text-white py-[11px] px-8 text-[14px] font-[500] rounded-[4px] hover:bg-[#44b0ec]"
+            className="w-full cursor-pointer sm:w-auto bg-[#3ba1da] text-white py-[11px] px-8 text-[14px] font-[500] rounded-[4px] hover:bg-[#44b0ec]"
           >
             {loading ? "Registering..." : "Register"}
           </button>
@@ -292,7 +283,7 @@ await wait(15000);
             Registration Successful
           </h2>
           <p className="text-sm text-gray-600 mb-6">
-            User registration successful. You can login when admin approves
+            User registration successful. You can login when PM approves
             your registration.
           </p>
           <button

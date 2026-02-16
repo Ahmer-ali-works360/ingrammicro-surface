@@ -5,7 +5,7 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto px-4">
         <div className="bg-white text-center py-2 ">
           <p className="text-l text-gray-500">
-            © 2025 All Rights Reserved. Design by Works360
+            © 2026 All Rights Reserved. Design by Works360
           </p>
         </div>
       </div>

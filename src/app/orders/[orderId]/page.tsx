@@ -1,3 +1,6 @@
+//src/app/orders/[orderId]/page.tsx 
+
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -125,6 +128,11 @@ const getTimelineStep = (status: OrderStatus) => {
 };
 
 
+useEffect(() => {
+  console.log("RETURN LABEL DEBUG 👉", order?.return_label);
+}, [order]);
+
+
 
 const currentStep = order ? getTimelineStep(order.status) : 0;
 
@@ -165,7 +173,9 @@ useEffect(() => {
 
     const fetchOrder = async () => {
       setLoading(true);
-      const res = await fetch(`/api/admin-orders/${orderId}`);
+       const res = await fetch(`/api/admin-orders/${orderId}`, {
+      cache: "no-store",
+    });
       const json = await res.json();
 
       if (res.ok) {
@@ -209,6 +219,7 @@ useEffect(() => {
     case_type: order.case_type ?? "",
     tracking_username: order.tracking_username ?? "",
     tracking_password: order.tracking_password ?? "",
+    return_label: order.return_label ?? null,
   });
 }, [order, isEdit]);
 
@@ -268,6 +279,7 @@ const updateStatus = async (nextStatus?: OrderStatus) => {
     }
 
     const res = await fetch(`/api/admin-orders/${order.id}`, {
+      cache: "no-store",
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
@@ -285,7 +297,14 @@ const updateStatus = async (nextStatus?: OrderStatus) => {
       throw new Error(json.error || "Status update failed");
     }
 
-    const refreshed = await fetch(`/api/admin-orders/${order.id}`);
+     if (isAdmin || isShopManager) {
+      console.log("Admin/ShopManager sending email for:", finalStatus);
+      await sendStatusEmails(finalStatus);
+    }
+
+    const refreshed = await fetch(`/api/admin-orders/${order.id}`, {
+  cache: "no-store",
+});
     const refreshedJson = await refreshed.json();
 
     setOrder(refreshedJson.order);
@@ -321,30 +340,52 @@ const saveOrder = async () => {
 
   setUpdating(true);
 
-  const { error } = await supabase
-    .from("orders")
-    .update({
-      ...form,
-      revenue: calculateRevenue(form.units, form.budget),
-    })
-    .eq("id", order.id);
+  try {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
 
-  // ❌ agar error aaya → yahin stop
-  if (error) {
-    alert("Order update failed");
-    console.error(error);
+    if (!session) throw new Error("Not authenticated");
+
+    // 🛡️ return_label ko overwrite hone se bachao
+    const safeForm = { ...form };
+
+    const res = await fetch(`/api/admin-orders/${order.id}`, {
+      cache: "no-store",
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session.access_token}`,
+      },
+      body: JSON.stringify({
+        data: {
+          ...safeForm,
+          revenue: calculateRevenue(safeForm.units, safeForm.budget),
+        },
+      }),
+    });
+
+    const json = await res.json();
+
+    if (!res.ok) {
+      throw new Error(json.error || "Order update failed");
+    }
+
+    const refreshed = await fetch(`/api/admin-orders/${order.id}`, {
+      cache: "no-store",
+    });
+    const refreshedJson = await refreshed.json();
+    setOrder(refreshedJson.order);
+
+    router.push(`/orders/${order.id}`);
+  } catch (err: any) {
+    alert(err.message);
+    console.error(err);
+  } finally {
     setUpdating(false);
-    return;
   }
-
-  // ✅ sirf successful update ke baad refetch
-  const refreshed = await fetch(`/api/admin-orders/${order.id}`);
-  const refreshedJson = await refreshed.json();
-  setOrder(refreshedJson.order);
-
-  router.push(`/orders/${order.id}`);
-  setUpdating(false);
 };
+
 
 
 /* ================= Edit order item(quantity) ================= */
@@ -471,69 +512,284 @@ useEffect(() => {
   console.log("ROLE DEBUG 👉", { role, isAdmin, isShopManager, isProgramManager });
 }, [role]);
 
- const uploadReturnLabel = async (file: File) => {
+const uploadReturnLabel = async (file: File) => {
   if (!order) return;
 
   const path = `return-labels/${order.id}-${Date.now()}-${file.name}`;
-
   setUploadingFile(true);
 
-  const { error } = await supabase.storage
-    .from("order-files")
-    .upload(path, file, { upsert: true });
-
-  if (error) {
-    alert(error.message);
-    setUploadingFile(false);
-    return;
-  }
-
-  const { data } = supabase.storage
-    .from("order-files")
-    .getPublicUrl(path);
-
-  await supabase
-    .from("orders")
-    .update({ return_label: data.publicUrl })
-    .eq("id", order.id);
-
-  setOrder({ ...order, return_label: data.publicUrl });
-   setUploadedFileName(file.name);
-  setUploadingFile(false);
-};
-
-const removeReturnLabel = async () => {
-  if (!order?.return_label) return;
-
   try {
-    // 🔹 storage path extract
-    const urlParts = order.return_label.split("/");
-    const filePath = `return-labels/${urlParts[urlParts.length - 1]}`;
-
-    setUploadingFile(true);
-
-    // 🔹 remove from storage
-    await supabase.storage
+    const { error } = await supabase.storage
       .from("order-files")
-      .remove([filePath]);
+      .upload(path, file, { upsert: true });
 
-    // 🔹 remove from DB
-    await supabase
-      .from("orders")
-      .update({ return_label: null })
-      .eq("id", order.id);
+    if (error) throw error;
 
-    // 🔹 update UI
-    setOrder({ ...order, return_label: null });
-    setUploadedFileName(null);
+    const { data } = supabase.storage
+      .from("order-files")
+      .getPublicUrl(path);
 
+
+const {
+  data: { session },
+} = await supabase.auth.getSession();
+
+if (!session) throw new Error("Not authenticated");
+
+const res = await fetch(`/api/admin-orders/${order.id}`, {
+  method: "PUT",
+  headers: {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${session.access_token}`,
+  },
+  body: JSON.stringify({
+    data: {
+      return_label: data.publicUrl,
+    },
+  }),
+});
+
+if (!res.ok) {
+  throw new Error("Failed to save return label");
+}
+
+
+    // ✅ VERY IMPORTANT: API se fresh data lao
+    const refreshed = await fetch(`/api/admin-orders/${order.id}`, {
+  cache: "no-store",
+});
+    const refreshedJson = await refreshed.json();
+    setOrder(refreshedJson.order);
+
+    setUploadedFileName(file.name);
   } catch (err) {
-    console.error("Failed to remove file", err);
-    alert("Failed to remove file");
+    console.error(err);
+    alert("Upload failed");
   } finally {
     setUploadingFile(false);
   }
 };
+
+
+const removeReturnLabel = async () => {
+  if (!order) return;
+
+  setUploadingFile(true);
+
+  const {
+  data: { session },
+} = await supabase.auth.getSession();
+
+if (!session) throw new Error("Not authenticated");
+
+const res = await fetch(`/api/admin-orders/${order.id}`, {
+  method: "PUT",
+  headers: {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${session.access_token}`,
+  },
+  body: JSON.stringify({
+    data: {
+      return_label: null,
+    },
+  }),
+});
+
+if (!res.ok) {
+  throw new Error("Failed to remove return label");
+}
+
+
+  // 🔁 REFRESH
+  const refreshed = await fetch(`/api/admin-orders/${order.id}`, {
+  cache: "no-store",
+});
+  const refreshedJson = await refreshed.json();
+  setOrder(refreshedJson.order);
+
+  setUploadedFileName(null);
+  setUploadingFile(false);
+};
+
+// ================= EMAIL SEND AFTER UPDATE STATUS FOR ADMIN/SM =================
+
+const sendStatusEmails = async (finalStatus: OrderStatus) => {
+  if (!order) return;
+
+  const emailData = {
+    // Basic Order Info
+    orderId: order.id,
+    order_number: order.order_number,
+    status: finalStatus,
+    created_at: order.created_at,
+    
+    // Customer Info
+    companyName: order.company_name,
+    contactName: order.contact_name,
+    contact_email: order.contact_email,
+    
+    // Seller/Team Info
+    sellerEmail: order.seller_email,
+    sellerName: order.seller_name,
+    
+    // Shipping Info
+    shippingAddress: order.address,
+    city: order.city,
+    state: order.state,
+    zip: order.zip,
+    deliveryDate: order.delivery_date,
+    
+    // Opportunity Details
+    units: order.units,
+    budget: order.budget,
+    revenue: order.revenue,
+    ingramAccount: order.ingram_account,
+    quote: order.quote,
+    segment: order.segment,
+    manufacturer: order.manufacturer,
+    isReseller: order.is_reseller,
+    
+    // Tracking Information
+    trackingNumber: order.tracking_number,
+    trackingLink: order.tracking_link,
+    returnTrackingNumber: order.return_tracking_number,
+    returnTrackingLink: order.return_tracking_link,
+    caseType: order.case_type,
+    trackingUsername: order.tracking_username,
+    // tracking_password: EXCLUDED (security)
+    returnLabel: order.return_label,
+    
+    // Approval Info
+    approvedBy: order.approved_by,
+    approvedAt: order.approved_at || new Date().toISOString(),
+    
+    // Additional Notes
+    notes: order.notes,
+    
+    // Order Items (complete details)
+    orderItems: order.cart_items.map((item: any) => ({
+      quantity: item.quantity,
+      productName: item.product_name,
+      sku: item.sku,
+      brand: item.brand,
+      processor: item.processor,
+      memory: item.memory,
+      // product_id: EXCLUDED (security)
+    }))
+  };
+  
+  console.log("Cart items being sent:", order.cart_items);
+
+  let userType = "";
+  let adminType = "";
+
+  switch (finalStatus) {
+    case "approved":
+      userType = "ORDER_APPROVED_USER";
+      adminType = "ORDER_APPROVED_ADMIN";
+      break;
+
+    case "rejected":
+      userType = "ORDER_REJECTED_USER";
+      adminType = "ORDER_REJECTED_ADMIN";
+      break;
+
+    case "shipped":
+      userType = "ORDER_SHIPPED_USER";
+      adminType = "ORDER_SHIPPED_ADMIN";
+      break;
+
+    case "return":
+      userType = "ORDER_RETURN_USER";
+      adminType = "ORDER_RETURN_ADMIN";
+      break;
+
+    default:
+      return; // pending pe email nahi bhejni
+  }
+
+  // USER EMAIL
+  await fetch("/api/send-email", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      to: order.contact_email,
+      type: userType,
+      data: emailData,
+    }),
+  });
+
+  // ADMIN EMAIL
+  await fetch("/api/send-email", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      to: "ahmer.ali@works360.com",
+      type: adminType,
+      data: emailData,
+    }),
+  });
+};
+
+// ================= PM APPROVE/REJECT WITH EMAIL =================
+const updateStatusWithEmail = async (nextStatus: OrderStatus) => {
+  if (!order) return;
+
+  setUpdating(true);
+
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      throw new Error("User not authenticated");
+    }
+
+    // 1️⃣ Status update
+    const res = await fetch(`/api/admin-orders/${order.id}`, {
+      cache: "no-store",
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session.access_token}`,
+      },
+      body: JSON.stringify({
+        status: nextStatus,
+        role,
+      }),
+    });
+
+    const statusUpdateResponse = await res.json();
+    console.log("Response from status update API:", statusUpdateResponse);
+
+    if (!res.ok) {
+      throw new Error("Status update failed");
+    }
+
+    // ✅ Call shared email function
+    console.log("Calling shared email sender for status:", nextStatus);
+    await sendStatusEmails(nextStatus);
+
+    // 2️⃣ Refresh order
+    const refreshed = await fetch(`/api/admin-orders/${order.id}`, {
+      cache: "no-store",
+    });
+    const refreshedJson = await refreshed.json();
+
+    setOrder(refreshedJson.order);
+    setStatus(refreshedJson.order.status);
+
+    alert(`Order ${nextStatus} successfully! Emails sent.`);
+  } catch (err: any) {
+    console.error("❌ Error:", err);
+    alert(err.message);
+  } finally {
+    setUpdating(false);
+  }
+};
+
+
+
+const [showStatusModal, setShowStatusModal] = useState(false);
+const [statusSuccess, setStatusSuccess] = useState(false);
 
 
 
@@ -633,7 +889,7 @@ if (!order) {
             </div>
 
             {/* RIGHT */}
-            <div className="flex flex-col items-end gap-2">
+            <div className="flex items-center gap-2">
 {(isAdmin || isShopManager) && (
   <>
               <select
@@ -650,10 +906,9 @@ if (!order) {
               </select>
 
               <button
-                onClick={() => updateStatus()}
+                onClick={() => setShowStatusModal(true)}
                 disabled={updating || status === order.status}
                 className="
-          mt-2
           text-xs font-medium
           px-4 py-2
           text-white
@@ -664,7 +919,7 @@ if (!order) {
           rounded-xl shadow
         "
               >
-                {updating ? "Updating status…" : "Save Status"}
+                {updating ? "Updating status…" : "Update Status"}
               </button>
               </>
               )}
@@ -672,7 +927,8 @@ if (!order) {
               {canPMAct && (
   <div className="flex gap-2">
     <button
-      onClick={() => updateStatus("approved")}
+      onClick={() => updateStatusWithEmail("approved")}
+      disabled={updating}
       className="cursor-pointer
                             flex items-center gap-1.5
                             rounded-md px-3 py-1.5 text-xs font-medium
@@ -685,7 +941,8 @@ if (!order) {
     </button>
 
     <button
-      onClick={() => updateStatus("rejected")}
+       onClick={() => updateStatusWithEmail("rejected")}
+      disabled={updating}
       className="cursor-pointer
                           flex items-center gap-1.5
                           rounded-md px-3 py-1.5 text-xs font-medium
@@ -772,7 +1029,7 @@ if (!order) {
           <div className="bg-white border border-gray-200 rounded-lg shadow">
             <div className="px-6 py-6">
               <p className="text-sm font-bold text-gray-700 flex items-center gap-2">
-                <User size={26} className="text-blue-600" />
+                <User size={26} className="text-blue-600" /> 
                 Customer Information
               </p>
             </div>
@@ -780,7 +1037,7 @@ if (!order) {
             <div className="px-6 py-4 space-y-4">
               <div>
                 <p className="text-[11px] uppercase tracking-wide text-gray-400 mb-1 flex items-center gap-1">
-                  <Building2 size={12} className="text-blue-400" />
+                  {/* <Building2 size={12} className="text-blue-400" /> */}
                   Company
                 </p>
                 {isEdit ? (
@@ -801,7 +1058,7 @@ if (!order) {
 
               <div>
                 <p className="text-[11px] uppercase tracking-wide text-gray-400 mb-1 flex items-center gap-1">
-                  <User size={12} className="text-blue-400" />
+                  {/* <User size={12} className="text-blue-400" /> */}
                   Contact Name
                 </p>
                 {isEdit ? (
@@ -823,7 +1080,7 @@ if (!order) {
 
               <div>
                 <p className="text-[11px] uppercase tracking-wide text-gray-400 mb-1 flex items-center gap-1">
-                  <Mail size={12} className="text-blue-400" />
+                  {/* <Mail size={12} className="text-blue-400" /> */}
                   Contact Email
                 </p>
 {isEdit ? (
@@ -858,7 +1115,7 @@ if (!order) {
             <div className="px-6 py-4 grid grid-cols-2 gap-x-6 gap-y-4">
               <div>
                 <p className="text-[11px] uppercase tracking-wide text-gray-400 mb-1 flex items-center gap-1">
-                  <Layers size={12} className="text-blue-400" />
+                  {/* <Layers size={12} className="text-blue-400" /> */}
                   Units
                 </p>
                 {isEdit ? (
@@ -890,7 +1147,7 @@ if (!order) {
 
               <div>
                 <p className="text-[11px] uppercase tracking-wide text-gray-400 mb-1 flex items-center gap-1">
-                  <DollarSign size={12} className="text-blue-400" />
+                  {/* <DollarSign size={12} className="text-blue-400" /> */}
                   Budget per Device
                 </p>
                 {isEdit ? (
@@ -913,7 +1170,7 @@ if (!order) {
   />
 ) : (
   <p className="text-sm text-gray-900">
-    {order.budget ? `$${order.budget}` : "—"}
+    {order.budget ? `$${order.budget.toLocaleString("en-US")}` : "—"}
   </p>
 )}
 
@@ -921,7 +1178,7 @@ if (!order) {
 
               <div>
                 <p className="text-[11px] uppercase tracking-wide text-gray-400 mb-1 flex items-center gap-1">
-                  <TrendingUp size={12} className="text-blue-400" />
+                  {/* <TrendingUp size={12} className="text-blue-400" /> */}
                   Revenue Opportunity
                 </p>
                 {isEdit ? (
@@ -932,7 +1189,7 @@ if (!order) {
   />
 ) : (
   <p className="text-sm text-gray-900">
-    {order.revenue ? `$${order.revenue}` : "—"}
+    {order.revenue ? `$${order.revenue.toLocaleString("en-US")}` : "—"}
   </p>
 )}
 
@@ -940,7 +1197,7 @@ if (!order) {
 
               <div>
                 <p className="text-[11px] uppercase tracking-wide text-gray-400 mb-1 flex items-center gap-1">
-                  <Tag size={12} className="text-blue-400" />
+                  {/* <Tag size={12} className="text-blue-400" /> */}
                   Segment
                 </p>
                 {isEdit ? (
@@ -966,7 +1223,7 @@ if (!order) {
 
               <div>
                 <p className="text-[11px] uppercase tracking-wide text-gray-400 mb-1 flex items-center gap-1">
-                  <Factory size={12} className="text-blue-400" />
+                  {/* <Factory size={12} className="text-blue-400" /> */}
                   Manufacturer
                 </p>
                 {isEdit ? (
@@ -992,7 +1249,7 @@ if (!order) {
 
               <div>
                 <p className="text-[11px] uppercase tracking-wide text-gray-400 mb-1 flex items-center gap-1">
-                  <Factory size={12} className="text-blue-400" />
+                  {/* <Factory size={12} className="text-blue-400" /> */}
                   Delivery Date
                 </p>
                 {isEdit ? (
@@ -1180,8 +1437,9 @@ if (!order) {
 <div>
   <p className="text-xs uppercase text-gray-400 mb-1">Return Label</p>
 
-  {isEdit ? (
-    <div className="space-y-1">
+  {/* Upload only in edit mode */}
+  {isEdit && (
+    <div className="space-y-1 mb-2">
       <label className="flex items-center gap-3 border rounded px-3 py-2 cursor-pointer hover:border-blue-500 text-sm">
         <input
           type="file"
@@ -1202,41 +1460,36 @@ if (!order) {
         <span className="text-gray-500 text-xs truncate">
           {uploadedFileName || "No file selected"}
         </span>
-        {/* ❌ REMOVE BUTTON */}
-    {order.return_label && (
-      <button
-        type="button"
-        onClick={removeReturnLabel}
-        className="text-red-500 hover:text-red-700 text-xs"
-        title="Remove file"
-      >
-        ✕
-      </button>
-    )}
-      </label>
 
-      {order.return_label && (
-        <a
-          href={order.return_label}
-          target="_blank"
-          className="text-blue-600 text-xs underline"
-        >
-          View uploaded file
-        </a>
-      )}
+        {order.return_label && order.return_label.trim() !== "" && (
+          <button
+            type="button"
+            onClick={removeReturnLabel}
+            className="text-red-500 hover:text-red-700 text-xs"
+            title="Remove file"
+          >
+            ✕
+          </button>
+        )}
+      </label>
     </div>
-  ) : order.return_label ? (
+  )}
+
+  {/* 👇 ALWAYS show view link if file exists */}
+  {order.return_label && order.return_label.trim() !== "" ? (
     <a
       href={order.return_label}
       target="_blank"
+      rel="noopener noreferrer"
       className="text-blue-600 underline text-sm"
     >
       View Return Label
     </a>
   ) : (
-    <p>—</p>
+    <p className="text-sm">—</p>
   )}
 </div>
+
 
 
 
@@ -1470,6 +1723,58 @@ if (!order) {
 </div>
 
       </div>
+
+      {showStatusModal && (
+  <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+    <div className="bg-white p-6 rounded-lg w-96 text-center space-y-4">
+      
+      {!statusSuccess ? (
+        <>
+          <p className="text-lg font-semibold">
+            Are you sure you want to update status?
+          </p>
+
+          <div className="flex justify-center gap-4">
+            <button
+              onClick={() => setShowStatusModal(false)}
+              className="px-4  cursor-pointer py-2 border rounded"
+            >
+              No
+            </button>
+
+            <button
+              onClick={async () => {
+                await updateStatus();
+                setStatusSuccess(true);
+              }}
+              className="px-4 py-2 cursor-pointer custom-blue text-white rounded"
+            >
+              Yes
+            </button>
+          </div>
+        </>
+      ) : (
+        <>
+          <p className="text-lg font-semibold">
+            Order successfully updated!
+          </p>
+
+          <button
+            onClick={() => {
+              setShowStatusModal(false);
+              setStatusSuccess(false);
+            }}
+            className="custom-blue px-4 py-2 cursor-pointer text-white rounded"
+          >
+            Close
+          </button>
+        </>
+      )}
+
+    </div>
+  </div>
+)}
+
     </div>
   );
 
@@ -1486,5 +1791,7 @@ function TimelineDot({ active, label }: any) {
     </div>
   );
 }
+
+
 
 

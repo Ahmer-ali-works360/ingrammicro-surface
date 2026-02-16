@@ -1,3 +1,5 @@
+// src/app/forgot-password/page.tsx 
+
 "use client";
 
 import { useState } from "react";
@@ -14,9 +16,11 @@ export default function ForgotPasswordPage() {
     setMessage("");
 
     // Supabase reset link
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: "http://localhost:3000/reset-password", // replace with production URL
-    });
+    const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${window.location.origin}/reset-password`,
+  });
+
+    console.log("Supabase Response:", { data, error }); 
 
     setLoading(false);
 

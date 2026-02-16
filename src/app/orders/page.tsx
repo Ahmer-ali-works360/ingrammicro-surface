@@ -32,7 +32,7 @@ export default function AdminOrdersPage() {
   // 🚫 Redirect if not allowed
   useEffect(() => {
     if (!authLoading && !isAllowed) {
-      router.replace("/");
+      router.replace("/login?redirect=/orders");
     }
   }, [authLoading, isAllowed, router]);
 
@@ -71,7 +71,7 @@ export default function AdminOrdersPage() {
     const data = filteredOrders.map((o) => ({
       "Order ID": o.id,
       "Seller Email": o.seller_email,
-      Revenue: o.revenue,
+      Revenue: o.revenue.toLocaleString("en-US"),
       Status: o.status,
       "Delivery Date": o.delivery_date
         ? new Date(o.delivery_date).toLocaleDateString()
@@ -130,7 +130,15 @@ export default function AdminOrdersPage() {
       {/* Table */}
       <div className="overflow-x-auto rounded-lg shadow border border-gray-200 bg-white">
         <table className="w-full text-sm">
-          <thead className="bg-gradient-to-t from-gray-100 via-gray-200 to-gray-300 text-gray-700 border-b">
+          {/* <thead className="bg-gradient-to-t from-gray-100 via-gray-200 to-gray-300 text-gray-700 border-b">
+            <tr>
+              <th colSpan={6} className="px-4 py-4 text-center text-3xl font-semibold">
+                Orders List
+              </th>
+            </tr>
+          </thead> */}
+<thead className="bg-[#3a8bc7] text-white border-b">
+
             <tr>
               <th colSpan={6} className="px-4 py-4 text-center text-3xl font-semibold">
                 Orders List
@@ -138,7 +146,7 @@ export default function AdminOrdersPage() {
             </tr>
           </thead>
 
-          <thead className="bg-gradient-to-t from-gray-100 via-gray-200 to-gray-300 text-gray-700 border-b">
+          <thead className="bg-blue-50 text-blue-900 border-b border-gray-200">
             <tr>
               <th className="px-4 py-3 text-left">Order ID</th>
               <th className="px-4 py-3 text-left">Seller Email</th>
@@ -177,40 +185,37 @@ export default function AdminOrdersPage() {
                     #{order.order_number}
                   </td>
                   <td className="px-4 py-3">{order.seller_email}</td>
-                  <td className="px-4 py-3">${order.revenue}</td>
+                  <td className="px-4 py-3">${order.revenue.toLocaleString()}</td>
+                  <td className="px-4 py-3">{order.status}</td>                
                   <td className="px-4 py-3">
-                    <span
-  className={`px-3 py-1 rounded-full text-xs font-medium capitalize
-    ${
-      order.status === "pending"
-        ? "bg-yellow-100 text-yellow-800"
-        : order.status === "approved"
-        ? "bg-gray-200 text-gray-700"
-        : order.status === "rejected"
-        ? "bg-red-100 text-red-800"
-        : order.status === "shipped"
-        ? "bg-green-100 text-green-800"
-        : order.status === "return"
-        ? "bg-orange-100 text-orange-800"
-        : order.status === "shipped_extension"
-        ? "bg-purple-100 text-purple-800"
-        : "bg-gray-100 text-gray-500"
-    }
-  `}
->
-  {order.status.replace("_", " ")}
-</span>
-
-                  </td>
+  {order.delivery_date
+    ? new Date(order.delivery_date)
+        .toLocaleDateString("en-GB", {
+          day: "2-digit",
+          month: "short",
+          year: "numeric",
+        })
+        .replace(/ /g, "-")
+        .toLowerCase()
+    : "-"}
+</td>
                   <td className="px-4 py-3">
-                    {order.delivery_date
-                      ? new Date(order.delivery_date).toLocaleDateString()
-                      : "-"}
-                  </td>
-                  <td className="px-4 py-3">
-                    {new Date(order.created_at).toLocaleString()}
-                  </td>
-                </tr>
+  {new Date(order.created_at)
+    .toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    })
+    .replace(/ /g, "-")
+    .toLowerCase() +
+    " " +
+    new Date(order.created_at).toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    })}
+</td>
+              </tr>
               ))
             )}
           </tbody>

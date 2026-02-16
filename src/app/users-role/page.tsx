@@ -218,10 +218,10 @@ export default function UserRolePage() {
 
   return (
     <div className="p-8">
-      <h1 className="text-3xl font-semibold mb-6">User Role Management</h1>
+      {/* <h1 className="text-3xl font-semibold mb-6">User Role Management</h1> */}
 
       {/* Top Controls */}
-      <div className="flex flex-wrap gap-4 items-center justify-between mb-4">
+      {/* <div className="flex flex-wrap gap-4 items-center justify-between mb-4">
         <input
           type="text"
           placeholder="Search user..."
@@ -255,11 +255,37 @@ export default function UserRolePage() {
             onClick={downloadExcel}
           />
         </div>
+      </div> */}
+
+      {/* Right aligned download + search */}
+      <div className="flex flex-col items-end gap-3 mb-4">
+        <img
+          src="/download-excel.png"
+          alt="Download Excel"
+          className="w-36 h-14 cursor-pointer hover:opacity-80"
+          onClick={downloadExcel}
+        />
+
+        <input
+          type="text"
+          placeholder="Search user..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="w-80 border border-gray-300 rounded-md px-3 py-2 top-6 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+        />
       </div>
 
       {/* Table */}
       <div className="overflow-x-auto rounded-lg shadow border border-gray-200 bg-white">
-        <table className="w-full text-sm border border-gray-200 rounded-lg overflow-hidden">
+        <table className="w-full text-sm">
+          <thead className="bg-[#3a8bc7] text-white border-b">
+
+            <tr>
+              <th colSpan={6} className="px-4 py-4 text-center text-3xl font-semibold">
+                User Role Management
+              </th>
+            </tr>
+          </thead>
           <thead className="bg-blue-50 text-blue-900 border-b border-gray-200">
             <tr>
               <th className="px-4 py-3 text-left">Name</th>

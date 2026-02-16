@@ -9,7 +9,7 @@ type EmailTemplate = {
   html: string;
 };
 
-/* ---------- BASE LAYOUT (Classic / Centered) ---------- */
+/* ---------- BASE LAYOUT (User Registration process) ---------- */
 function baseLayout(title: string, body: string): string {
   return `
 <!DOCTYPE html>
@@ -18,10 +18,8 @@ function baseLayout(title: string, body: string): string {
   <meta charset="UTF-8" />
   <title>${title}</title>
 </head>
-
 <body style="margin:0;padding:0;background:#f4f6f8;font-family:Arial,Helvetica,sans-serif;">
   <p>&nbsp;</p>
-
   <table
     width="600"
     align="center"
@@ -30,10 +28,81 @@ function baseLayout(title: string, body: string): string {
     border="0"
     style="background:#ffffff;border-radius:8px;overflow:hidden;border:1px solid #dddddd;"
   >
-
     <!-- Header -->
     <tr>
       <td
+        style="
+          background:#3ba1da;
+          padding:14px 20px;
+          font-size:16px;
+          font-weight:bold;
+          color:#ffffff;
+          text-align:center;
+        "
+      >
+        ${title}
+      </td>
+    </tr>
+    <!-- Logo Section -->
+    <tr>
+      <td style="padding:30px 20px;text-align:center;background:#ffffff;">
+        <img 
+          src="https://hcxexaouqvbvaycgpmfs.supabase.co/storage/v1/object/public/images/Ingram_micro_logo.png" 
+          alt="Company Logo" 
+          style="max-width:200px;height:auto;display:block;margin:0 auto;"
+        />
+      </td>
+    </tr>
+    <!-- Body -->
+    <tr>
+      <td style="padding:30px;font-size:14px;color:#333333;line-height:1.6;">
+        ${body}
+      </td>
+    </tr>
+    <!-- Footer -->
+    <tr>
+      <td
+        style="
+          background:#3ba1da;
+          padding:12px 15px;
+          font-size:16px;
+          color:#ffffff;
+          text-align:center;
+        "
+      >
+        <a href="https://www.ingrammicro-surface.com/" style="color:white;text-decoration:none;">www.ingrammicro-surface.com</a> | <a href="mailto:ahmer.ali@worls360.com" style="color:white;text-decoration:none;">support@Ingrammicro-surface.com</a> 
+      </td>
+    </tr>
+  </table>
+  <p>&nbsp;</p>
+</body>
+</html>
+`;
+}
+/* ---------- ORDER LAYOUT (Detailed order emails) ---------- */
+function orderLayout(title: string, body: string): string {
+  return `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="UTF-8">
+      <title>${title}</title>
+      <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,700&display=swap" rel="stylesheet">
+    </head>
+    <body style="margin:0;padding:30px 0;">
+      <table width="100%" cellpadding="0" cellspacing="0">
+        <tr>
+          <td align="center">
+            <table width="600" cellpadding="0" cellspacing="0"
+              style="background:#ffffff;
+                     font-family:'Open Sans',Helvetica Neue,Helvetica,Arial,sans-serif;
+                     font-size:15px;
+                     border:1px solid #d1d1e0;
+                     border-collapse:collapse;">
+              
+              <!-- HEADER -->
+              <tr>
+                  <td
         style="
           background:#3ba1da;
           padding:14px 20px;
@@ -45,16 +114,26 @@ function baseLayout(title: string, body: string): string {
       >
         ${title}
       </td>
-    </tr>
-
-    <!-- Body -->
+              </tr>
+              <!-- Logo Section -->
     <tr>
-      <td style="padding:30px;font-size:15px;color:#333333;line-height:1.6;">
-        ${body}
+      <td style="padding:30px 20px;text-align:center;background:#ffffff;">
+        <img 
+          src="https://hcxexaouqvbvaycgpmfs.supabase.co/storage/v1/object/public/images/Ingram_micro_logo.png" 
+          alt="Company Logo" 
+          style="max-width:200px;height:auto;display:block;margin:0 auto;"
+        />
       </td>
     </tr>
 
-    <!-- Footer -->
+              <!-- BODY CONTENT -->
+              <tr>
+                <td style="padding:15px;">
+                  ${body}
+                </td>
+              </tr>
+
+              <!-- Footer -->
     <tr>
       <td
         style="
@@ -65,16 +144,17 @@ function baseLayout(title: string, body: string): string {
           text-align:center;
         "
       >
-        © 2026 Ingrammicro-Surface
+        <a href="https://www.ingrammicro-surface.com/" style="color:white;text-decoration:none;">www.ingrammicro-surface.com</a> | <a href="mailto:ahmer.ali@worls360.com" style="color:white;text-decoration:none;">ahmer.ali@worls360.com</a> 
       </td>
     </tr>
 
-  </table>
-
-  <p>&nbsp;</p>
-</body>
-</html>
-`;
+            </table>
+          </td>
+        </tr>
+      </table>
+    </body>
+    </html>
+  `;
 }
 
 /* ---------- EMAIL FACTORY ---------- */
@@ -84,9 +164,9 @@ export function getEmailTemplate(type: string, data: any): EmailTemplate {
     /* -------- ADMIN: NEW USER REGISTRATION -------- */
     case "NEW_USER_REGISTRATION":
       return {
-        subject: "New User Registration",
+        subject: "New user Registration | Ingrammicro Surface (Awaiting Approval)",
         html: baseLayout(
-          "New Registration | Ingrammicro Surface",
+          "New user Registration | Ingrammicro Surface (Awaiting Approval)",
           `
           <p>Dear PM,</p>
 
@@ -138,9 +218,9 @@ export function getEmailTemplate(type: string, data: any): EmailTemplate {
     /* -------- USER REGISTERED -------- */
     case "USER_REGISTERED":
       return {
-        subject: "Registration Received",
+        subject: "New user Registration | Ingrammicro Surface (Awaiting Approval)",
         html: baseLayout(
-          "Registration Received | Ingrammicro Surface",
+          "New user Registration | Ingrammicro Surface (Awaiting Approval)",
           `
           <p>Hello <strong>${data.name}</strong>,</p>
 
@@ -169,9 +249,9 @@ export function getEmailTemplate(type: string, data: any): EmailTemplate {
     /* -------- USER APPROVED -------- */
     case "USER_APPROVED":
       return {
-        subject: "Your Account Is Now Active",
+        subject: "New user Registration | Ingrammicro Surface (Approved)",
         html: baseLayout(
-          "New User Registration | Ingrammicro Surface",
+          "New user Registration | Ingrammicro Surface (Approved)",
           `
           <p>Dear <strong>${data.name}</strong>,</p>
 
@@ -204,12 +284,57 @@ export function getEmailTemplate(type: string, data: any): EmailTemplate {
         ),
       };
 
+      /* -------- ADMIN: USER APPROVED NOTIFICATION -------- */
+    case "ADMIN_USER_APPROVED":
+      return {
+        subject: "New user Registration | Ingrammicro Surface (Approved)",
+        html: baseLayout(
+          "New user Registration | Ingrammicro Surface (Approved)",
+          `
+          <p>Dear PM,</p>
+
+          <p>
+            The following user has been <strong>approved</strong> on
+            <strong>Ingrammicro Surface</strong>.
+          </p>
+
+          <p style="margin-top:25px;">
+            <strong>User Details:</strong>
+          </p>
+
+          <table style="margin-top:10px;font-size:14px;">
+            <tr>
+              <td style="padding:6px 10px 6px 0;"><strong>Name:</strong></td>
+              <td>${data.name}</td>
+            </tr>
+            <tr>
+              <td style="padding:6px 10px 6px 0;"><strong>Email:</strong></td>
+              <td>${data.email}</td>
+            </tr>
+            <tr>
+              <td style="padding:6px 10px 6px 0;"><strong>Reseller:</strong></td>
+              <td>${data.reseller}</td>
+            </tr>
+            <tr>
+              <td style="padding:6px 10px 6px 0;"><strong>Status:</strong></td>
+              <td><span style="color:#28a745;font-weight:bold;">Approved</span></td>
+            </tr>
+          </table>
+
+          <p style="margin-top:25px;">
+            Regards,<br/>
+            <strong>Ingrammicro Surface Team</strong>
+          </p>
+          `
+        ),
+      };
+
     /* -------- USER REJECTED -------- */
     case "USER_REJECTED":
       return {
-        subject: "Your Account Has Been Rejected",
+        subject: "New user Registration | Ingrammicro Surface (Rejected)",
         html: baseLayout(
-          "Account Rejected | Ingrammicro Surface",
+          " New user Registration | Ingrammicro Surface (Rejected)",
           `
           <p>Hello <strong>${data.name}</strong>,</p>
 
@@ -225,22 +350,44 @@ export function getEmailTemplate(type: string, data: any): EmailTemplate {
         ),
       };
 
-    /* -------- ORDER APPROVED -------- */
-    case "ORDER_APPROVED":
+      /* -------- ADMIN: USER REJECTED NOTIFICATION -------- */
+    case "ADMIN_USER_REJECTED":
       return {
-        subject: "Order Approved",
+        subject: "New user Registration | Ingrammicro Surface (Rejected)",
         html: baseLayout(
-          "Order Approved | Ingrammicro Surface",
+          "New user Registration | Ingrammicro Surface (Rejected)",
           `
-          <p>Hello <strong>${data.name}</strong>,</p>
+          <p>Dear PM,</p>
 
           <p>
-            Your order <strong>#${data.orderId}</strong> has been approved.
+            The following user has been <strong>rejected</strong> on
+            <strong>Ingrammicro Surface</strong>.
           </p>
 
-          <p>We will process it shortly.</p>
+          <p style="margin-top:25px;">
+            <strong>User Details:</strong>
+          </p>
 
-          <p>
+          <table style="margin-top:10px;font-size:14px;">
+            <tr>
+              <td style="padding:6px 10px 6px 0;"><strong>Name:</strong></td>
+              <td>${data.name}</td>
+            </tr>
+            <tr>
+              <td style="padding:6px 10px 6px 0;"><strong>Email:</strong></td>
+              <td>${data.email}</td>
+            </tr>
+            <tr>
+              <td style="padding:6px 10px 6px 0;"><strong>Reseller:</strong></td>
+              <td>${data.reseller}</td>
+            </tr>
+            <tr>
+              <td style="padding:6px 10px 6px 0;"><strong>Status:</strong></td>
+              <td><span style="color:#dc3545;font-weight:bold;">Rejected</span></td>
+            </tr>
+          </table>
+
+          <p style="margin-top:25px;">
             Regards,<br/>
             <strong>Ingrammicro Surface Team</strong>
           </p>
@@ -248,36 +395,1232 @@ export function getEmailTemplate(type: string, data: any): EmailTemplate {
         ),
       };
 
-    /* -------- ORDER APPROVED -------- */
-      case "ORDER_PLACED_ADMIN":
+
+/* -------- ORDER_APPROVED_USER (UPDATED) -------- */
+case "ORDER_APPROVED_USER":
   return {
-    subject: "New Order Placed",
-    html: baseLayout(
-      "New Order Received",
+    subject: `Order Approved (#${data.order_number}) | Ingrammicro Surface`,
+    html: orderLayout(
+      `Approved Order (#${data.order_number})  | Ingrammicro Surface`,
       `
-      <p>A new order has been placed.</p>
-      <p><strong>Order ID:</strong> ${data.orderId}</p>
-      <p><strong>Seller:</strong> ${data.email}</p>
+        <!-- TITLE -->
+        <h3 style="margin:0;font-size:18px;font-weight:bold;color:#000;">
+          Approved Order (#${data.order_number})<br>
+          <span style="font-size:14px;font-weight:normal;color:#848484;">
+            Placed on ${data.created_at ? new Date(data.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : "N/A"}
+          </span>
+        </h3>
+
+        <div style="text-align:center; margin:24px 0;">
+          <img src="https://hcxexaouqvbvaycgpmfs.supabase.co/storage/v1/object/public/order-files/order%20email/order%20approved.png" width="550" style="width:100%; max-width:550px; height:auto;">
+        </div>
+        
+        <!-- INTRO -->
+        <div style="padding:15px 0;color:#000;">
+          <p style="font-size:15px;line-height:1.5;margin:10px 0;font-weight:100;">
+            Your order on <a style="color:#0d62c2;text-decoration:none" href="#" target="_blank">ingrammicro-surface.com/</a> has been approved. Once your package ships, you will receive a shipping email with tracking information and a prepaid Return Label for your order.
+          </p>
+          <p style="font-size:15px;line-height:1.5;margin:10px 0;">
+            If you have any questions please contact us at <a style="color:#0d62c2;text-decoration:none" href="mailto:ahmer.ali@works360.com">ahmer.ali@works360.com</a>
+          </p>
+        </div>
+
+        <!-- PRODUCTS TABLE -->
+        <table width="100%" cellpadding="8" cellspacing="0" style="border:1px solid #ccc;border-collapse:collapse;margin:15px 0;">
+          <tr style="background:#E3E3E3;">
+            <th width="75%" style="border:1px solid #213747;text-align:left;padding:8px;">Product</th>
+            <th width="25%" style="border:1px solid #213747;text-align:left;padding:8px;">Quantity</th>
+          </tr>
+          ${data.orderItems?.map((item: any) => `
+            <tr>
+              <td style="border:1px solid #ccc;padding:8px;">
+                ${item.productName || "N/A"}<br>
+                <span style="font-size:12px;color:#666;">${item.sku || ""}</span>
+              </td>
+              <td style="border:1px solid #ccc;padding:8px;">${item.quantity}</td>
+            </tr>
+          `).join("") || '<tr><td colspan="2" style="border:1px solid #ccc;padding:8px;">No items</td></tr>'}
+        </table>
+
+        <!-- SHIPPING DETAILS -->
+        <table width="100%" cellpadding="8" cellspacing="0" style="border:1px solid #ccc;border-collapse:collapse;margin:15px 0;">
+          <tr>
+            <th colspan="2" style="background:#E3E3E3;border:1px solid #213747;text-align:left;padding:8px;font-size:15px;">
+              Shipping Details
+            </th>
+          </tr>  
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Company Name</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.companyName || 'N/A'}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Contact Name</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.contactName || 'N/A'}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Contact Email</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.contact_email || 'N/A'}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Shipping Address</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.shippingAddress || 'N/A'}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">State</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.state || 'N/A'}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">City</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.city || 'N/A'}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">ZIP code</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.zip || 'N/A'}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Delivery Date</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.deliveryDate || 'N/A'}</td></tr>
+        </table>
+
+        <!-- OPPORTUNITY DETAILS -->
+        <table width="100%" cellpadding="8" cellspacing="0" style="border:1px solid #ccc;border-collapse:collapse;margin:15px 0;">
+          <tr>
+            <th colspan="2" style="background:#E3E3E3;border:1px solid #213747;text-align:left;padding:8px;font-size:15px;">
+              Opportunity Details
+            </th>
+          </tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Device Opportunity Size (Units)</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.units ?? "N/A"}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Budget Per Device ($)</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.budget ? `$${data.budget.toLocaleString()}` : "N/A"}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Revenue Opportunity Size ($ Device Rev)</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.revenue ? `$${data.revenue.toLocaleString()}` : "N/A"}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Ingram Account #</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.ingramAccount ?? "N/A"}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Quote #</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.quote ?? "N/A"}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Segment</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.segment ?? "N/A"}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Existing Manufacturer</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.manufacturer ?? "N/A"}</td></tr>
+        </table>
+
+        ${data.notes ? `
+        <table width="100%" cellpadding="8" cellspacing="0" style="border:1px solid #ccc;border-collapse:collapse;margin:15px 0;">
+          <tr>
+            <th style="background:#E3E3E3;border:1px solid #213747;text-align:left;padding:8px;font-size:15px;">
+              Order Notes
+            </th>
+          </tr>
+          <tr>
+            <td style="border:1px solid #ccc;padding:8px;color:#4b5563;">${data.notes}</td>
+          </tr>
+        </table>
+        ` : ''}
       `
     ),
   };
 
+  
+/* -------- ORDER_APPROVED_ADMIN (UPDATED) -------- */
+case "ORDER_APPROVED_ADMIN":
+  return {
+    subject: `Order Approved (#${data.order_number}) | Ingrammicro Surface`,
+    html: orderLayout(
+      `Order Approved (#${data.order_number})  | Ingrammicro Surface`,
+      `
+        <!-- TITLE -->
+        <h3 style="margin:0;font-size:18px;font-weight:bold;color:#000;">
+          Approved Order (#${data.order_number})<br>
+          <span style="font-size:14px;font-weight:normal;color:#848484;">
+            Placed on ${data.created_at ? new Date(data.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : "N/A"}
+          </span>
+        </h3>
+
+        <div style="text-align:center; margin:24px 0;">
+          <img src="https://hcxexaouqvbvaycgpmfs.supabase.co/storage/v1/object/public/order-files/order%20email/order%20approved.png" width="550" style="width:100%; max-width:550px; height:auto;">
+        </div>
+        
+        <!-- ADMIN INTRO -->
+        <div style="padding:20px 0;color:#000;text-align:center;">
+          <p style="font-size:16px;line-height:1.5;margin:10px 0;font-weight:bold;color:#000;">
+            Order Approved Successfully
+          </p>
+          <p style="font-size:15px;line-height:1.5;margin:10px 0;">
+            The following order has been approved on <a style="color:#0d62c2;text-decoration:none" href="#" target="_blank">ingrammicro-surface.com/</a>.<br>
+            Please review the order details below.
+          </p>
+          
+          <a href="${data.ordersPageUrl || 'https://localhost:3000/orders'}" 
+             style="display:inline-block;
+                    margin:20px 0;
+                    padding:12px 30px;
+                    background-color:#0d62c2;
+                    color:#ffffff;
+                    text-decoration:none;
+                    border-radius:5px;
+                    font-weight:bold;
+                    font-size:16px;">
+            View Order
+          </a>
+        </div>
+
+        <!-- PRODUCTS TABLE -->
+        <table width="100%" cellpadding="8" cellspacing="0" style="border:1px solid #ccc;border-collapse:collapse;margin:15px 0;">
+          <tr style="background:#E3E3E3;">
+            <th width="75%" style="border:1px solid #213747;text-align:left;padding:8px;">Product</th>
+            <th width="25%" style="border:1px solid #213747;text-align:left;padding:8px;">Quantity</th>
+          </tr>
+          ${data.orderItems?.map((item: any) => `
+            <tr>
+              <td style="border:1px solid #ccc;padding:8px;">
+                ${item.productName || "N/A"}<br>
+                <span style="font-size:12px;color:#666;">${item.sku || ""}</span>
+              </td>
+              <td style="border:1px solid #ccc;padding:8px;">${item.quantity}</td>
+            </tr>
+          `).join("") || '<tr><td colspan="2" style="border:1px solid #ccc;padding:8px;">No items</td></tr>'}
+        </table>
+
+        <!-- SHIPPING DETAILS -->
+        <table width="100%" cellpadding="8" cellspacing="0" style="border:1px solid #ccc;border-collapse:collapse;margin:15px 0;">
+          <tr>
+            <th colspan="2" style="background:#E3E3E3;border:1px solid #213747;text-align:left;padding:8px;font-size:15px;">
+              Shipping Details
+            </th>
+          </tr>  
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Company Name</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.companyName || 'N/A'}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Contact Name</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.contactName || 'N/A'}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Contact Email</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.contact_email || 'N/A'}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Shipping Address</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.shippingAddress || 'N/A'}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">State</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.state || 'N/A'}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">City</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.city || 'N/A'}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">ZIP code</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.zip || 'N/A'}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Delivery Date</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.deliveryDate || 'N/A'}</td></tr>
+        </table>
+
+        <!-- OPPORTUNITY DETAILS -->
+        <table width="100%" cellpadding="8" cellspacing="0" style="border:1px solid #ccc;border-collapse:collapse;margin:15px 0;">
+          <tr>
+            <th colspan="2" style="background:#E3E3E3;border:1px solid #213747;text-align:left;padding:8px;font-size:15px;">
+              Opportunity Details
+            </th>
+          </tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Device Opportunity Size (Units)</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.units ?? "N/A"}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Budget Per Device ($)</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.budget ? `$${data.budget.toLocaleString()}` : "N/A"}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Revenue Opportunity Size ($ Device Rev)</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.revenue ? `$${data.revenue.toLocaleString()}` : "N/A"}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Ingram Account #</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.ingramAccount ?? "N/A"}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Quote #</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.quote ?? "N/A"}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Segment</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.segment ?? "N/A"}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Existing Manufacturer</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.manufacturer ?? "N/A"}</td></tr>
+        </table>
+
+        ${data.notes ? `
+        <table width="100%" cellpadding="8" cellspacing="0" style="border:1px solid #ccc;border-collapse:collapse;margin:15px 0;">
+          <tr>
+            <th style="background:#E3E3E3;border:1px solid #213747;text-align:left;padding:8px;font-size:15px;">
+              Order Notes
+            </th>
+          </tr>
+          <tr>
+            <td style="border:1px solid #ccc;padding:8px;color:#4b5563;">${data.notes}</td>
+          </tr>
+        </table>
+        ` : ''}
+      `
+    ),
+  };
+
+  
+
+
+    /* -------- ORDER_PLACED_USER-------- */
 case "ORDER_PLACED_USER":
   return {
-    subject: "Order Placed Successfully",
-    html: baseLayout(
-      "Order Placed",
+    subject: `New Order (#${data.order_number}) | Ingram Micro Surface`,
+    html: orderLayout(
+      `New Ingrammicro Surface Order (#${data.order_number})`,
       `
-      <p>Hello <strong>${data.name}</strong>,</p>
-      <p>Your order <strong>#${data.orderId}</strong> has been placed successfully.</p>
-      <p>We’ll notify you once it’s approved.</p>
+        <!-- TITLE -->
+        <h3 style="margin:0;font-size:18px;font-weight:bold;color:#000;">
+          Order Placed Successfully (#${data.order_number})<br>
+          <span style="font-size:14px;font-weight:normal;color:#848484;">
+            Placed on ${data.createdAt ? new Date(data.createdAt).toLocaleDateString() : "N/A"}
+          </span>
+        </h3>
+
+        <div style="text-align:center; margin:24px 0;">
+          <img src="https://hcxexaouqvbvaycgpmfs.supabase.co/storage/v1/object/public/order-files/order%20email/order%20placed.png" width="550" style="width:100%; max-width:550px; height:auto;">
+        </div>
+        
+        <!-- INTRO -->
+        <div style="padding:15px 0;color:#000;">
+          <p style="font-size:15px;line-height:1.5;margin:10px 0;font-weight:100;">
+            Thank you for your order from ingrammicro-surface.com. Once your order is approved, you will receive a confirmation email after which it will be shipped to your customer.
+          </p>
+          <p>
+            If you have any questions please contact us at  <a style="color:#0d62c2;text-decoration:none" href="mailto:ahmer.ali@works360.com">ahmer.ali@worls360.com</a>
+          </p>
+        </div>
+
+        <!-- PRODUCTS TABLE -->
+        <table width="100%" cellpadding="8" cellspacing="0" style="border:1px solid #ccc;border-collapse:collapse;margin:15px 0;">
+          <tr style="background:#E3E3E3;">
+            <th width="75%" style="border:1px solid #213747;text-align:left;padding:8px;">Product</th>
+            <th width="25%" style="border:1px solid #213747;text-align:left;padding:8px;">Quantity</th>
+          </tr>
+          ${data.orderItems?.map((item: any) => {
+            const inv = Array.isArray(item.inventory) ? item.inventory[0] : item.inventory;
+            return `
+              <tr>
+                <td style="border:1px solid #ccc;padding:8px;">
+                  ${inv?.product_names || "N/A"}<br>
+                  <span style="font-size:12px;color:#666;">${inv?.skus || ""}</span>
+                </td>
+                <td style="border:1px solid #ccc;padding:8px;">${item.quantity}</td>
+              </tr>
+            `;
+          }).join("") || '<tr><td colspan="2" style="border:1px solid #ccc;padding:8px;">No items</td></tr>'}
+        </table>
+
+        <!-- SHIPPING DETAILS -->
+        <table width="100%" cellpadding="8" cellspacing="0" style="border:1px solid #ccc;border-collapse:collapse;margin:15px 0;">
+          <tr>
+            <th colspan="2" style="background:#E3E3E3;border:1px solid #213747;text-align:left;padding:8px;font-size:15px;">
+              Shipping Details
+            </th>
+          </tr>  
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Company Name</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.companyName || 'N/A'}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Contact Name</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.contactName || 'N/A'}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Contact Email</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.contact_email || 'N/A'}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Shipping Address</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.shippingAddress || 'N/A'}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">State</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.state || 'N/A'}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">City</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.city || 'N/A'}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">ZIP code</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.zip || 'N/A'}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Delivery Date</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.deliveryDate || 'N/A'}</td></tr>
+        </table>
+
+        <!-- OPPORTUNITY DETAILS -->
+        <table width="100%" cellpadding="8" cellspacing="0" style="border:1px solid #ccc;border-collapse:collapse;margin:15px 0;">
+          <tr>
+            <th colspan="2" style="background:#E3E3E3;border:1px solid #213747;text-align:left;padding:8px;font-size:15px;">
+              Opportunity Details
+            </th>
+          </tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Device Opportunity Size(units)</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.units ?? "N/A"}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Budget Per Device ($)</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.budget ?? "N/A"}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Revenue Opportunity Size($ Device Rev)</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.revenue ?? "N/A"}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">ingram_account #</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.ingramAccount ?? "N/A"}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Quote #</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.quote ?? "N/A"}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Segment</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.segment ?? "N/A"}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Existing Manufacturer</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.manufacturer ?? "N/A"}</td></tr>
+        </table>
+
+        ${data.notes ? `
+        <table width="100%" cellpadding="8" cellspacing="0" style="border:1px solid #ccc;border-collapse:collapse;margin:15px 0;">
+          <tr>
+            <th style="background:#E3E3E3;border:1px solid #213747;text-align:left;padding:8px;font-size:15px;">
+              Order Notes
+            </th>
+          </tr>
+          <tr>
+            <td style="border:1px solid #ccc;padding:8px;color:#4b5563;">${data.notes}</td>
+          </tr>
+        </table>
+        ` : ''}
       `
     ),
   };
 
+
+    /* -------- ORDER_PLACED_Admin-------- */
+case "ORDER_PLACED_ADMIN":
+  return {
+    subject: `New Order (#${data.order_number}) | Ingram Micro Surface`,
+    html: orderLayout(
+      `New Order (#${data.order_number}) | Ingram Micro Surface`,
+      `
+        <!-- TITLE -->
+        <h3 style="margin:0;font-size:18px;font-weight:bold;color:#000;">
+          New Order Received (#${data.order_number})<br>
+          <span style="font-size:14px;font-weight:normal;color:#848484;">
+            Placed on ${data.createdAt ? new Date(data.createdAt).toLocaleDateString() : "N/A"}
+          </span>
+        </h3>
+
+        <div style="text-align:center; margin:24px 0;">
+          <img src="https://hcxexaouqvbvaycgpmfs.supabase.co/storage/v1/object/public/order-files/order%20email/order%20placed.png" width="550" style="width:100%; max-width:550px; height:auto;">
+        </div>
+        
+        <!-- ACTION REQUIRED -->
+        <div style="padding:20px 0;color:#000;text-align:center;">
+          <p style="font-size:16px;line-height:1.5;margin:10px 0;font-weight:bold;color:#000;">
+            Action Required
+          </p>
+          <p style="font-size:15px;line-height:1.5;margin:10px 0;">
+            A new order has been placed and requires review.<br>
+            Click below to review and process the order.
+          </p>
+          <a href="${data.ordersPageUrl || 'https://localhost:3000/orders'}" 
+             style="display:inline-block;
+                    margin:20px 0;
+                    padding:12px 30px;
+                    background-color:#0d62c2;
+                    color:#ffffff;
+                    text-decoration:none;
+                    border-radius:5px;
+                    font-weight:bold;
+                    font-size:16px;">
+            Review Order
+          </a>
+        </div>
+
+        <!-- PRODUCTS TABLE -->
+        <table width="100%" cellpadding="8" cellspacing="0" style="border:1px solid #ccc;border-collapse:collapse;margin:15px 0;">
+          <tr style="background:#E3E3E3;">
+            <th width="75%" style="border:1px solid #213747;text-align:left;padding:8px;">Product</th>
+            <th width="25%" style="border:1px solid #213747;text-align:left;padding:8px;">Quantity</th>
+          </tr>
+          ${data.orderItems?.map((item: any) => {
+            const inv = item.inventory ? (Array.isArray(item.inventory) ? item.inventory[0] : item.inventory) : null;
+            return `
+              <tr>
+                <td style="border:1px solid #ccc;padding:8px;">
+                  ${inv?.product_names || "N/A"}<br>
+                  <span style="font-size:12px;color:#666;">${inv?.skus || ""}</span>
+                </td>
+                <td style="border:1px solid #ccc;padding:8px;">${item.quantity}</td>
+              </tr>
+            `;
+          }).join("") || '<tr><td colspan="2" style="border:1px solid #ccc;padding:8px;">No items</td></tr>'}
+        </table>
+
+        <!-- CUSTOMER INFO -->
+        <table width="100%" cellpadding="8" cellspacing="0" style="border:1px solid #ccc;border-collapse:collapse;margin:15px 0;">
+          <tr>
+            <th colspan="2" style="background:#E3E3E3;border:1px solid #213747;text-align:left;padding:8px;font-size:15px;">
+              Customer Information
+            </th>
+          </tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Company</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.companyName || 'N/A'}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Contact</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.contactName || 'N/A'}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Email</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.contactEmail || 'N/A'}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Seller</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.sellerName || 'N/A'}</td></tr>
+        </table>
+
+        <!-- SHIPPING DETAILS -->
+        <table width="100%" cellpadding="8" cellspacing="0" style="border:1px solid #ccc;border-collapse:collapse;margin:15px 0;">
+          <tr>
+            <th colspan="2" style="background:#E3E3E3;border:1px solid #213747;text-align:left;padding:8px;font-size:15px;">
+              Shipping Details
+            </th>
+          </tr>  
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Company Name</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.companyName || 'N/A'}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Contact Name</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.contactName || 'N/A'}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Contact Email</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.contact_email || 'N/A'}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Shipping Address</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.shippingAddress || 'N/A'}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">State</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.state || 'N/A'}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">City</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.city || 'N/A'}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">ZIP code</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.zip || 'N/A'}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Delivery Date</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.deliveryDate || 'N/A'}</td></tr>
+        </table>
+
+        <!-- OPPORTUNITY DETAILS -->
+        <table width="100%" cellpadding="8" cellspacing="0" style="border:1px solid #ccc;border-collapse:collapse;margin:15px 0;">
+          <tr>
+            <th colspan="2" style="background:#E3E3E3;border:1px solid #213747;text-align:left;padding:8px;font-size:15px;">
+              Opportunity Details
+            </th>
+          </tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Device Opportunity Size(units)</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.units ?? "N/A"}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Budget Per Device ($)</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.budget ?? "N/A"}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Revenue Opportunity Size($ Device Rev)</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.revenue ?? "N/A"}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">ingram_account #</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.ingramAccount ?? "N/A"}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Quote #</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.quote ?? "N/A"}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Segment</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.segment ?? "N/A"}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Existing Manufacturer</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.manufacturer ?? "N/A"}</td></tr>
+        </table>
+
+        ${data.notes ? `
+        <table width="100%" cellpadding="8" cellspacing="0" style="border:1px solid #ccc;border-collapse:collapse;margin:15px 0;">
+          <tr>
+            <th style="background:#E3E3E3;border:1px solid #213747;text-align:left;padding:8px;font-size:15px;">
+              Order Notes
+            </th>
+          </tr>
+          <tr>
+            <td style="border:1px solid #ccc;padding:8px;color:#4b5563;">${data.notes}</td>
+          </tr>
+        </table>
+        ` : ''}
+      `
+    ),
+  };
+
+/* -------- ORDER_SHIPPED_USER (UPDATED) -------- */
+case "ORDER_SHIPPED_USER":
+  return {
+    subject: `Order Shipped (#${data.order_number}) | Ingram Micro Surface`,
+    html: orderLayout(
+      `Order Shipped (#${data.order_number}) | Ingram Micro Surface`,
+      `
+        <!-- TITLE -->
+        <h3 style="margin:0;font-size:18px;font-weight:bold;color:#000;">
+          Shipped Order (#${data.order_number})<br>
+          <span style="font-size:14px;font-weight:normal;color:#848484;">
+            Placed On ${data.created_at ? new Date(data.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : "N/A"}
+          </span>
+        </h3>
+
+        <div style="text-align:center; margin:24px 0;">
+          <img src="https://hcxexaouqvbvaycgpmfs.supabase.co/storage/v1/object/public/order-files/order%20email/order%20shipped.png" width="550" style="width:100%; max-width:550px; height:auto;">
+        </div>
+
+        <!-- PERSONALIZED INTRO -->
+        <div style="padding:15px 0;color:#000;">
+          <p style="font-size:15px;line-height:1.5;margin:10px 0;font-weight:bold;">
+            Hello, ${data.contactName || 'Customer'}
+          </p>
+          <p style="font-size:15px;line-height:1.5;margin:10px 0;font-weight:100;">
+            Your order on Ingrammicro Surface has been shipped. You can find below Tracking information and Return Label for your order.
+          </p>
+        </div>
+
+        <!-- TRACKING INFORMATION BOX -->
+        <table width="100%" cellpadding="12" cellspacing="0" style="border:1px solid #ccc;border-collapse:collapse;margin:15px 0;background:#f9fafb;">
+          <tr>
+            <th colspan="2" style="background:#E3E3E3;border:1px solid #213747;text-align:left;padding:8px;font-size:15px;">
+              Tracking Information
+            </th>
+          </tr>
+          <tr>
+            <td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Order Tracking #:</td>
+            <td width="60%" style="border:1px solid #ccc;padding:8px;"><a href="#">${data.trackingNumber || 'N/A'}</a></td>
+          </tr>
+          <tr>
+            <td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Return Tracking #:</td>
+            <td width="60%" style="border:1px solid #ccc;padding:8px;"><a href="#">${data.returnTrackingNumber || 'N/A'}</a></td>
+          </tr>
+          <tr>
+            <td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Case Type:</td>
+            <td width="60%" style="border:1px solid #ccc;padding:8px;">${data.caseType || 'N/A'}</td>
+          </tr>
+        </table>
+
+        <!-- SHIPPED STATUS BOX -->
+        <div style="background:#e8f5e9;border-left:4px solid #4caf50;padding:15px;margin:15px 0;">
+          <p style="margin:0;font-size:16px;font-weight:bold;color:#2e7d32;">
+            ✓ Shipped
+          </p>
+          <p style="margin:5px 0 0 0;font-size:14px;color:#555;">
+            Shipped on: ${data.approvedAt ? new Date(data.approvedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : "N/A"}
+          </p>
+          ${data.trackingNumber ? `
+          <p style="margin:5px 0 0 0;font-size:14px;color:#555;">
+            FedEx ${data.trackingNumber}
+          </p>
+          ` : ''}
+        </div>
+
+        <!-- ACTION BUTTONS -->
+        <div style="text-align:center;margin:20px 0;">
+          ${data.trackingLink ? `
+          <a href="${data.trackingLink}" 
+             target="_blank"
+             style="display:inline-block;
+                    margin:10px;
+                    padding:12px 30px;
+                    custom-blue;
+                    color:#ffffff;
+                    text-decoration:none;
+                    border-radius:5px;
+                    font-weight:bold;
+                    font-size:14px;">
+            Track Your Order
+          </a>
+          ` : ''}
+          
+          ${data.returnLabel ? `
+          <a href="${data.returnLabel}" 
+             target="_blank"
+             download
+             style="display:inline-block;
+                    margin:10px;
+                    padding:12px 30px;
+                    custom-blue
+                    color:#ffffff;
+                    text-decoration:none;
+                    border-radius:5px;
+                    font-weight:bold;
+                    font-size:14px;">
+            Download Return Label
+          </a>
+          ` : ''}
+        </div>
+
+        <!-- PRODUCTS TABLE -->
+        <table width="100%" cellpadding="8" cellspacing="0" style="border:1px solid #ccc;border-collapse:collapse;margin:15px 0;">
+          <tr style="background:#E3E3E3;">
+            <th width="75%" style="border:1px solid #213747;text-align:left;padding:8px;">Product</th>
+            <th width="25%" style="border:1px solid #213747;text-align:left;padding:8px;">Quantity</th>
+          </tr>
+          ${data.orderItems?.map((item: any) => `
+            <tr>
+              <td style="border:1px solid #ccc;padding:8px;">
+                ${item.productName || "N/A"}<br>
+                <span style="font-size:12px;color:#666;">(#${item.sku || ""})</span>
+              </td>
+              <td style="border:1px solid #ccc;padding:8px;">${item.quantity}</td>
+            </tr>
+          `).join("") || '<tr><td colspan="2" style="border:1px solid #ccc;padding:8px;">No items</td></tr>'}
+        </table>
+
+        <!-- TEAM DETAILS -->
+        <table width="100%" cellpadding="8" cellspacing="0" style="border:1px solid #ccc;border-collapse:collapse;margin:15px 0;">
+          <tr>
+            <th colspan="2" style="background:#E3E3E3;border:1px solid #213747;text-align:left;padding:8px;font-size:15px;">
+              Team Details
+            </th>
+          </tr>
+          <tr>
+            <td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Seller Contact Name</td>
+            <td width="60%" style="border:1px solid #ccc;padding:8px;">${data.sellerName || 'N/A'}</td>
+          </tr>
+          <tr>
+            <td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Seller Contact Email</td>
+            <td width="60%" style="border:1px solid #ccc;padding:8px;">${data.sellerEmail || 'N/A'}</td>
+          </tr>
+        </table>
+
+        <!-- SHIPPING DETAILS -->
+        <table width="100%" cellpadding="8" cellspacing="0" style="border:1px solid #ccc;border-collapse:collapse;margin:15px 0;">
+          <tr>
+            <th colspan="2" style="background:#E3E3E3;border:1px solid #213747;text-align:left;padding:8px;font-size:15px;">
+              Shipping Details
+            </th>
+          </tr>  
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Customer Company Name</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.companyName || 'N/A'}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Customer Contact Name</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.contactName || 'N/A'}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Customer Contact Email Address</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.contact_email || 'N/A'}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Customer Shipping Address</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.shippingAddress || 'N/A'}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">City</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.city || 'N/A'}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">State</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.state || 'N/A'}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Zip</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.zip || 'N/A'}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Desired Delivery Date</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.deliveryDate || 'N/A'}</td></tr>
+        </table>
+
+        <!-- OPPORTUNITY DETAILS -->
+        <table width="100%" cellpadding="8" cellspacing="0" style="border:1px solid #ccc;border-collapse:collapse;margin:15px 0;">
+          <tr>
+            <th colspan="2" style="background:#E3E3E3;border:1px solid #213747;text-align:left;padding:8px;font-size:15px;">
+              Opportunity Details
+            </th>
+          </tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Device Opportunity Size (Units)</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.units ?? "N/A"}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Budget Per Device ($)</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.budget ? `$${data.budget.toLocaleString()}` : "N/A"}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Revenue Opportunity Size ($ Device Rev)</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.revenue ? `$${data.revenue.toLocaleString()}` : "N/A"}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Ingram Account #</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.ingramAccount ?? "N/A"}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Quote #</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.quote ?? "N/A"}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Segment</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.segment ?? "N/A"}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Is this a competitive opportunity?</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.isReseller ? "Yes" : "No"}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Current Manufacturer</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.manufacturer ?? "N/A"}</td></tr>
+        </table>
+
+        ${data.notes ? `
+        <table width="100%" cellpadding="8" cellspacing="0" style="border:1px solid #ccc;border-collapse:collapse;margin:15px 0;">
+          <tr>
+            <th style="background:#E3E3E3;border:1px solid #213747;text-align:left;padding:8px;font-size:15px;">
+              Note
+            </th>
+          </tr>
+          <tr>
+            <td style="border:1px solid #ccc;padding:8px;color:#4b5563;">${data.notes}</td>
+          </tr>
+        </table>
+        ` : ''}
+      `
+    ),
+  };
+/* -------- ORDER_SHIPPED_ADMIN (UPDATED) -------- */
+case "ORDER_SHIPPED_ADMIN":
+  return {
+    subject: `Order Shipped (#${data.order_number}) | Ingram Micro Surface`,
+    html: orderLayout(
+      `Order Shipped (#${data.order_number}) | Ingram Micro Surface`,
+      `
+        <!-- TITLE -->
+        <h3 style="margin:0;font-size:18px;font-weight:bold;color:#000;">
+          Shipped Order (#${data.order_number})<br>
+          <span style="font-size:14px;font-weight:normal;color:#848484;">
+            Placed On ${data.created_at ? new Date(data.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : "N/A"}
+          </span>
+        </h3>
+
+        <div style="text-align:center; margin:24px 0;">
+          <img src="https://hcxexaouqvbvaycgpmfs.supabase.co/storage/v1/object/public/order-files/order%20email/order%20shipped.png" width="550" style="width:100%; max-width:550px; height:auto;">
+        </div>
+
+        <!-- ADMIN INTRO -->
+        <div style="padding:20px 0;color:#000;text-align:center;">
+          <p style="font-size:16px;line-height:1.5;margin:10px 0;font-weight:bold;color:#000;">
+            Order Shipped Successfully
+          </p>
+          <p style="font-size:15px;line-height:1.5;margin:10px 0;">
+            The order has been shipped to ${data.contactName || 'the customer'}.<br>
+            Click below to view order details.
+          </p>
+          <a href="${data.ordersPageUrl || 'https://localhost:3000/orders'}" 
+             style="display:inline-block;
+                    margin:20px 0;
+                    padding:12px 30px;
+                    background-color:#0d62c2;
+                    color:#ffffff;
+                    text-decoration:none;
+                    border-radius:5px;
+                    font-weight:bold;
+                    font-size:16px;">
+            View Order
+          </a>
+        </div>
+
+        <!-- TRACKING INFORMATION BOX -->
+        <table width="100%" cellpadding="12" cellspacing="0" style="border:1px solid #ccc;border-collapse:collapse;margin:15px 0;background:#f9fafb;">
+          <tr>
+            <th colspan="2" style="background:#E3E3E3;border:1px solid #213747;text-align:left;padding:8px;font-size:15px;">
+              Tracking Information
+            </th>
+          </tr>
+          <tr>
+            <td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Order Tracking #:</td>
+            <td width="60%" style="border:1px solid #ccc;padding:8px;"><a href="#">${data.trackingNumber || 'N/A'}</a></td>
+          </tr>
+          <tr>
+            <td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Return Tracking #:</td>
+            <td width="60%" style="border:1px solid #ccc;padding:8px;"> <a href="#">${data.returnTrackingNumber || 'N/A'}</a></td>
+          </tr>
+          <tr>
+            <td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Case Type:</td>
+            <td width="60%" style="border:1px solid #ccc;padding:8px;">${data.caseType || 'N/A'}</td>
+          </tr>
+          <tr>
+            <td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Shipped On:</td>
+            <td width="60%" style="border:1px solid #ccc;padding:8px;">${data.approvedAt ? new Date(data.approvedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : "N/A"}</td>
+          </tr>
+          ${data.trackingLink ? `
+          <tr>
+            <td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Tracking Link:</td>
+            <td width="60%" style="border:1px solid #ccc;padding:8px;">
+              <a href="${data.trackingLink}" target="_blank" style="color:#0d62c2;">Track Shipment</a>
+            </td>
+          </tr>
+          ` : ''}
+          ${data.returnLabel ? `
+          <tr>
+            <td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Return Label:</td>
+            <td width="60%" style="border:1px solid #ccc;padding:8px;">
+              <a href="${data.returnLabel}" target="_blank" style="color:#0d62c2;">Download Return Label</a>
+            </td>
+          </tr>
+          ` : ''}
+        </table>
+
+        <!-- PRODUCTS TABLE -->
+        <table width="100%" cellpadding="8" cellspacing="0" style="border:1px solid #ccc;border-collapse:collapse;margin:15px 0;">
+          <tr style="background:#E3E3E3;">
+            <th width="75%" style="border:1px solid #213747;text-align:left;padding:8px;">Product</th>
+            <th width="25%" style="border:1px solid #213747;text-align:left;padding:8px;">Quantity</th>
+          </tr>
+          ${data.orderItems?.map((item: any) => `
+            <tr>
+              <td style="border:1px solid #ccc;padding:8px;">
+                ${item.productName || "N/A"}<br>
+                <span style="font-size:12px;color:#666;">(#${item.sku || ""})</span>
+              </td>
+              <td style="border:1px solid #ccc;padding:8px;">${item.quantity}</td>
+            </tr>
+          `).join("") || '<tr><td colspan="2" style="border:1px solid #ccc;padding:8px;">No items</td></tr>'}
+        </table>
+
+        <!-- TEAM DETAILS -->
+        <table width="100%" cellpadding="8" cellspacing="0" style="border:1px solid #ccc;border-collapse:collapse;margin:15px 0;">
+          <tr>
+            <th colspan="2" style="background:#E3E3E3;border:1px solid #213747;text-align:left;padding:8px;font-size:15px;">
+              Team Details
+            </th>
+          </tr>
+          <tr>
+            <td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Seller Contact Name</td>
+            <td width="60%" style="border:1px solid #ccc;padding:8px;">${data.sellerName || 'N/A'}</td>
+          </tr>
+          <tr>
+            <td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Seller Contact Email</td>
+            <td width="60%" style="border:1px solid #ccc;padding:8px;">${data.sellerEmail || 'N/A'}</td>
+          </tr>
+        </table>
+
+        <!-- SHIPPING DETAILS -->
+        <table width="100%" cellpadding="8" cellspacing="0" style="border:1px solid #ccc;border-collapse:collapse;margin:15px 0;">
+          <tr>
+            <th colspan="2" style="background:#E3E3E3;border:1px solid #213747;text-align:left;padding:8px;font-size:15px;">
+              Shipping Details
+            </th>
+          </tr>  
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Customer Company Name</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.companyName || 'N/A'}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Customer Contact Name</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.contactName || 'N/A'}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Customer Contact Email Address</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.contact_email || 'N/A'}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Customer Shipping Address</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.shippingAddress || 'N/A'}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">City</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.city || 'N/A'}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">State</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.state || 'N/A'}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Zip</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.zip || 'N/A'}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Desired Delivery Date</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.deliveryDate || 'N/A'}</td></tr>
+        </table>
+
+        <!-- OPPORTUNITY DETAILS -->
+        <table width="100%" cellpadding="8" cellspacing="0" style="border:1px solid #ccc;border-collapse:collapse;margin:15px 0;">
+          <tr>
+            <th colspan="2" style="background:#E3E3E3;border:1px solid #213747;text-align:left;padding:8px;font-size:15px;">
+              Opportunity Details
+            </th>
+          </tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Device Opportunity Size (Units)</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.units ?? "N/A"}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Budget Per Device ($)</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.budget ? `$${data.budget.toLocaleString()}` : "N/A"}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Revenue Opportunity Size ($ Device Rev)</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.revenue ? `$${data.revenue.toLocaleString()}` : "N/A"}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Ingram Account #</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.ingramAccount ?? "N/A"}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Quote #</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.quote ?? "N/A"}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Segment</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.segment ?? "N/A"}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Is this a competitive opportunity?</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.isReseller ? "Yes" : "No"}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Current Manufacturer</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.manufacturer ?? "N/A"}</td></tr>
+        </table>
+
+        ${data.notes ? `
+        <table width="100%" cellpadding="8" cellspacing="0" style="border:1px solid #ccc;border-collapse:collapse;margin:15px 0;">
+          <tr>
+            <th style="background:#E3E3E3;border:1px solid #213747;text-align:left;padding:8px;font-size:15px;">
+              Note
+            </th>
+          </tr>
+          <tr>
+            <td style="border:1px solid #ccc;padding:8px;color:#4b5563;">${data.notes}</td>
+          </tr>
+        </table>
+        ` : ''}
+      `
+    ),
+  };
+    /* -------- ORDER_RETURN-------- */
+case "ORDER_RETURN_USER":
+  return {
+    subject: `Order Returned (#${data.order_number})) | Ingram Micro Surface`,
+    html: orderLayout(
+      `Order Returned (#${data.order_number}) | Ingram Micro Surface`,
+      `
+        <!-- TITLE -->
+        <h3 style="margin:0;font-size:18px;font-weight:bold;color:#000;">
+          Order Returned (#${data.order_number}))<br>
+          <span style="font-size:14px;font-weight:normal;color:#848484;">
+            Returned on ${data.returnedAt ? new Date(data.returnedAt).toLocaleDateString() : "N/A"}
+          </span>
+        </h3>
+
+        <div style="text-align:center; margin:24px 0;">
+          <img src="https://hcxexaouqvbvaycgpmfs.supabase.co/storage/v1/object/public/order-files/order%20email/order%20return.png" width="550" style="width:100%; max-width:550px; height:auto;">
+        </div>
+        
+        <!-- INTRO -->
+        <div style="padding:15px 0;color:#000;">
+          <p style="font-size:15px;line-height:1.5;margin:10px 0;font-weight:100;">
+            Your order has been successfully returned and received by our warehouse.
+          </p>
+          <p>
+            If you have any questions please contact us at <a style="color:#0d62c2;text-decoration:none" href="mailto:ahmer.ali@worls360.com">ahmer.ali@worls360.com</a>
+          </p>
+        </div>
+
+       
+        <!-- PRODUCTS TABLE -->
+        <table width="100%" cellpadding="8" cellspacing="0" style="border:1px solid #ccc;border-collapse:collapse;margin:15px 0;">
+          <tr style="background:#E3E3E3;">
+            <th width="75%" style="border:1px solid #213747;text-align:left;padding:8px;">Product</th>
+            <th width="25%" style="border:1px solid #213747;text-align:left;padding:8px;">Quantity</th>
+          </tr>
+          ${data.orderItems?.map((item: any) => `
+            <tr>
+              <td style="border:1px solid #ccc;padding:8px;">
+                ${item.productName || "N/A"}<br>
+                <span style="font-size:12px;color:#666;">(#${item.sku || ""})</span>
+              </td>
+              <td style="border:1px solid #ccc;padding:8px;">${item.quantity}</td>
+            </tr>
+          `).join("") || '<tr><td colspan="2" style="border:1px solid #ccc;padding:8px;">No items</td></tr>'}
+        </table>
+
+        <!-- SHIPPING DETAILS -->
+        <table width="100%" cellpadding="8" cellspacing="0" style="border:1px solid #ccc;border-collapse:collapse;margin:15px 0;">
+          <tr>
+            <th colspan="2" style="background:#E3E3E3;border:1px solid #213747;text-align:left;padding:8px;font-size:15px;">
+              Shipping Details
+            </th>
+          </tr>  
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Company Name</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.companyName || 'N/A'}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Contact Name</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.contactName || 'N/A'}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Contact Email</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.contact_email || 'N/A'}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Shipping Address</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.shippingAddress || 'N/A'}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">State</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.state || 'N/A'}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">City</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.city || 'N/A'}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">ZIP code</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.zip || 'N/A'}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Delivery Date</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.deliveryDate || 'N/A'}</td></tr>
+        </table>
+
+        <!-- OPPORTUNITY DETAILS -->
+        <table width="100%" cellpadding="8" cellspacing="0" style="border:1px solid #ccc;border-collapse:collapse;margin:15px 0;">
+          <tr>
+            <th colspan="2" style="background:#E3E3E3;border:1px solid #213747;text-align:left;padding:8px;font-size:15px;">
+              Opportunity Details
+            </th>
+          </tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Device Opportunity Size(units)</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.units ?? "N/A"}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Budget Per Device ($)</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.budget ?? "N/A"}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Revenue Opportunity Size($ Device Rev)</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.revenue ?? "N/A"}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">ingram_account #</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.ingramAccount ?? "N/A"}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Quote #</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.quote ?? "N/A"}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Segment</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.segment ?? "N/A"}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Existing Manufacturer</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.manufacturer ?? "N/A"}</td></tr>
+        </table>
+
+        ${data.notes ? `
+        <table width="100%" cellpadding="8" cellspacing="0" style="border:1px solid #ccc;border-collapse:collapse;margin:15px 0;">
+          <tr>
+            <th style="background:#E3E3E3;border:1px solid #213747;text-align:left;padding:8px;font-size:15px;">
+              Order Notes
+            </th>
+          </tr>
+          <tr>
+            <td style="border:1px solid #ccc;padding:8px;color:#4b5563;">${data.notes}</td>
+          </tr>
+        </table>
+        ` : ''}
+      `
+    ),
+  };
+
+  
+    /* -------- ORDER_RETURN_ADMIN-------- */
+case "ORDER_RETURN_ADMIN":
+  return {
+    subject: `Order Returned (#${data.orderId}) | Ingram Micro Surface`,
+    html: orderLayout(
+      `Order Returned (#${data.orderId}) | Ingram Micro Surface`,
+      `
+        <!-- TITLE -->
+        <h3 style="margin:0;font-size:18px;font-weight:bold;color:#000;">
+          Order Returned (#${data.orderId})<br>
+          <span style="font-size:14px;font-weight:normal;color:#848484;">
+            Returned on ${data.returnedAt ? new Date(data.returnedAt).toLocaleDateString() : "N/A"}
+          </span>
+        </h3>
+
+        <div style="text-align:center; margin:24px 0;">
+          <img src="https://hcxexaouqvbvaycgpmfs.supabase.co/storage/v1/object/public/order-files/order%20email/order%20return.png" width="550" style="width:100%; max-width:550px; height:auto;">
+        </div>
+
+        <!-- ADMIN INTRO -->
+        <div style="padding:20px 0;color:#000;text-align:center;">
+          <p style="font-size:16px;line-height:1.5;margin:10px 0;font-weight:bold;color:#000;">
+            Order Return Notification
+          </p>
+          <p style="font-size:15px;line-height:1.5;margin:10px 0;">
+            An order has been returned and received by the warehouse.<br>
+            Click below to review return details.
+          </p>
+          <a href="${data.ordersPageUrl || 'https://localhost:3000/orders'}" 
+             style="display:inline-block;
+                    margin:20px 0;
+                    padding:12px 30px;
+                    background-color:#0d62c2;
+                    color:#ffffff;
+                    text-decoration:none;
+                    border-radius:5px;
+                    font-weight:bold;
+                    font-size:16px;">
+            View Order
+          </a>
+        </div>
+
+        <!-- PRODUCTS TABLE -->
+        <table width="100%" cellpadding="8" cellspacing="0" style="border:1px solid #ccc;border-collapse:collapse;margin:15px 0;">
+          <tr style="background:#E3E3E3;">
+            <th width="75%" style="border:1px solid #213747;text-align:left;padding:8px;">Product</th>
+            <th width="25%" style="border:1px solid #213747;text-align:left;padding:8px;">Quantity</th>
+          </tr>
+          ${data.orderItems?.map((item: any) => `
+            <tr>
+              <td style="border:1px solid #ccc;padding:8px;">
+                ${item.productName || "N/A"}<br>
+                <span style="font-size:12px;color:#666;">(#${item.sku || ""})</span>
+              </td>
+              <td style="border:1px solid #ccc;padding:8px;">${item.quantity}</td>
+            </tr>
+          `).join("") || '<tr><td colspan="2" style="border:1px solid #ccc;padding:8px;">No items</td></tr>'}
+        </table>
+
+        <!-- CUSTOMER INFO -->
+        <table width="100%" cellpadding="8" cellspacing="0" style="border:1px solid #ccc;border-collapse:collapse;margin:15px 0;">
+          <tr>
+            <th colspan="2" style="background:#E3E3E3;border:1px solid #213747;text-align:left;padding:8px;font-size:15px;">
+              Customer Information
+            </th>
+          </tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Company</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.companyName || 'N/A'}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Contact</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.contactName || 'N/A'}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Email</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.contactEmail || 'N/A'}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Seller</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.sellerName || 'N/A'}</td></tr>
+        </table>
+
+        <!-- SHIPPING DETAILS -->
+        <table width="100%" cellpadding="8" cellspacing="0" style="border:1px solid #ccc;border-collapse:collapse;margin:15px 0;">
+          <tr>
+            <th colspan="2" style="background:#E3E3E3;border:1px solid #213747;text-align:left;padding:8px;font-size:15px;">
+              Shipping Details
+            </th>
+          </tr>  
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Company Name</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.companyName || 'N/A'}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Contact Name</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.contactName || 'N/A'}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Contact Email</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.contact_email || 'N/A'}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Shipping Address</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.shippingAddress || 'N/A'}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">State</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.state || 'N/A'}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">City</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.city || 'N/A'}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">ZIP code</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.zip || 'N/A'}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Delivery Date</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.deliveryDate || 'N/A'}</td></tr>
+        </table>
+
+        <!-- OPPORTUNITY DETAILS -->
+        <table width="100%" cellpadding="8" cellspacing="0" style="border:1px solid #ccc;border-collapse:collapse;margin:15px 0;">
+          <tr>
+            <th colspan="2" style="background:#E3E3E3;border:1px solid #213747;text-align:left;padding:8px;font-size:15px;">
+              Opportunity Details
+            </th>
+          </tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Device Opportunity Size(units)</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.units ?? "N/A"}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Budget Per Device ($)</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.budget ?? "N/A"}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Revenue Opportunity Size($ Device Rev)</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.revenue ?? "N/A"}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">ingram_account #</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.ingramAccount ?? "N/A"}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Quote #</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.quote ?? "N/A"}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Segment</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.segment ?? "N/A"}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Existing Manufacturer</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.manufacturer ?? "N/A"}</td></tr>
+        </table>
+
+        ${data.notes ? `
+        <table width="100%" cellpadding="8" cellspacing="0" style="border:1px solid #ccc;border-collapse:collapse;margin:15px 0;">
+          <tr>
+            <th style="background:#E3E3E3;border:1px solid #213747;text-align:left;padding:8px;font-size:15px;">
+              Order Notes
+            </th>
+          </tr>
+          <tr>
+            <td style="border:1px solid #ccc;padding:8px;color:#4b5563;">${data.notes}</td>
+          </tr>
+        </table>
+        ` : ''}
+      `
+    ),
+  };
+
+
+/* -------- ORDER_REJECTED-------- */
+ case "ORDER_REJECTED_USER":
+  return {
+    subject: `Order Rejected (#${data.orderId}) | Ingram Micro Surface`,
+    html: orderLayout(
+      `Order Rejected (#${data.orderId})  | Ingram Micro Surface`,
+      `
+        <!-- TITLE -->
+        <h3 style="margin:0;font-size:18px;font-weight:bold;color:#000;">
+          Order Rejected (#${data.orderId})<br>
+          <span style="font-size:14px;font-weight:normal;color:#848484;">
+            Rejected on ${data.rejectedAt ? new Date(data.rejectedAt).toLocaleDateString() : "N/A"}
+          </span>
+        </h3>
+
+        <div style="text-align:center; margin:24px 0;">
+          <img src="https://hcxexaouqvbvaycgpmfs.supabase.co/storage/v1/object/public/order-files/order%20email/order%20rejected.png" width="550" style="width:100%; max-width:550px; height:auto;">
+        </div>
+        
+        <!-- INTRO -->
+        <div style="padding:15px 0;color:#000;">
+          <p style="font-size:15px;line-height:1.5;margin:10px 0;font-weight:100;">
+            We regret to inform you that your order has been rejected.
+          </p>
+          <p style="font-size:15px;line-height:1.5;margin:10px 0;font-weight:100;">
+            If you have any questions or would like to discuss this further, please contact us at <a style="color:#0d62c2;text-decoration:none" href="mailto:ahmer.ali@worls360.com">ahmer.ali@worls360.com</a>
+          </p>
+        </div>
+
+        <!-- PRODUCTS TABLE -->
+        <table width="100%" cellpadding="8" cellspacing="0" style="border:1px solid #ccc;border-collapse:collapse;margin:15px 0;">
+          <tr style="background:#E3E3E3;">
+            <th width="75%" style="border:1px solid #213747;text-align:left;padding:8px;">Product</th>
+            <th width="25%" style="border:1px solid #213747;text-align:left;padding:8px;">Quantity</th>
+          </tr>
+          ${data.orderItems?.map((item: any) => {
+            const inv = Array.isArray(item.inventory) ? item.inventory[0] : item.inventory;
+            return `
+              <tr>
+                <td style="border:1px solid #ccc;padding:8px;">
+                  ${inv?.product_names || "N/A"}<br>
+                  <span style="font-size:12px;color:#666;">${inv?.skus || ""}</span>
+                </td>
+                <td style="border:1px solid #ccc;padding:8px;">${item.quantity}</td>
+              </tr>
+            `;
+          }).join("") || '<tr><td colspan="2" style="border:1px solid #ccc;padding:8px;">No items</td></tr>'}
+        </table>
+
+        <!-- SHIPPING DETAILS -->
+        <table width="100%" cellpadding="8" cellspacing="0" style="border:1px solid #ccc;border-collapse:collapse;margin:15px 0;">
+          <tr>
+            <th colspan="2" style="background:#E3E3E3;border:1px solid #213747;text-align:left;padding:8px;font-size:15px;">
+              Shipping Details
+            </th>
+          </tr>  
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Company Name</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.companyName || 'N/A'}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Contact Name</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.contactName || 'N/A'}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Contact Email</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.contact_email || 'N/A'}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Shipping Address</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.shippingAddress || 'N/A'}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">State</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.state || 'N/A'}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">City</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.city || 'N/A'}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">ZIP code</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.zip || 'N/A'}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Delivery Date</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.deliveryDate || 'N/A'}</td></tr>
+        </table>
+
+        <!-- OPPORTUNITY DETAILS -->
+        <table width="100%" cellpadding="8" cellspacing="0" style="border:1px solid #ccc;border-collapse:collapse;margin:15px 0;">
+          <tr>
+            <th colspan="2" style="background:#E3E3E3;border:1px solid #213747;text-align:left;padding:8px;font-size:15px;">
+              Opportunity Details
+            </th>
+          </tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Device Opportunity Size(units)</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.units ?? "N/A"}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Budget Per Device ($)</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.budget ?? "N/A"}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Revenue Opportunity Size($ Device Rev)</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.revenue ?? "N/A"}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">ingram_account #</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.ingramAccount ?? "N/A"}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Quote #</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.quote ?? "N/A"}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Segment</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.segment ?? "N/A"}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Existing Manufacturer</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.manufacturer ?? "N/A"}</td></tr>
+        </table>
+
+        ${data.notes ? `
+        <table width="100%" cellpadding="8" cellspacing="0" style="border:1px solid #ccc;border-collapse:collapse;margin:15px 0;">
+          <tr>
+            <th style="background:#E3E3E3;border:1px solid #213747;text-align:left;padding:8px;font-size:15px;">
+              Order Notes
+            </th>
+          </tr>
+          <tr>
+            <td style="border:1px solid #ccc;padding:8px;color:#4b5563;">${data.notes}</td>
+          </tr>
+        </table>
+        ` : ''}
+      `
+    ),
+  };
+
+/* -------- ORDER_REJECTED_ADMIN-------- */
+  case "ORDER_REJECTED_ADMIN":
+  return {
+    subject: `Order Rejected (#${data.orderId})  | Ingram Micro Surface`,
+    html: orderLayout(
+      `Order Rejected (#${data.orderId})  | Ingram Micro Surface`,
+      `
+        <!-- TITLE -->
+        <h3 style="margin:0;font-size:18px;font-weight:bold;color:#000;">
+          Order Rejected (#${data.orderId})<br>
+          <span style="font-size:14px;font-weight:normal;color:#848484;">
+            Rejected on ${data.rejectedAt ? new Date(data.rejectedAt).toLocaleDateString() : "N/A"}
+          </span>
+        </h3>
+
+        <div style="text-align:center; margin:24px 0;">
+          <img src="https://hcxexaouqvbvaycgpmfs.supabase.co/storage/v1/object/public/order-files/order%20email/order%20rejected.png" width="550" style="width:100%; max-width:550px; height:auto;">
+        </div>
+
+        <!-- ADMIN INTRO -->
+        <div style="padding:20px 0;color:#000;text-align:center;">
+          <p style="font-size:16px;line-height:1.5;margin:10px 0;font-weight:bold;color:#000;">
+            Order Rejection Notification
+          </p>
+          <p style="font-size:15px;line-height:1.5;margin:10px 0;">
+            An order has been rejected.<br>
+            Click below to view order details.
+          </p>
+          <a href="${data.ordersPageUrl || 'https://localhost:3000/orders'}" 
+             style="display:inline-block;
+                    margin:20px 0;
+                    padding:12px 30px;
+                    background-color:#0d62c2;
+                    color:#ffffff;
+                    text-decoration:none;
+                    border-radius:5px;
+                    font-weight:bold;
+                    font-size:16px;">
+            View Order
+          </a>
+        </div>
+
+        <!-- PRODUCTS TABLE -->
+        <table width="100%" cellpadding="8" cellspacing="0" style="border:1px solid #ccc;border-collapse:collapse;margin:15px 0;">
+          <tr style="background:#E3E3E3;">
+            <th width="75%" style="border:1px solid #213747;text-align:left;padding:8px;">Product</th>
+            <th width="25%" style="border:1px solid #213747;text-align:left;padding:8px;">Quantity</th>
+          </tr>
+          ${data.orderItems?.map((item: any) => {
+            const inv = Array.isArray(item.inventory) ? item.inventory[0] : item.inventory;
+            return `
+              <tr>
+                <td style="border:1px solid #ccc;padding:8px;">
+                  ${inv?.product_names || "N/A"}<br>
+                  <span style="font-size:12px;color:#666;">${inv?.skus || ""}</span>
+                </td>
+                <td style="border:1px solid #ccc;padding:8px;">${item.quantity}</td>
+              </tr>
+            `;
+          }).join("") || '<tr><td colspan="2" style="border:1px solid #ccc;padding:8px;">No items</td></tr>'}
+        </table>
+
+        <!-- CUSTOMER INFO -->
+        <table width="100%" cellpadding="8" cellspacing="0" style="border:1px solid #ccc;border-collapse:collapse;margin:15px 0;">
+          <tr>
+            <th colspan="2" style="background:#E3E3E3;border:1px solid #213747;text-align:left;padding:8px;font-size:15px;">
+              Customer Information
+            </th>
+          </tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Company</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.companyName || 'N/A'}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Contact</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.contactName || 'N/A'}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Email</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.contactEmail || 'N/A'}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Seller</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.sellerName || 'N/A'}</td></tr>
+        </table>
+
+        <!-- SHIPPING DETAILS -->
+        <table width="100%" cellpadding="8" cellspacing="0" style="border:1px solid #ccc;border-collapse:collapse;margin:15px 0;">
+          <tr>
+            <th colspan="2" style="background:#E3E3E3;border:1px solid #213747;text-align:left;padding:8px;font-size:15px;">
+              Shipping Details
+            </th>
+          </tr>  
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Company Name</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.companyName || 'N/A'}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Contact Name</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.contactName || 'N/A'}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Contact Email</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.contact_email || 'N/A'}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Shipping Address</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.shippingAddress || 'N/A'}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">State</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.state || 'N/A'}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">City</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.city || 'N/A'}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">ZIP code</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.zip || 'N/A'}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Delivery Date</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.deliveryDate || 'N/A'}</td></tr>
+        </table>
+
+        <!-- OPPORTUNITY DETAILS -->
+        <table width="100%" cellpadding="8" cellspacing="0" style="border:1px solid #ccc;border-collapse:collapse;margin:15px 0;">
+          <tr>
+            <th colspan="2" style="background:#E3E3E3;border:1px solid #213747;text-align:left;padding:8px;font-size:15px;">
+              Opportunity Details
+            </th>
+          </tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Device Opportunity Size(units)</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.units ?? "N/A"}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Budget Per Device ($)</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.budget ?? "N/A"}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Revenue Opportunity Size($ Device Rev)</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.revenue ?? "N/A"}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">ingram_account #</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.ingramAccount ?? "N/A"}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Quote #</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.quote ?? "N/A"}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Segment</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.segment ?? "N/A"}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Existing Manufacturer</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.manufacturer ?? "N/A"}</td></tr>
+        </table>
+
+        ${data.notes ? `
+        <table width="100%" cellpadding="8" cellspacing="0" style="border:1px solid #ccc;border-collapse:collapse;margin:15px 0;">
+          <tr>
+            <th style="background:#E3E3E3;border:1px solid #213747;text-align:left;padding:8px;font-size:15px;">
+              Order Notes
+            </th>
+          </tr>
+          <tr>
+            <td style="border:1px solid #ccc;padding:8px;color:#4b5563;">${data.notes}</td>
+          </tr>
+        </table>
+        ` : ''}
+      `
+    ),
+  };
 
     /* -------- SAFETY -------- */
     default:
       throw new Error("Invalid email template type");
   }
 }
+

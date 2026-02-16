@@ -25,6 +25,7 @@ type CheckoutForm = {
   state: string;
   zip: string;
   deliveryDate: string;
+  estimatedCloseDate: string;
   notes: string;
 };
 
@@ -55,6 +56,7 @@ export default function CheckoutPage() {
     state: "",
     zip: "",
     deliveryDate: "",
+    estimatedCloseDate: "", 
     notes: ""
   });
 
@@ -172,12 +174,13 @@ export default function CheckoutPage() {
           state: form.state,
           zip: form.zip,
           delivery_date: form.deliveryDate || null,
+          estimated_close_date: form.estimatedCloseDate || null,
           notes: form.notes,
           cart_items: cartItemsSnapshot,
           status: "pending"
         },
       ])
-      .select("id")
+      .select("id, order_number")
       .single();
 
     if (error) {
@@ -212,37 +215,105 @@ if (!stockRes.ok) {
 
     // 👇 YAHAN email Send hogi
 
-    // 📧 EMAIL TO ADMIN (IMMEDIATE)
-    await fetch("/api/send-email", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        to: "ahmer.ali.works360@gmail.com", // 🔴 admin email
-        type: "ORDER_PLACED_ADMIN",
-        data: {
-          orderId: orderData.id,
-          email: form.sellerEmail,
-        },
-      })
-    });
+ // 📧 EMAIL TO ADMIN (IMMEDIATE)
+await fetch("/api/send-email", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    to: "ahmer.ali.works360@gmail.com",
+    type: "ORDER_PLACED_ADMIN",
+    data: {
+      orderId: orderData.id,
+      order_number: orderData.order_number,
+      createdAt: new Date().toISOString(),
+      
+      // Team Details
+      sellerName: form.sellerName,
+      sellerEmail: form.sellerEmail,
+      
+      // Opportunity Details
+      units: form.units,
+      budget: form.budget,
+      revenue: form.revenue,
+      ingramAccount: form.ingramAccount,
+      quote: form.quote,
+      segment: form.segment,
+      manufacturer: form.manufacturer,
+      isReseller: form.isReseller,
+      estimatedCloseDate: form.estimatedCloseDate,
+      
+      // Shipping Details
+      companyName: form.companyName,
+      contactName: form.contactName,
+      contactEmail: form.contactEmail,
+      shippingAddress: form.address,
+      city: form.city,
+      state: form.state,
+      zip: form.zip,
+      deliveryDate: form.deliveryDate,
+      notes: form.notes,
+      
+      ordersPageUrl: "http://localhost:3000/orders",
+      orderItems: cartItemsSnapshot.map(item => ({
+        quantity: item.quantity,
+        inventory: {
+          product_names: item.product_name,
+          skus: item.sku,
+        }
+      })),
+    },
+  })
+});
 
-    // ⏱️ WAIT 15 SECONDS
-    await delay(15000);
 
-    // 📧 EMAIL TO USER (AFTER 5 SECONDS)
-    await fetch("/api/send-email", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        to: form.sellerEmail,
-        type: "ORDER_PLACED_USER",
-        data: {
-          orderId: orderData.id,
-          name: form.sellerName,
-        },
-      })
-    });
-
+// 📧 EMAIL TO USER (AFTER 15 SECONDS)
+await fetch("/api/send-email", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    to: form.sellerEmail,
+    type: "ORDER_PLACED_USER",
+    data: {
+      orderId: orderData.id,
+      order_number: orderData.order_number,
+      createdAt: new Date().toISOString(),
+      
+      // Team Details
+      name: form.sellerName,
+      sellerEmail: form.sellerEmail,
+      
+      // Opportunity Details
+      units: form.units,
+      budget: form.budget,
+      revenue: form.revenue,
+      ingramAccount: form.ingramAccount,
+      quote: form.quote,
+      segment: form.segment,
+      manufacturer: form.manufacturer,
+      isReseller: form.isReseller,
+      estimatedCloseDate: form.estimatedCloseDate,
+      
+      // Shipping Details
+      companyName: form.companyName,
+      contactName: form.contactName,
+      contactEmail: form.contactEmail,
+      shippingAddress: form.address,
+      city: form.city,
+      state: form.state,
+      zip: form.zip,
+      deliveryDate: form.deliveryDate,
+      notes: form.notes,
+      
+      orderItems: cartItemsSnapshot.map(item => ({
+        quantity: item.quantity,
+        inventory: {
+          product_names: item.product_name,
+          skus: item.sku,
+        }
+      })),
+    },
+  })
+});
 
     // 👇 YAHAN ORDER SUCCESS HO CHUKA HAI
 
@@ -303,22 +374,22 @@ if (!stockRes.ok) {
           <div className="p-4 grid grid-cols-2 gap-4">
 
             <div>
-              <label className="block mb-1 font-medium">Seller Contact Name *</label>
+              <label className="block mb-1 font-medium text-sm">Seller Contact Name *</label>
               <input
                 name="sellerName"
                 value={form.sellerName}
                 onChange={handleChange}
-                className="border border-gray-300 p-2 rounded w-full"
+                className="border border-gray-300 p-2 rounded w-full text-sm"
               />
             </div>
 
             <div>
-              <label className="block mb-1 font-medium">Seller Contact Email *</label>
+              <label className="block mb-1 font-medium text-sm">Seller Contact Email *</label>
               <input
                 name="sellerEmail"
                 value={form.sellerEmail}
                 disabled
-                className="border border-gray-300 p-2 rounded bg-gray-100 w-full"
+                className="border text-sm border-gray-300 p-2 rounded bg-gray-100 w-full"
               />
             </div>
           </div>
@@ -330,7 +401,7 @@ if (!stockRes.ok) {
           <div className="p-4 grid grid-cols-2 gap-4">
 
             <div>
-              <label className="block mb-1 font-medium">
+              <label className="block mb-1 font-medium text-sm">
                 Device Opportunity Size (Units) *
               </label>
               <input
@@ -339,22 +410,22 @@ if (!stockRes.ok) {
                 value={form.units}
                 required
                 onChange={handleChange}
-                className="border border-gray-300 p-2 rounded w-full"
+                className="border text-sm border-gray-300 p-2 rounded w-full"
               />
             </div>
 
             <div>
-              <label className="block mb-1 font-medium">Budget Per Device ($)</label>
+              <label className="block mb-1 text-sm font-medium">Budget Per Device ($)</label>
               <input
   name="budget"
   value={`$ ${form.budget.toLocaleString()}`}
   disabled
-  className="border border-gray-300 p-2 rounded bg-gray-100 w-full"
+  className="border text-sm border-gray-300 p-2 rounded bg-gray-100 w-full"
 />
             </div>
 
             <div>
-              <label className="block mb-1 font-medium">
+              <label className="block mb-1 text-sm font-medium">
                 Revenue Opportunity Size ($ Device Rev) *
               </label>
               <input
@@ -365,40 +436,40 @@ if (!stockRes.ok) {
       : ""
   }
   readOnly
-  className="border border-gray-300 p-2 rounded bg-gray-100 w-full"
+  className="border text-sm border-gray-300 p-2 rounded bg-gray-100 w-full"
 />
 
             </div>
 
             <div>
-              <label className="block mb-1 font-medium">Ingram Account # *</label>
+              <label className="block mb-1 font-medium text-sm">Ingram Account # *</label>
               <input
                 name="ingramAccount"
                 value={form.ingramAccount}
                 onChange={handleChange}
                 required
-                className="border border-gray-300 p-2 rounded w-full"
+                className="border border-gray-300 p-2 rounded w-full text-sm"
               />
             </div>
 
             <div>
-              <label className="block mb-1 font-medium">Quote #</label>
+              <label className="block mb-1 font-medium text-sm">Quote #</label>
               <input
                 name="quote"
                 value={form.quote}
                 onChange={handleChange}
                 required
-                className="border border-gray-300 p-2 rounded w-full"
+                className="border border-gray-300 p-2 rounded w-full text-sm"
               />
             </div>
 
             <div>
-              <label className="block mb-1 font-medium">Segment</label>
+              <label className="block mb-1 font-medium text-sm">Segment</label>
               <select
                 name="segment"
                 value={form.segment}
                 onChange={handleChange}
-                className="border border-gray-300 p-2 rounded w-full"
+                className="border border-gray-300 p-2 rounded w-full text-sm"
                 required
               >
                 <option value="" disabled hidden>
@@ -417,13 +488,13 @@ if (!stockRes.ok) {
             </div>
 
             <div>
-              <label className="block mb-1 font-medium">Current Manufacturer</label>
+              <label className="block mb-1 font-medium text-sm">Current Manufacturer</label>
               <select
                 name="manufacturer"
                 value={form.manufacturer}
                 onChange={handleChange}
                 required
-                className="border border-gray-300 p-2 rounded w-full"
+                className="border border-gray-300 p-2 rounded w-full text-sm"
               >
                 <option value="" disabled hidden>
                   Select Manufacturer *
@@ -440,7 +511,7 @@ if (!stockRes.ok) {
             </div>
 
             <div>
-              <label className="block mb-1 font-medium">
+              <label className="block mb-1 font-medium text-sm">
                 Is this a reseller opportunity?
               </label>
               <select
@@ -448,7 +519,7 @@ if (!stockRes.ok) {
                 value={form.isReseller}
                 onChange={handleChange}
                 required
-                className="border border-gray-300 p-2 rounded w-full"
+                className="border border-gray-300 p-2 rounded w-full text-sm"
               >
                 <option value="" disabled hidden>
                   Select Opportunity *
@@ -456,6 +527,18 @@ if (!stockRes.ok) {
                 <option value="yes">Yes</option>
                 <option value="no">No</option>
               </select>
+            </div>
+
+            <div>
+              <label className="block mb-1 font-medium text-sm">Estimated Close Date</label>
+              <input
+                type="date"
+                name="estimatedCloseDate"
+                value={form.estimatedCloseDate}
+                required
+                onChange={handleChange}
+                className="border text-sm border-gray-300 p-2 rounded focus:border-black outline-none w-full"
+              />
             </div>
 
           </div>
@@ -467,64 +550,50 @@ if (!stockRes.ok) {
           <div className="p-4 grid grid-cols-2 gap-4">
 
             <div>
-              <label className="block mb-1 font-medium">Customer Company Name *</label>
+              <label className="block mb-1 font-medium text-sm">Customer Company Name *</label>
               <input
                 name="companyName"
                 value={form.companyName}
                 onChange={handleChange}
                 required
-                placeholder="Customer Company Name *"
-                className="border border-gray-300 p-2 rounded focus:border-black outline-none w-full"
+                className="border text-sm border-gray-300 p-2 rounded focus:border-black outline-none w-full"
               />
             </div>
 
             <div>
-              <label className="block mb-1 font-medium">Customer Contact Name *</label>
+              <label className="block mb-1 font-medium text-sm">Customer Contact Name *</label>
               <input
                 name="contactName"
                 value={form.contactName}
                 onChange={handleChange}
                 required
-                placeholder="Customer Contact Name *"
-                className="border border-gray-300 p-2 rounded focus:border-black outline-none w-full"
+                className="border text-sm border-gray-300 p-2 rounded focus:border-black outline-none w-full"
               />
             </div>
 
             <div>
-              <label className="block mb-1 font-medium">Customer Contact Email *</label>
+              <label className="block mb-1 font-medium text-sm">Customer Contact Email *</label>
               <input
                 name="contactEmail"
                 value={form.contactEmail}
                 onChange={handleChange}
                 required
-                placeholder="Customer Contact Email Address *"
-                className="border border-gray-300 p-2 rounded focus:border-black outline-none w-full"
+                className="border text-sm border-gray-300 p-2 rounded focus:border-black outline-none w-full"
               />
             </div>
 
             <div>
-              <label className="block mb-1 font-medium">Customer Shipping Address *</label>
+              <label className="block mb-1 font-medium text-sm">Customer Shipping Address *</label>
               <input
                 name="address"
                 value={form.address}
                 onChange={handleChange}
                 required
-                placeholder="Customer Shipping Address *"
-                className="border border-gray-300 p-2 rounded focus:border-black outline-none w-full"
+                className="border text-sm border-gray-300 p-2 rounded focus:border-black outline-none w-full"
               />
             </div>
 
-            <div>
-              <label className="block mb-1 font-medium">City *</label>
-              <input
-                name="city"
-                value={form.city}
-                onChange={handleChange}
-                required
-                placeholder="City *"
-                className="border border-gray-300 p-2 rounded focus:border-black outline-none w-full"
-              />
-            </div>
+
 
             <div>
               <label className="block mb-1 font-medium">State *</label>
@@ -610,36 +679,45 @@ if (!stockRes.ok) {
             </div>
 
             <div>
-              <label className="block mb-1 font-medium">Zip *</label>
+              <label className="block mb-1 font-medium text-sm">City *</label>
+              <input
+                name="city"
+                value={form.city}
+                onChange={handleChange}
+                required
+                className="border text-sm border-gray-300 p-2 rounded focus:border-black outline-none w-full"
+              />
+            </div>
+
+            <div>
+              <label className="block mb-1 font-medium text-sm">Zip *</label>
               <input
                 name="zip"
                 value={form.zip}
                 onChange={handleChange}
                 required
-                placeholder="Zip *"
-                className="border border-gray-300 p-2 rounded focus:border-black outline-none w-full"
+                className="border text-sm border-gray-300 p-2 rounded focus:border-black outline-none w-full"
               />
             </div>
 
             <div>
-              <label className="block mb-1 font-medium">Delivery Date</label>
+              <label className="block mb-1 font-medium text-sm "> Desired Delivery Date</label>
               <input
                 type="date"
                 name="deliveryDate"
                 value={form.deliveryDate}
                 required
                 onChange={handleChange}
-                className="border border-gray-300 p-2 rounded focus:border-black outline-none w-full"
+                className="border text-sm border-gray-300 p-2 rounded focus:border-black outline-none w-full"
               />
             </div>
 
             <div className="col-span-2">
-              <label className="block mb-1 font-medium">Notes</label>
+              <label className="block mb-1 font-medium text-sm">Notes</label>
               <textarea
                 name="notes"
                 value={form.notes}
                 onChange={handleChange}
-                placeholder="Notes"
                 className="border border-gray-300 p-2 rounded focus:border-black outline-none w-full"
               />
             </div>
