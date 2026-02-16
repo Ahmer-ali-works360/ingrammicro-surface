@@ -99,12 +99,17 @@ function LoginPageContent() {
 // ✅ Login successful
 toast.success("Login successful! Redirecting...", toastOptions.success);
 
+// ✅ Sync session first
 await syncSession();
 
-// Small delay to show the success toast before redirecting
+// ✅ CRITICAL FIX: Force router refresh to update middleware
+router.refresh();
+
+// ✅ Small delay then redirect with window.location for hard refresh
 setTimeout(() => {
-  router.push(redirectTo || "/");
-}, 500);
+  const destination = redirectTo || "/";
+  window.location.href = destination; // ✅ Hard redirect instead of router.push
+}, 800);
 
   
   } catch (err) {
