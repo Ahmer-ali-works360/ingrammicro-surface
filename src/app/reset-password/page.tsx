@@ -37,6 +37,9 @@ function ResetPasswordContent() {
       const { data } = await supabase.auth.getSession();
       if (data.session) {
         console.log("✅ Existing session found");
+
+         // 🔐 Activate recovery mode lock
+  document.cookie = "sb-recovery-mode=true; path=/";
         setSessionReady(true);
       }
     };
@@ -49,6 +52,9 @@ function ResetPasswordContent() {
         console.log("🔔 Auth event:", event);
         if (event === "PASSWORD_RECOVERY" && session) {
           console.log("✅ Password recovery session detected");
+
+          // 🔐 Activate recovery mode lock
+  document.cookie = "sb-recovery-mode=true; path=/";
           setSessionReady(true);
         }
       }
@@ -96,6 +102,9 @@ function ResetPasswordContent() {
     // ✅ Important: Logout after password reset (security fix)
     setTimeout(async () => {
       await supabase.auth.signOut();
+
+      document.cookie = "sb-recovery-mode=; path=/; max-age=0";
+
       
       // ✅ Hard redirect to clear all sessions
       window.location.href = "/login";
