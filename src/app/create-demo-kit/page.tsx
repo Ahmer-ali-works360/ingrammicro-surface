@@ -1,3 +1,5 @@
+//src/app/create-demo-kit/page.tsx 
+
 "use client";
 
 import Image from "next/image";
@@ -302,6 +304,18 @@ export default function CreateDemoKitPage() {
       return aOut ? 1 : -1;
     });
 
+    // 🔥 Dynamic filter options based on currently filtered products
+const dynamicFilterOptions = {
+  formFactor: Array.from(new Set(filteredProducts.map(p => p.form_factor))).filter(Boolean),
+  processor: Array.from(new Set(filteredProducts.map(p => p.processor))).filter(Boolean),
+  screenSize: Array.from(new Set(filteredProducts.map(p => p.screen_size))).filter(Boolean),
+  memory: Array.from(new Set(filteredProducts.map(p => p.memory))).filter(Boolean),
+  storage: Array.from(new Set(filteredProducts.map(p => p.storage))).filter(Boolean),
+  copilot: Array.from(new Set(filteredProducts.map(p => (p.copilot ? "Yes" : "No")))).filter(Boolean),
+  fiveG: Array.from(new Set(filteredProducts.map(p => (p.five_g ? "Yes" : "No")))).filter(Boolean),
+};
+
+
   return (
     <div className="min-h-screen bg-gray-50">
       {authLoading ? null : (
@@ -334,8 +348,16 @@ export default function CreateDemoKitPage() {
               {(Object.keys(filterOptions) as FilterCategory[]).map((category) => (
                 <FilterGroup
                   key={category}
-                  title={category.replace(/([A-Z])/g, " $1")}
-                  options={filterOptions[category]}
+                  title={
+  category === "fiveG"
+    ? "5G"
+    : category.replace(/([A-Z])/g, " $1")
+}
+                  options={
+  selectedFilters.formFactor.length > 0
+    ? dynamicFilterOptions[category]
+    : filterOptions[category]
+}
                   category={category}
                   selectedFilters={selectedFilters}
                   onChange={handleFilterChange}
@@ -471,7 +493,11 @@ export default function CreateDemoKitPage() {
                 {(Object.keys(filterOptions) as FilterCategory[]).map((category) => (
                   <FilterGroup
                     key={category}
-                    title={category.replace(/([A-Z])/g, " $1")}
+                    title={
+  category === "fiveG"
+    ? "5G"
+    : category.replace(/([A-Z])/g, " $1")
+}
                     options={filterOptions[category]}
                     category={category}
                     selectedFilters={selectedFilters}
