@@ -6,6 +6,7 @@ import { supabase } from "@/lib/supabaseClient";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "../context/AuthContext";
+import { useSearchParams } from "next/navigation";
 
 const PLACEHOLDER_SVG =
   "data:image/svg+xml;utf8," +
@@ -59,6 +60,8 @@ export default function CreateDemoKitPage() {
   const { addToCart, openCart } = useCart();
   const { role } = useAuth();
 
+  const searchParams = useSearchParams();
+
   // 🔒 AUTH CHECK (NO BLINK)
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -88,6 +91,18 @@ export default function CreateDemoKitPage() {
 
     fetchProducts();
   }, []);
+
+  useEffect(() => {
+  const formFactorFromURL = searchParams.get("form_factor");
+
+  if (formFactorFromURL) {
+    setSelectedFilters((prev) => ({
+      ...prev,
+      formFactor: [formFactorFromURL],
+    }));
+  }
+}, [searchParams]);
+
 
   // ✅ DYNAMIC FILTER FETCHING WITH NULL FILTERING
   useEffect(() => {

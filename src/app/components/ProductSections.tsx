@@ -37,7 +37,7 @@ export default function ProductSections() {
                             </p>
 
                             <a
-                                href="/create-demo-kit"
+                                href="/create-demo-kit?form_factor=2%20in%201%27s"
                                 className="inline-flex items-center justify-center gap-1 text-m font-largr text-blue-600 hover:underline mb-6"
                             >
                                 Explore Surface 2-in-1 PCs
@@ -64,7 +64,7 @@ export default function ProductSections() {
                             </p>
 
                             <a
-                                href="#"
+                                href="/create-demo-kit?form_factor=Notebook"
                                 className="inline-flex items-center justify-center gap-1 text-m font-largr text-blue-600 hover:underline mb-6"
                             >
                                 See All Surface Laptops
