@@ -150,6 +150,11 @@ const isAdmin = normalizedRole === "admin";
 const isShopManager = normalizedRole === "shop_manager";
 const isProgramManager = normalizedRole === "program_manager";
 
+const isShopManagerEdit = isEdit && isShopManager;
+
+const canEditFull = isEdit && isAdmin;
+const canEditLimited = isEdit && isShopManager; 
+
 const isPending = (order?.status ?? status) === "pending";
 
 // program manager sirf pending pe ek dafa action
@@ -963,38 +968,341 @@ if (!order) {
           </div>
 
           {/* ===== BOTTOM ROW (APPROVAL INFO) ===== */}
-          <div className="border-t border-gray-200 px-6 py-3 grid grid-cols-2 gap-6">
-            <div>
-              <p className="text-[10px] uppercase tracking-wide text-gray-400 mb-1">
-                Approved by
-              </p>
-              <p className="text-sm text-gray-800">
-                {order.approved_by || "—"}
-              </p>
-            </div>
+         <div className="border-t border-gray-200 px-6 py-3 grid grid-cols-2 gap-6">
+  <div>
+    <p className="text-[10px] uppercase tracking-wide text-gray-400 mb-1">
+      Approved by
+    </p>
+    <p className="text-sm text-gray-800">
+      {order.approved_by || "—"}
+    </p>
+  </div>
 
-            <div>
-              <p className="text-[10px] uppercase tracking-wide text-gray-400 mb-1">
-                {getStatusLabel(status)}
-              </p>
-              <p className="text-sm text-gray-800">
-                {order.approved_at
-                  ? new Date(order.approved_at).toLocaleString("en-US", {
-                    year: "numeric",
-                    month: "short",
-                    day: "2-digit",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                    hour12: true,
-                    timeZone: "UTC",
-                    timeZoneName: "short",
-                  })
-                  : "—"}
-              </p>
-            </div>
-          </div>
+  <div>
+    <p className="text-[10px] uppercase tracking-wide text-gray-400 mb-1">
+      Approved on
+    </p>
+    <p className="text-sm text-gray-800">
+      {order.approved_at
+        ? new Date(order.approved_at).toLocaleString("en-US", {
+            year: "numeric",
+            month: "short",
+            day: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: true,
+            timeZone: "UTC",
+            timeZoneName: "short",
+          })
+        : "—"}
+    </p>
+  </div>
+</div>
+
 
         </div>
+
+
+{/* SHOP MANAGER EDIT MODE — TRACKING + ORDER ITEMS ON TOP */}
+{isShopManagerEdit && (
+  <>
+    {/* ================= TRACKING INFORMATION ================= */}
+  <div className="bg-white border border-gray-200 rounded-lg shadow">
+  <div className="px-6 py-6">
+    <p className="text-sm font-bold text-gray-700 flex items-center gap-2">
+      <Truck size={26} className="text-blue-600" />
+      Tracking Information
+    </p>
+  </div>
+
+  <div className="grid grid-cols-2 gap-6 px-6 py-4 text-sm">
+
+    {/* Tracking Number */}
+    <div>
+      <p className="text-xs uppercase text-gray-400 mb-1">Tracking Number</p>
+      {isEdit ? (
+        <input
+          value={form.tracking_number || ""}
+          onChange={(e) =>
+            setForm({ ...form, tracking_number: e.target.value })
+          }
+          className="border px-3 py-2 rounded w-full text-sm"
+        />
+      ) : (
+        <p>{order.tracking_number || "—"}</p>
+      )}
+    </div>
+
+    {/* Tracking Link */}
+    <div>
+      <p className="text-xs uppercase text-gray-400 mb-1">Tracking Link</p>
+      {isEdit ? (
+        <input
+          value={form.tracking_link || ""}
+          onChange={(e) =>
+            setForm({ ...form, tracking_link: e.target.value })
+          }
+          className="border px-3 py-2 rounded w-full text-sm"
+        />
+      ) : order.tracking_link ? (
+        <a
+          href={order.tracking_link}
+          target="_blank"
+          className="text-blue-600 underline"
+        >
+          Open Link
+        </a>
+      ) : (
+        <p>—</p>
+      )}
+    </div>
+
+    {/* Return Tracking Number */}
+    <div>
+      <p className="text-xs uppercase text-gray-400 mb-1">
+        Return Tracking Number
+      </p>
+      {isEdit ? (
+        <input
+          value={form.return_tracking_number || ""}
+          onChange={(e) =>
+            setForm({ ...form, return_tracking_number: e.target.value })
+          }
+          className="border px-3 py-2 rounded w-full text-sm"
+        />
+      ) : (
+        <p>{order.return_tracking_number || "—"}</p>
+      )}
+    </div>
+
+    {/* Return Tracking Link */}
+    <div>
+      <p className="text-xs uppercase text-gray-400 mb-1">
+        Return Tracking Link
+      </p>
+      {isEdit ? (
+        <input
+          value={form.return_tracking_link || ""}
+          onChange={(e) =>
+            setForm({ ...form, return_tracking_link: e.target.value })
+          }
+          className="border px-3 py-2 rounded w-full text-sm"
+        />
+      ) : order.return_tracking_link ? (
+        <a
+          href={order.return_tracking_link}
+          target="_blank"
+          className="text-blue-600 underline"
+        >
+          Open Link
+        </a>
+      ) : (
+        <p>—</p>
+      )}
+    </div>
+
+    {/* Case Type */}
+    <div>
+      <p className="text-xs uppercase text-gray-400 mb-1">Case Type</p>
+      {isEdit ? (
+        <input
+          value={form.case_type || ""}
+          onChange={(e) =>
+            setForm({ ...form, case_type: e.target.value })
+          }
+          className="border px-3 py-2 rounded w-full text-sm"
+        />
+      ) : (
+        <p>{order.case_type || "—"}</p>
+      )}
+    </div>
+
+    {/* Username */}
+    <div>
+      <p className="text-xs uppercase text-gray-400 mb-1">Username</p>
+      {isEdit ? (
+        <input
+          value={form.tracking_username || ""}
+          onChange={(e) =>
+            setForm({ ...form, tracking_username: e.target.value })
+          }
+          className="border px-3 py-2 rounded w-full text-sm"
+        />
+      ) : (
+        <p>{order.tracking_username || "—"}</p>
+      )}
+    </div>
+
+    {/* Password */}
+<div>
+  <p className="text-xs uppercase text-gray-400 mb-1">Password</p>
+
+  {isEdit ? (
+    <div className="flex items-center border rounded w-full px-3 py-2">
+      <input
+        type={showPassword ? "text" : "password"}
+        value={form.tracking_password || ""}
+        onChange={(e) =>
+          setForm({ ...form, tracking_password: e.target.value })
+        }
+        className="flex-1 outline-none text-sm"
+      />
+
+      <button
+        type="button"
+        onClick={() => setShowPassword(!showPassword)}
+        className="text-gray-400 hover:text-blue-600 ml-2"
+      >
+        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+      </button>
+    </div>
+  ) : (
+    <p>{order.tracking_password ? "••••••" : "—"}</p>
+  )}
+</div>
+
+
+
+
+    {/* Return Label */}
+<div>
+  <p className="text-xs uppercase text-gray-400 mb-1">Return Label</p>
+
+  {/* Upload only in edit mode */}
+  {isEdit && (
+    <div className="space-y-1 mb-2">
+      <label className="flex items-center gap-3 border rounded px-3 py-2 cursor-pointer hover:border-blue-500 text-sm">
+        <input
+          type="file"
+          accept=".pdf,.png,.jpg"
+          className="hidden"
+          onChange={(e) => {
+            if (e.target.files?.[0]) {
+              uploadReturnLabel(e.target.files[0]);
+            }
+          }}
+          disabled={uploadingFile}
+        />
+
+        <span className="px-3 py-1 text-xs bg-blue-600 text-white rounded">
+          {uploadingFile ? "Uploading..." : "Choose file"}
+        </span>
+
+        <span className="text-gray-500 text-xs truncate">
+          {uploadedFileName || "No file selected"}
+        </span>
+
+        {order.return_label && order.return_label.trim() !== "" && (
+          <button
+            type="button"
+            onClick={removeReturnLabel}
+            className="text-red-500 hover:text-red-700 text-xs"
+            title="Remove file"
+          >
+            ✕
+          </button>
+        )}
+      </label>
+    </div>
+  )}
+
+  {/* 👇 ALWAYS show view link if file exists */}
+  {order.return_label && order.return_label.trim() !== "" ? (
+    <a
+      href={order.return_label}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="text-blue-600 underline text-sm"
+    >
+      View Return Label
+    </a>
+  ) : (
+    <p className="text-sm">—</p>
+  )}
+</div>
+
+
+
+
+
+
+  </div>
+</div>
+
+
+
+{/* ================= ORDER ITEMS ================= */}
+<div className="bg-white border border-gray-200 rounded-lg shadow mt-6">
+  <div className="px-6 py-6">
+    <p className="text-sm font-bold text-gray-700 flex items-center gap-2">
+      <Package size={26} className="text-blue-600" />
+      Order Items
+    </p>
+  </div>
+
+  <div className="divide-y">
+    {order.cart_items.map((item: any, i: number) => (
+      <div key={i} className="px-6 py-4 text-sm">
+
+        <div className="flex items-center justify-between">
+          <p className="text-blue-600 font-medium">
+            {item.product_name}
+          </p>
+
+          <div className="flex gap-2">
+            <button
+              onClick={() => startEditItem(item, i)}
+              className="text-gray-500 hover:text-blue-600"
+            >
+              <Pencil size={14} />
+            </button>
+          </div>
+        </div>
+
+        <p className="text-xs text-gray-500 mb-2">
+          {item.sku}
+        </p>
+
+        <div className="grid grid-cols-4 gap-4 text-xs items-center">
+          <span>Brand: {item.brand}</span>
+          <span>Processor: {item.processor}</span>
+          <span>Memory: {item.memory}</span>
+
+          {editingItemIndex === i ? (
+            <div className="flex items-center gap-2">
+              <input
+                type="number"
+                min={1}
+                value={itemQty}
+                onChange={(e) => setItemQty(Number(e.target.value))}
+                className="w-20 border px-2 py-1 text-xs rounded"
+              />
+              <button
+                onClick={() => saveItemQuantity(i)}
+                className="text-blue-600 text-xs"
+              >
+                Save
+              </button>
+              <button
+                onClick={() => setEditingItemIndex(null)}
+                className="text-gray-500 text-xs"
+              >
+                Cancel
+              </button>
+            </div>
+          ) : (
+            <span>Qty: {item.quantity}</span>
+          )}
+        </div>
+      </div>
+    ))}
+  </div>
+</div>
+
+
+
+  </>
+)}
 
 
 
@@ -1040,7 +1348,7 @@ if (!order) {
                   {/* <Building2 size={12} className="text-blue-400" /> */}
                   Company
                 </p>
-                {isEdit ? (
+                {canEditFull ? (
   <input
     value={form.company_name || ""}
     onChange={(e) =>
@@ -1061,7 +1369,7 @@ if (!order) {
                   {/* <User size={12} className="text-blue-400" /> */}
                   Contact Name
                 </p>
-                {isEdit ? (
+                {canEditFull ? (
   <input
     value={form.contact_name || ""}
     onChange={(e) =>
@@ -1083,7 +1391,7 @@ if (!order) {
                   {/* <Mail size={12} className="text-blue-400" /> */}
                   Contact Email
                 </p>
-{isEdit ? (
+{canEditFull ? (
   <input
     type="email"
     value={form.contact_email || ""}
@@ -1118,7 +1426,7 @@ if (!order) {
                   {/* <Layers size={12} className="text-blue-400" /> */}
                   Units
                 </p>
-                {isEdit ? (
+                {canEditFull ? (
   <input
     type="number"
     value={form.units ?? ""}
@@ -1150,7 +1458,7 @@ if (!order) {
                   {/* <DollarSign size={12} className="text-blue-400" /> */}
                   Budget per Device
                 </p>
-                {isEdit ? (
+                {canEditFull ? (
   <input
     type="number"
     value={form.budget ?? ""}
@@ -1181,7 +1489,7 @@ if (!order) {
                   {/* <TrendingUp size={12} className="text-blue-400" /> */}
                   Revenue Opportunity
                 </p>
-                {isEdit ? (
+                {canEditFull ? (
   <input
     value={form.revenue ?? ""}
     disabled
@@ -1200,7 +1508,7 @@ if (!order) {
                   {/* <Tag size={12} className="text-blue-400" /> */}
                   Segment
                 </p>
-                {isEdit ? (
+                {canEditFull ? (
   <select
     value={form.segment || ""}
     onChange={(e) =>
@@ -1226,7 +1534,7 @@ if (!order) {
                   {/* <Factory size={12} className="text-blue-400" /> */}
                   Manufacturer
                 </p>
-                {isEdit ? (
+                {canEditFull ? (
   <select
     value={form.manufacturer || ""}
     onChange={(e) =>
@@ -1252,7 +1560,7 @@ if (!order) {
                   {/* <Factory size={12} className="text-blue-400" /> */}
                   Delivery Date
                 </p>
-                {isEdit ? (
+                {canEditFull ? (
   <input
     type="date"
     value={form.delivery_date || ""}
@@ -1275,6 +1583,9 @@ if (!order) {
         </div>
 
 
+
+{!isShopManagerEdit && (
+  <>
 {/* ================= TRACKING INFORMATION ================= */}
 <div className="bg-white border border-gray-200 rounded-lg shadow">
   <div className="px-6 py-6">
@@ -1493,9 +1804,12 @@ if (!order) {
 
 
 
+
+
   </div>
 </div>
-
+</>
+)}
 
 
 
@@ -1514,7 +1828,7 @@ if (!order) {
             {/* Address */}
             <div>
               <p className="text-xs uppercase text-gray-400 mb-1">Address</p>
-              {isEdit ? (
+              {canEditFull ? (
                 <input
                   value={form.address || ""}
                   onChange={(e) =>
@@ -1530,7 +1844,7 @@ if (!order) {
             {/* City */}
             <div>
               <p className="text-xs uppercase text-gray-400 mb-1">City</p>
-              {isEdit ? (
+              {canEditFull ? (
                 <input
                   value={form.city || ""}
                   onChange={(e) =>
@@ -1546,7 +1860,7 @@ if (!order) {
             {/* State */}
             <div>
               <p className="text-xs uppercase text-gray-400 mb-1">State</p>
-              {isEdit ? (
+              {canEditFull ? (
                 <input
                   value={form.state || ""}
                   onChange={(e) =>
@@ -1562,7 +1876,7 @@ if (!order) {
             {/* ZIP */}
             <div>
               <p className="text-xs uppercase text-gray-400 mb-1">ZIP</p>
-              {isEdit ? (
+              {canEditFull ? (
                 <input
                   value={form.zip || ""}
                   onChange={(e) =>
@@ -1613,6 +1927,9 @@ if (!order) {
 
           
         </div>
+
+{!isShopManagerEdit && (
+  <>
 
 {/* ================= ORDER ITEMS ================= */}
 <div className="bg-white border border-gray-200 rounded-lg shadow">
@@ -1694,6 +2011,8 @@ if (!order) {
     ))}
   </div>
 </div>
+</>
+)}
 
 
   {/* ================= NOTES ================= */}
@@ -1706,7 +2025,7 @@ if (!order) {
   </div>
 
   <div className="px-6 py-4 text-sm">
-    {isEdit ? (
+    {canEditFull ? (
       <textarea
         value={form.notes || ""}
         onChange={(e) =>
