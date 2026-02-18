@@ -33,7 +33,7 @@ export async function proxy(req: NextRequest) {
           const cookieOptions = {
             ...options,
             sameSite: "lax" as const,
-            secure: process.env.NODE_ENV === "production",
+            secure: true,
             path: "/",
             maxAge: 60 * 60 * 24 * 7,
           };
@@ -47,7 +47,7 @@ export async function proxy(req: NextRequest) {
           const cookieOptions = {
             ...options,
             sameSite: "lax" as const,
-            secure: process.env.NODE_ENV === "production",
+            secure: true,
             path: "/",
           };
           req.cookies.set({ name, value: "", ...cookieOptions });
