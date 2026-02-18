@@ -8,7 +8,21 @@ import { supabase } from "@/lib/supabaseClient";
 import toast, { Toaster } from "react-hot-toast";
 import { useAuth } from "@/app/context/AuthContext";
 
- // Custom toast styles
+
+
+function LoginPageContent() {
+  const router = useRouter();
+  const { syncSession } = useAuth();
+  const searchParams = useSearchParams();
+  const redirectTo = searchParams.get("redirect");
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [keepSignedIn, setKeepSignedIn] = useState(true); // UI only
+  const [loading, setLoading] = useState(false);
+
+
+   // Custom toast styles
 
 const isMobile = window.innerWidth < 640;
 const toastOptions = {
@@ -49,17 +63,6 @@ const toastOptions = {
     },
   },
 };
-
-function LoginPageContent() {
-  const router = useRouter();
-  const { syncSession } = useAuth();
-  const searchParams = useSearchParams();
-  const redirectTo = searchParams.get("redirect");
-
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [keepSignedIn, setKeepSignedIn] = useState(true); // UI only
-  const [loading, setLoading] = useState(false);
 
   // Check if user is already logged in
   useEffect(() => {
