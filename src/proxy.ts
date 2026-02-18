@@ -93,7 +93,7 @@ if (recoveryMode) {
   console.log("👤 User email:", session?.user?.email || "NO SESSION");
   console.log("==================");
 
-  const publicRoutes = ["/login", "/forgot-password", "/reset-password"];
+  const publicRoutes = ["/login", "/forgot-password", "/reset-password", "/account-registration"];
   const isPublicRoute = publicRoutes.some((route) =>
     pathname.startsWith(route)
   );
