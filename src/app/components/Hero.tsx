@@ -26,13 +26,14 @@ export default function Hero() {
                     md:bg-cover
                     md:bg-no-repeat
                     md:bg-right
+                    
                 "
                 style={{
                     backgroundImage: "url('/Ingram-Banner-2-1.png')",
                 }}
             >
                 {/* Desktop pe background image hai, mobile pe white background */}
-                <div className="max-w-7xl mx-auto px-6 py-10 md:py-24">
+                <div className="max-w-7xl mx-auto px-6 py-10 md:py-0 md:h-[600px] lg:h-[700px] md:flex md:items-center">
                     <div className="max-w-2xl text-center md:text-left">
 
                         {/* H1 - Heading */}

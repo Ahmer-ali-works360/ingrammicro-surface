@@ -115,7 +115,7 @@ function ResetPasswordContent() {
   if (error) {
     return (
       <div className="relative min-h-screen flex items-center justify-center bg-[#f9f9f9]">
-        <div className="w-[420px] bg-white p-10 rounded shadow">
+        <div className="w-full max-w-[420px] mx-4 sm:mx-0 bg-white p-6 sm:p-10 rounded shadow">
           <h1 className="text-xl font-semibold mb-6 text-center text-red-600">
             Link Invalid or Expired
           </h1>
@@ -137,7 +137,7 @@ function ResetPasswordContent() {
 
   return (
     <div className="relative min-h-screen flex items-center justify-center bg-[#f9f9f9]">
-      <div className="w-[420px] bg-white p-10 rounded shadow">
+      <div className="w-full max-w-[420px] mx-4 sm:mx-0 bg-white p-6 sm:p-10 rounded shadow">
         <h1 className="text-xl font-semibold mb-6 text-center">
           Reset Password
         </h1>
