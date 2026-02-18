@@ -9,19 +9,21 @@ import toast, { Toaster } from "react-hot-toast";
 import { useAuth } from "@/app/context/AuthContext";
 
  // Custom toast styles
+
+const isMobile = window.innerWidth < 640;
 const toastOptions = {
   success: {
     duration: 7000,
     style: {
       background: '#54c500',
-      color: '#fff',
-      borderRadius: '8px',
-      fontSize: '12px',
-      fontWeight: '400',
-      minWidth: '320px',    // Minimum 320px width
-      maxWidth: '500px',    // Maximum 500px tak expand ho sakta
-      padding: '16px 20px', // Horizontal padding increase
-      boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
+        color: '#fff',
+        borderRadius: '8px',
+        fontSize: isMobile ? '11px' : '12px',
+        fontWeight: '400',
+        minWidth: isMobile ? '200px' : '320px',
+        maxWidth: isMobile ? '280px' : '500px',
+        padding: isMobile ? '10px 14px' : '16px 20px',
+        boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
     },
     iconTheme: {
       primary: '#fff',
@@ -32,14 +34,14 @@ const toastOptions = {
     duration: 4000,
     style: {
       background: '#ef4444',
-      color: '#fff',
-      minWidth: '320px',    // Minimum 320px width
-      maxWidth: '500px',    // Maximum 500px tak expand ho sakta
-      padding: '16px 20px', // Horizontal padding increase
-      borderRadius: '8px',
-      fontSize: '12px',
-      fontWeight: '400',
-      boxShadow: '0 4px 12px rgba(239, 68, 68, 0.3)',
+        color: '#fff',
+        minWidth: isMobile ? '200px' : '320px',
+        maxWidth: isMobile ? '280px' : '500px',
+        padding: isMobile ? '10px 14px' : '16px 20px',
+        borderRadius: '8px',
+        fontSize: isMobile ? '11px' : '12px',
+        fontWeight: '400',
+        boxShadow: '0 4px 12px rgba(239, 68, 68, 0.3)',
     },
     iconTheme: {
       primary: '#fff',
