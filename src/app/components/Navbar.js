@@ -311,7 +311,7 @@ const [bellDropdownOpen, setBellDropdownOpen] = useState(false);
 
             {/* Search Input Field */}
             {searchVisible && (
-              <div className="absolute top-full left-0 mt-2 w-36 md:w-96 bg-white shadow-lg rounded-md border border-gray-300 z-50">
+              <div className="absolute top-full right-0 mt-2 w-36 md:w-96 bg-white shadow-lg rounded-md border border-gray-300 z-50">
                 <input
                   type="text"
                   placeholder="Search for products..."
