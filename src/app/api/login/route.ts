@@ -71,6 +71,9 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
     const { email, password } = body;
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanPassword = password.trim();
+
 
     // Input validation
     if (!email || !password) {
@@ -105,8 +108,8 @@ export async function POST(req: Request) {
 
     const { data, error } =
       await supabase.auth.signInWithPassword({
-        email,
-        password,
+        email: cleanEmail,
+  password: cleanPassword,
       });
 
     // 🔴 Failed login
