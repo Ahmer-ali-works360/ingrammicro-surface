@@ -178,7 +178,7 @@ export function getEmailTemplate(type: string, data: any): EmailTemplate {
 
           <p style="margin:25px 0;text-align:center;">
             <a
-              href="http://localhost:3000/users"
+              href="http://https://ingrammicro-surface.vercel.app/users"
               style="
                 background:#3ba1da;
                 color:#ffffff;
@@ -521,7 +521,7 @@ case "ORDER_APPROVED_ADMIN":
             Please review the order details below.
           </p>
           
-          <a href="${data.ordersPageUrl || 'https://localhost:3000/orders'}" 
+          <a href="${data.ordersPageUrl || 'https://ingrammicro-surface.vercel.app/orders'}" 
              style="display:inline-block;
                     margin:20px 0;
                     padding:12px 30px;
@@ -731,7 +731,7 @@ case "ORDER_PLACED_ADMIN":
             A new order has been placed and requires review.<br>
             Click below to review and process the order.
           </p>
-          <a href="${data.ordersPageUrl || 'https://localhost:3000/orders'}" 
+          <a href="${data.ordersPageUrl || 'https://ingrammicro-surface.vercel.app/orders'}" 
              style="display:inline-block;
                     margin:20px 0;
                     padding:12px 30px;
@@ -1039,7 +1039,7 @@ case "ORDER_SHIPPED_ADMIN":
             The order has been shipped to ${data.contactName || 'the customer'}.<br>
             Click below to view order details.
           </p>
-          <a href="${data.ordersPageUrl || 'https://localhost:3000/orders'}" 
+          <a href="${data.ordersPageUrl || 'https://ingrammicro-surface.vercel.app/orders'}" 
              style="display:inline-block;
                     margin:20px 0;
                     padding:12px 30px;
@@ -1302,7 +1302,7 @@ case "ORDER_RETURN_ADMIN":
             An order has been returned and received by the warehouse.<br>
             Click below to review return details.
           </p>
-          <a href="${data.ordersPageUrl || 'https://localhost:3000/orders'}" 
+          <a href="${data.ordersPageUrl || 'https://ingrammicro-surface.vercel.app/orders'}" 
              style="display:inline-block;
                     margin:20px 0;
                     padding:12px 30px;
@@ -1522,7 +1522,7 @@ case "ORDER_RETURN_ADMIN":
             An order has been rejected.<br>
             Click below to view order details.
           </p>
-          <a href="${data.ordersPageUrl || 'https://localhost:3000/orders'}" 
+          <a href="${data.ordersPageUrl || 'https://ingrammicro-surface.vercel.app/orders'}" 
              style="display:inline-block;
                     margin:20px 0;
                     padding:12px 30px;
