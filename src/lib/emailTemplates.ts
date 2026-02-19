@@ -877,56 +877,13 @@ case "ORDER_SHIPPED_USER":
           </tr>
         </table>
 
-        <!-- SHIPPED STATUS BOX -->
-        <div style="background:#e8f5e9;border-left:4px solid #4caf50;padding:15px;margin:15px 0;">
-          <p style="margin:0;font-size:16px;font-weight:bold;color:#2e7d32;">
-            ✓ Shipped
-          </p>
-          <p style="margin:5px 0 0 0;font-size:14px;color:#555;">
-            Shipped on: ${data.approvedAt ? new Date(data.approvedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : "N/A"}
-          </p>
-          ${data.trackingNumber ? `
-          <p style="margin:5px 0 0 0;font-size:14px;color:#555;">
-            FedEx ${data.trackingNumber}
-          </p>
-          ` : ''}
+       
+        <div style="text-align:center; margin:15px 0;">
+         <a href="${data.trackingLink}" target="_blank" style="display:inline-block; margin:10px; padding:8px 16px; text-decoration:none; ">
+        Download Return Label
+        </a>
         </div>
 
-        <!-- ACTION BUTTONS -->
-        <div style="text-align:center;margin:20px 0;">
-          ${data.trackingLink ? `
-          <a href="${data.trackingLink}" 
-             target="_blank"
-             style="display:inline-block;
-                    margin:10px;
-                    padding:12px 30px;
-                    custom-blue;
-                    color:#ffffff;
-                    text-decoration:none;
-                    border-radius:5px;
-                    font-weight:bold;
-                    font-size:14px;">
-            Track Your Order
-          </a>
-          ` : ''}
-          
-          ${data.returnLabel ? `
-          <a href="${data.returnLabel}" 
-             target="_blank"
-             download
-             style="display:inline-block;
-                    margin:10px;
-                    padding:12px 30px;
-                    custom-blue
-                    color:#ffffff;
-                    text-decoration:none;
-                    border-radius:5px;
-                    font-weight:bold;
-                    font-size:14px;">
-            Download Return Label
-          </a>
-          ` : ''}
-        </div>
 
         <!-- PRODUCTS TABLE -->
         <table width="100%" cellpadding="8" cellspacing="0" style="border:1px solid #ccc;border-collapse:collapse;margin:15px 0;">
@@ -1072,27 +1029,13 @@ case "ORDER_SHIPPED_ADMIN":
             <td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Case Type:</td>
             <td width="60%" style="border:1px solid #ccc;padding:8px;">${data.caseType || 'N/A'}</td>
           </tr>
-          <tr>
-            <td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Shipped On:</td>
-            <td width="60%" style="border:1px solid #ccc;padding:8px;">${data.approvedAt ? new Date(data.approvedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : "N/A"}</td>
-          </tr>
-          ${data.trackingLink ? `
-          <tr>
-            <td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Tracking Link:</td>
-            <td width="60%" style="border:1px solid #ccc;padding:8px;">
-              <a href="${data.trackingLink}" target="_blank" style="color:#0d62c2;">Track Shipment</a>
-            </td>
-          </tr>
-          ` : ''}
-          ${data.returnLabel ? `
-          <tr>
-            <td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Return Label:</td>
-            <td width="60%" style="border:1px solid #ccc;padding:8px;">
-              <a href="${data.returnLabel}" target="_blank" style="color:#0d62c2;">Download Return Label</a>
-            </td>
-          </tr>
-          ` : ''}
         </table>
+        
+         <div style="text-align:center; margin:15px 0;">
+         <a href="${data.trackingLink}" target="_blank" style="display:inline-block; margin:10px; padding:8px 16px; text-decoration:none; ">
+        Download Return Label
+        </a>
+        </div>
 
         <!-- PRODUCTS TABLE -->
         <table width="100%" cellpadding="8" cellspacing="0" style="border:1px solid #ccc;border-collapse:collapse;margin:15px 0;">
@@ -1617,6 +1560,43 @@ case "ORDER_RETURN_ADMIN":
       `
     ),
   };
+
+/* -------- eol-device-------- */
+  case "EOL_DEVICE_SUBMITTED":
+  return {
+    subject: "EOL Device Request Submitted | Ingrammicro Surface",
+    html: baseLayout(
+      "EOL Device Request Submitted",
+      `
+        <p><strong>Submitted By:</strong> ${data.submitted_by}</p>
+        <p><strong>Address:</strong> ${data.address}</p>
+        <p><strong>Note:</strong> ${data.notes || "N/A"}</p>
+
+        <table width="100%" cellpadding="8" cellspacing="0" 
+          style="border:1px solid #ccc;border-collapse:collapse;margin-top:20px;">
+          
+          <tr style="background:#E3E3E3;">
+            <th style="border:1px solid #ccc;text-align:left;">Products</th>
+            <th style="border:1px solid #ccc;text-align:left;">SKU</th>
+            <th style="border:1px solid #ccc;text-align:left;">Qty</th>
+          </tr>
+
+          ${
+            data.products?.map((item: any) => `
+              <tr>
+                <td style="border:1px solid #ccc;">${item.product_name}</td>
+                <td style="border:1px solid #ccc;">${item.sku}</td>
+                <td style="border:1px solid #ccc;">${item.quantity}</td>
+              </tr>
+            `).join("") 
+            || `<tr><td colspan="3" style="border:1px solid #ccc;">No products</td></tr>`
+          }
+        </table>
+      `
+    ),
+  };
+
+
 
     /* -------- SAFETY -------- */
     default:
