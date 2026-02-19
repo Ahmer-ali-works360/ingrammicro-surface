@@ -99,7 +99,7 @@ export default function EOLDevicesPage() {
     }
 
     // ✅ Send email only after successful DB insert
-    await fetch("/api/send-email", {
+    fetch("/api/send-email", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
