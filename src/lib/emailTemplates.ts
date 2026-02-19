@@ -1562,39 +1562,51 @@ case "ORDER_RETURN_ADMIN":
   };
 
 /* -------- eol-device-------- */
-  case "EOL_DEVICE_SUBMITTED":
+case "EOL_DEVICE_SUBMITTED":
   return {
     subject: "EOL Device Request Submitted | Ingrammicro Surface",
     html: baseLayout(
       "EOL Device Request Submitted",
       `
         <p><strong>Submitted By:</strong> ${data.submitted_by}</p>
-        <p><strong>Address:</strong> ${data.address}</p>
-        <p><strong>Note:</strong> ${data.notes || "N/A"}</p>
+
+        ${
+          data.notes
+            ? `<p><strong>Notes:</strong> ${data.notes}</p>`
+            : ""
+        }
 
         <table width="100%" cellpadding="8" cellspacing="0" 
           style="border:1px solid #ccc;border-collapse:collapse;margin-top:20px;">
           
           <tr style="background:#E3E3E3;">
-            <th style="border:1px solid #ccc;text-align:left;">Products</th>
+            <th style="border:1px solid #ccc;text-align:left;">Product</th>
             <th style="border:1px solid #ccc;text-align:left;">SKU</th>
             <th style="border:1px solid #ccc;text-align:left;">Qty</th>
+            <th style="border:1px solid #ccc;text-align:left;">Address</th>
           </tr>
 
           ${
-            data.products?.map((item: any) => `
-              <tr>
-                <td style="border:1px solid #ccc;">${item.product_name}</td>
-                <td style="border:1px solid #ccc;">${item.sku}</td>
-                <td style="border:1px solid #ccc;">${item.quantity}</td>
-              </tr>
-            `).join("") 
-            || `<tr><td colspan="3" style="border:1px solid #ccc;">No products</td></tr>`
+            data.products?.length
+              ? data.products.map((item: any) => `
+                  <tr>
+                    <td style="border:1px solid #ccc;">${item.product_name}</td>
+                    <td style="border:1px solid #ccc;">${item.sku}</td>
+                    <td style="border:1px solid #ccc;">${item.quantity}</td>
+                    <td style="border:1px solid #ccc;">${item.address}</td>
+                  </tr>
+                `).join("")
+              : `<tr>
+                   <td colspan="4" style="border:1px solid #ccc;">
+                     No products
+                   </td>
+                 </tr>`
           }
         </table>
       `
     ),
   };
+
 
 
 

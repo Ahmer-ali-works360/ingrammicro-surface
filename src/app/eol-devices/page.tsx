@@ -10,16 +10,16 @@ type Product = {
   sku: string;
   quantity: string;
   address: string;
-  notes: string;
 };
 
 export default function EOLDevicesPage() {
   const router = useRouter();
 
   const [email, setEmail] = useState("");
+  const [notes, setNotes] = useState("");
   const [userId, setUserId] = useState("");
   const [products, setProducts] = useState<Product[]>([
-    { product_name: "", sku: "", quantity: "", address: "", notes: "" },
+    { product_name: "", sku: "", quantity: "", address:"" },
   ]);
   const [showModal, setShowModal] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
@@ -53,7 +53,7 @@ export default function EOLDevicesPage() {
   const addProduct = () => {
     setProducts([
       ...products,
-      { product_name: "", sku: "", quantity: "", address: "", notes: "" },
+      { product_name: "", sku: "", quantity: "", address: "" },
     ]);
   };
 
@@ -64,6 +64,8 @@ export default function EOLDevicesPage() {
 
  const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
+
+  console.log("FORM SUBMITTED");
 
   const isInvalid = products.some(
     (p) =>
@@ -87,6 +89,7 @@ export default function EOLDevicesPage() {
         user_id: userId,
         submitted_by: email,
         products,
+        notes
       }),
     });
 
@@ -111,8 +114,7 @@ export default function EOLDevicesPage() {
         type: "EOL_DEVICE_SUBMITTED",
         data: {
           submitted_by: email,
-          address: products[0]?.address,
-          notes: products[0]?.notes,
+          notes,
           products,
         },
       }),
@@ -122,8 +124,10 @@ export default function EOLDevicesPage() {
     setShowModal(true);
 
     setProducts([
-      { product_name: "", sku: "", quantity: "", address: "", notes: "" },
+      { product_name: "", sku: "", quantity: "", address: ""},
     ]);
+
+    setNotes("");
 
   } catch (error) {
     setModalMessage("Something went wrong.");
@@ -238,24 +242,22 @@ export default function EOLDevicesPage() {
                       required
                     />
                   </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Notes (Optional)
-                    </label>
-                    <input
-                      type="text"
-                      value={product.notes}
-                      onChange={(e) =>
-                        handleChange(index, "notes", e.target.value)
-                      }
-                      className="w-full border border-gray-300 px-3 py-1.5 text-sm rounded-md bg-white"
-                    />
-                  </div>
                 </div>
 
               </div>
             ))}
+
+            <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Notes (Optional)
+                    </label>
+                    <textarea
+    value={notes}
+    onChange={(e) => setNotes(e.target.value)}
+    rows={3}
+    className="w-full border border-gray-300 px-3 py-1.5 text-sm rounded-md bg-white"
+  />
+                  </div>
 
             {/* Add Icon */}
             <div className="flex justify-end pt-2">

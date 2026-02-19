@@ -1,4 +1,4 @@
-//src/app/api/eol-devices/route.ts
+// src/app/api/eol-devices/route.ts
 
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
@@ -12,7 +12,7 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
 
-    const { user_id, submitted_by, products } = body;
+    const { user_id, submitted_by, products, notes } = body;
 
     if (!products || products.length === 0) {
       return NextResponse.json(
@@ -21,7 +21,7 @@ export async function POST(req: Request) {
       );
     }
 
-    // Get next submission_id
+    // 🔹 Get next submission_id
     const { data: submissionId, error: seqError } =
       await supabase.rpc("get_next_eol_submission_id");
 
@@ -32,6 +32,7 @@ export async function POST(req: Request) {
       );
     }
 
+    // 🔹 Prepare rows (same submission_id for all)
     const rowsToInsert = products.map((product: any) => ({
       submission_id: submissionId,
       user_id,
@@ -40,7 +41,7 @@ export async function POST(req: Request) {
       sku: product.sku,
       quantity: product.quantity,
       address: product.address,
-      notes: product.notes,
+      notes: notes || null, // 👈 global notes
     }));
 
     const { error } = await supabase
@@ -54,37 +55,10 @@ export async function POST(req: Request) {
       );
     }
 
-    /* ===============================
-       📧 SEND EMAIL AFTER SUCCESS
-    =============================== */
-
-    try {
-      await fetch(`/api/send-email`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          to: [
-            "ahmer.ali@worls360.com",
-            "email2@example.com",
-            submitted_by  
-          ],
-          type: "EOL_DEVICE_SUBMITTED",
-          data: {
-            submitted_by,
-            address: products[0]?.address,
-            notes: products[0]?.notes,
-            products,
-          },
-        }),
-      });
-    } catch (emailError) {
-      console.error("Email sending failed:", emailError);
-      // Important: We are NOT failing the request
-    }
-
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ 
+      success: true,
+      submission_id: submissionId
+    });
 
   } catch (err) {
     return NextResponse.json(
