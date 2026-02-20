@@ -298,7 +298,7 @@ const handleWaitlistSubmit = async () => {
     {stockQty > 0 ? (
       /* ✅ IN STOCK */
       <button
-        className="w-xs bg-yellow-400 text-black py-3 rounded hover:bg-yellow-500 font-semibold"
+        className="w-xs custom-blue text-white py-3 rounded font-semibold transition duration-200"
         onClick={() =>
           addToCart({
             id: product.id,
@@ -434,7 +434,7 @@ const handleWaitlistSubmit = async () => {
                   className={`w-32 py-2 px-4 rounded text-sm transition ${
                     out
                       ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                      : "bg-yellow-400 text-black hover:bg-yellow-500 cursor-pointer"
+                      : "custom-blue text-white cursor-pointer"
                   }`}
                 >
                   {out ? "Out of Stock" : "Add to Cart"}

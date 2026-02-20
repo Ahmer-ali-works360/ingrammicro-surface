@@ -135,7 +135,7 @@ export default function CartDrawer() {
             {/* Checkout button now has validation */}
             <button
               onClick={handleCheckout}
-              className="w-full bg-yellow-400 text-black py-2 rounded hover:bg-yellow-500 transition"
+              className="w-full custom-blue text-white py-2 rounded transition duration-200"
             >
               Checkout
             </button>

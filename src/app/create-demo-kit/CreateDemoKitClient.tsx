@@ -299,23 +299,13 @@ export default function CreateDemoKitClient() {
     <div className="min-h-screen bg-gray-50">
       {authLoading ? null : (
         <>
-          {/* Banner */}
-          <div className="w-full overflow-hidden">
-            <Image
-              src="/products-banner.png"
-              alt="Demo Kit Banner"
-              width={1600}
-              height={400}
-              priority
-              className="w-full h-[360px] object-cover"
-            />
-          </div>
+          
 
           <div className="max-w-7xl mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-[240px_1fr] gap-6">
             {/* Mobile Filter Button */}
             <div className="lg:hidden mb-4 flex justify-end">
               <button
-                className="bg-yellow-400 text-black px-4 py-2 rounded text-sm hover:bg-yellow-500 transition"
+                className="custom-blue text-white px-4 py-2 rounded text-sm transition"
                 onClick={() => setMobileFilterOpen(true)}
               >
                 Filters
@@ -345,8 +335,19 @@ export default function CreateDemoKitClient() {
 
             </aside>
 
-            {/* Products */}
-            <section className="flex flex-col">
+            {/* Right Side Content */}
+            <section className="flex flex-col space-y-6">
+                  {/* Banner */}
+  <div className="w-full rounded-2xl overflow-hidden">
+    <Image
+      src="/products-banner.png"
+      alt="Demo Kit Banner"
+      width={1600}
+      height={400}
+      priority
+      className="w-full aspect-[16/9] lg:aspect-auto object-contain lg:object-cover h-auto lg:h-[320px] rounded-2xl"
+    />
+  </div>
               {(role === "admin" || role === "shop manager") && (
                 <div className="flex justify-end mb-4">
                   <button
@@ -365,7 +366,7 @@ export default function CreateDemoKitClient() {
                   No products found for selected filters.
                 </p>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
                   {filteredProducts.map((product) => {
                     const outOfStock =
                       product.stock_quantity === 0 ||
@@ -377,7 +378,7 @@ export default function CreateDemoKitClient() {
   className="bg-white rounded-2xl shadow hover:shadow-lg transition flex flex-col group relative"
 > <div className="relative left-0 w-full h-[35px] p-2 pointer-events-none">
       {outOfStock && (
-        <div className="absolute top-2 left-2 bg-red-600 text-white text-xs font-semibold px-2 py-1 rounded">
+        <div className=" absolute top-1 left-1 lg:top-2 lg:left-2 bg-red-600 text-white text-[10px] lg:text-xs font-semibold px-1.5 py-0.5 lg:px-2 lg:py-1 rounded">
           Out of Stock
         </div>
       )}
@@ -387,67 +388,68 @@ export default function CreateDemoKitClient() {
           alt="5G Badge"
           width={30}
           height={30}
-          className="absolute top-2 right-2 z-10"
+          className=" absolute top-1 right-1 lg:top-2 lg:right-2 w-4 h-5 lg:w-[30px] lg:h-[30px] z-10"
         />
       )}
     </div>
     
     {/* Image div */}
-    <div className="w-full h-[200px] relative rounded-t-2xl overflow-hidden">
-      <Image
-        src={product.thumbnail_url || PLACEHOLDER_SVG}
-        alt={product.product_name}
-        fill
-        className="object-cover cursor-pointer transition-transform duration-300 group-hover:scale-105"
-        onClick={() => {
-          if (!product.slug) return;
-          router.push(`/product/${product.slug}`);
-        }}
-      />
-    </div>
+    <div className="relative w-full h-[160px] sm:h-[180px] lg:h-[200px] overflow-hidden rounded-t-2xl">
+  <Image
+    src={product.thumbnail_url || PLACEHOLDER_SVG}
+    alt={product.product_name}
+    fill
+    className="object-contain bg-gray-50 transition-transform duration-300 group-hover:scale-105"
+    onClick={() => {
+      if (!product.slug) return;
+      router.push(`/product/${product.slug}`);
+    }}
+  />
+</div>
 
     {/* Separate div for 5G icon and Out of Stock, overlaid on the image */}
    
 
-    <div className="p-4 flex-1 flex flex-col justify-between">
-      <div className="text-center">
-        <h3 className="font-semibold  text-sm">
-          {product.product_name}
-        </h3>
+<div className="p-3 sm:p-4 flex flex-col flex-1">
 
-        <div className="flex-1" />
+  <div className="text-center">
+    <h3 className="font-semibold text-sm  min-h-[44px]">
+      {product.product_name}
+    </h3>
 
-        <p className="text-xs text-gray-500 text-center mt-6">
-          SKU: {product.sku}
-        </p>
-      </div>
-<div className="flex justify-center mt-1" >
-      <button
-        disabled={outOfStock}
-        onClick={() => {
-          if (outOfStock) return;
-          addToCart({
-            id: product.id,
-            product_name: product.product_name,
-            image_url: product.thumbnail_url,
-            sku: product.sku,
-            brand: product.brand ?? "—", // 👈 IMPORTANT
-            processor: product.processor ?? "—",
-            memory: product.memory ?? "—",
-            quantity: 1,
-          });
-          openCart();
-        }}
-        className={` w-32 py-2 px-4 rounded text-sm transition ${
-          outOfStock
-            ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-            : "bg-yellow-400 text-black hover:bg-yellow-500 cursor-pointer"
-        }`}
-      >
-        {outOfStock ? "Out of Stock" : "Add to Cart"}
-      </button>
-      </div>
-    </div>
+    <p className="text-xs text-gray-500 mt-1">
+      SKU: {product.sku}
+    </p>
+  </div>
+
+  <div className="mt-auto pt-3 flex justify-center">
+    <button
+      disabled={outOfStock}
+      onClick={() => {
+        if (outOfStock) return;
+        addToCart({
+          id: product.id,
+          product_name: product.product_name,
+          image_url: product.thumbnail_url,
+          sku: product.sku,
+          brand: product.brand ?? "—",
+          processor: product.processor ?? "—",
+          memory: product.memory ?? "—",
+          quantity: 1,
+        });
+        openCart();
+      }}
+      className={`w-full sm:w-32 py-2 rounded text-sm transition ${
+        outOfStock
+          ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+          : "custom-blue text-white cursor-pointer"
+      }`}
+    >
+      {outOfStock ? "Out of Stock" : "Add to Cart"}
+    </button>
+  </div>
+
+</div>
 </div>
                     );
                   })}
@@ -535,7 +537,7 @@ function FilterGroup({
               <label
                 key={opt}
                 className={`flex items-center gap-2 text-sm px-2 py-1 rounded cursor-pointer ${isSelected
-                  ? "bg-yellow-400 text-black font-semibold"
+                  ? "custom-blue text-white font-semibold"
                   : "text-gray-700 hover:bg-gray-100"
                   }`}
               >
@@ -543,7 +545,7 @@ function FilterGroup({
                   type="checkbox"
                   checked={isSelected}
                   onChange={() => onChange(category, opt)}
-                  className="rounded accent-yellow-400"
+                  className=" rounded accent-[#4799D5]"
                 />
                 {opt}
               </label>
