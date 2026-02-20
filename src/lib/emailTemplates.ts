@@ -396,103 +396,103 @@ export function getEmailTemplate(type: string, data: any): EmailTemplate {
       };
 
 
-/* -------- ORDER_APPROVED_USER (UPDATED) -------- */
-case "ORDER_APPROVED_USER":
-  return {
-    subject: `Order Approved (#${data.order_number}) | Ingrammicro Surface`,
-    html: orderLayout(
-      `Approved Order (#${data.order_number})  | Ingrammicro Surface`,
-      `
-        <!-- TITLE -->
-        <h3 style="margin:0;font-size:18px;font-weight:bold;color:#000;">
-          Approved Order (#${data.order_number})<br>
-          <span style="font-size:14px;font-weight:normal;color:#848484;">
-            Placed on ${data.created_at ? new Date(data.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : "N/A"}
-          </span>
-        </h3>
+    /* -------- ORDER_APPROVED_USER (UPDATED) -------- */
+    case "ORDER_APPROVED_USER":
+      return {
+        subject: `Order Approved (#${data.order_number}) | Ingrammicro Surface`,
+        html: orderLayout(
+          `Approved Order (#${data.order_number})  | Ingrammicro Surface`,
+          `
+            <!-- TITLE -->
+            <h3 style="margin:0;font-size:18px;font-weight:bold;color:#000;">
+              Approved Order (#${data.order_number})<br>
+              <span style="font-size:14px;font-weight:normal;color:#848484;">
+                Placed on ${data.created_at ? new Date(data.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : "N/A"}
+              </span>
+            </h3>
 
-        <div style="text-align:center; margin:24px 0;">
-          <img src="https://hcxexaouqvbvaycgpmfs.supabase.co/storage/v1/object/public/order-files/order%20email/order%20approved.png" width="550" style="width:100%; max-width:550px; height:auto;">
-        </div>
-        
-        <!-- INTRO -->
-        <div style="padding:15px 0;color:#000;">
-          <p style="font-size:15px;line-height:1.5;margin:10px 0;font-weight:100;">
-            Your order on <a style="color:#0d62c2;text-decoration:none" href="#" target="_blank">ingrammicro-surface.com/</a> has been approved. Once your package ships, you will receive a shipping email with tracking information and a prepaid Return Label for your order.
-          </p>
-          <p style="font-size:15px;line-height:1.5;margin:10px 0;">
-            If you have any questions please contact us at <a style="color:#0d62c2;text-decoration:none" href="mailto:ahmer.ali@works360.com">ahmer.ali@works360.com</a>
-          </p>
-        </div>
+            <div style="text-align:center; margin:24px 0;">
+              <img src="https://hcxexaouqvbvaycgpmfs.supabase.co/storage/v1/object/public/order-files/order%20email/order%20approved.png" width="550" style="width:100%; max-width:550px; height:auto;">
+            </div>
+            
+            <!-- INTRO -->
+            <div style="padding:15px 0;color:#000;">
+              <p style="font-size:15px;line-height:1.5;margin:10px 0;font-weight:100;">
+                Your order on <a style="color:#0d62c2;text-decoration:none" href="#" target="_blank">ingrammicro-surface.com/</a> has been approved. Once your package ships, you will receive a shipping email with tracking information and a prepaid Return Label for your order.
+              </p>
+              <p style="font-size:15px;line-height:1.5;margin:10px 0;">
+                If you have any questions please contact us at <a style="color:#0d62c2;text-decoration:none" href="mailto:ahmer.ali@works360.com">ahmer.ali@works360.com</a>
+              </p>
+            </div>
 
-        <!-- PRODUCTS TABLE -->
-        <table width="100%" cellpadding="8" cellspacing="0" style="border:1px solid #ccc;border-collapse:collapse;margin:15px 0;">
-          <tr style="background:#E3E3E3;">
-            <th width="75%" style="border:1px solid #213747;text-align:left;padding:8px;">Product</th>
-            <th width="25%" style="border:1px solid #213747;text-align:left;padding:8px;">Quantity</th>
-          </tr>
-          ${data.orderItems?.map((item: any) => `
-            <tr>
-              <td style="border:1px solid #ccc;padding:8px;">
-                ${item.productName || "N/A"}<br>
-                <span style="font-size:12px;color:#666;">${item.sku || ""}</span>
-              </td>
-              <td style="border:1px solid #ccc;padding:8px;">${item.quantity}</td>
-            </tr>
-          `).join("") || '<tr><td colspan="2" style="border:1px solid #ccc;padding:8px;">No items</td></tr>'}
-        </table>
+            <!-- PRODUCTS TABLE -->
+            <table width="100%" cellpadding="8" cellspacing="0" style="border:1px solid #ccc;border-collapse:collapse;margin:15px 0;">
+              <tr style="background:#E3E3E3;">
+                <th width="75%" style="border:1px solid #213747;text-align:left;padding:8px;">Product</th>
+                <th width="25%" style="border:1px solid #213747;text-align:left;padding:8px;">Quantity</th>
+              </tr>
+              ${data.orderItems?.map((item: any) => `
+                <tr>
+                  <td style="border:1px solid #ccc;padding:8px;">
+                    ${item.productName || "N/A"}<br>
+                    <span style="font-size:12px;color:#666;">${item.sku || ""}</span>
+                  </td>
+                  <td style="border:1px solid #ccc;padding:8px;">${item.quantity}</td>
+                </tr>
+              `).join("") || '<tr><td colspan="2" style="border:1px solid #ccc;padding:8px;">No items</td></tr>'}
+            </table>
 
-        <!-- SHIPPING DETAILS -->
-        <table width="100%" cellpadding="8" cellspacing="0" style="border:1px solid #ccc;border-collapse:collapse;margin:15px 0;">
-          <tr>
-            <th colspan="2" style="background:#E3E3E3;border:1px solid #213747;text-align:left;padding:8px;font-size:15px;">
-              Shipping Details
-            </th>
-          </tr>  
-          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Company Name</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.companyName || 'N/A'}</td></tr>
-          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Contact Name</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.contactName || 'N/A'}</td></tr>
-          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Contact Email</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.contact_email || 'N/A'}</td></tr>
-          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Shipping Address</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.shippingAddress || 'N/A'}</td></tr>
-          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">State</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.state || 'N/A'}</td></tr>
-          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">City</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.city || 'N/A'}</td></tr>
-          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">ZIP code</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.zip || 'N/A'}</td></tr>
-          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Delivery Date</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.deliveryDate || 'N/A'}</td></tr>
-        </table>
+            <!-- SHIPPING DETAILS -->
+            <table width="100%" cellpadding="8" cellspacing="0" style="border:1px solid #ccc;border-collapse:collapse;margin:15px 0;">
+              <tr>
+                <th colspan="2" style="background:#E3E3E3;border:1px solid #213747;text-align:left;padding:8px;font-size:15px;">
+                  Shipping Details
+                </th>
+              </tr>  
+              <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Company Name</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.companyName || 'N/A'}</td></tr>
+              <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Contact Name</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.contactName || 'N/A'}</td></tr>
+              <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Contact Email</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.contact_email || 'N/A'}</td></tr>
+              <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Shipping Address</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.shippingAddress || 'N/A'}</td></tr>
+              <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">State</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.state || 'N/A'}</td></tr>
+              <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">City</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.city || 'N/A'}</td></tr>
+              <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">ZIP code</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.zip || 'N/A'}</td></tr>
+              <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Delivery Date</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.deliveryDate || 'N/A'}</td></tr>
+            </table>
 
-        <!-- OPPORTUNITY DETAILS -->
-        <table width="100%" cellpadding="8" cellspacing="0" style="border:1px solid #ccc;border-collapse:collapse;margin:15px 0;">
-          <tr>
-            <th colspan="2" style="background:#E3E3E3;border:1px solid #213747;text-align:left;padding:8px;font-size:15px;">
-              Opportunity Details
-            </th>
-          </tr>
-          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Device Opportunity Size (Units)</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.units ?? "N/A"}</td></tr>
-          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Budget Per Device ($)</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.budget ? `$${data.budget.toLocaleString()}` : "N/A"}</td></tr>
-          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Revenue Opportunity Size ($ Device Rev)</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.revenue ? `$${data.revenue.toLocaleString()}` : "N/A"}</td></tr>
-          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Ingram Account #</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.ingramAccount ?? "N/A"}</td></tr>
-          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Quote #</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.quote ?? "N/A"}</td></tr>
-          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Segment</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.segment ?? "N/A"}</td></tr>
-          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Existing Manufacturer</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.manufacturer ?? "N/A"}</td></tr>
-        </table>
+            <!-- OPPORTUNITY DETAILS -->
+            <table width="100%" cellpadding="8" cellspacing="0" style="border:1px solid #ccc;border-collapse:collapse;margin:15px 0;">
+              <tr>
+                <th colspan="2" style="background:#E3E3E3;border:1px solid #213747;text-align:left;padding:8px;font-size:15px;">
+                  Opportunity Details
+                </th>
+              </tr>
+              <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Device Opportunity Size (Units)</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.units ?? "N/A"}</td></tr>
+              <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Budget Per Device ($)</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.budget ? `$${data.budget.toLocaleString()}` : "N/A"}</td></tr>
+              <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Revenue Opportunity Size ($ Device Rev)</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.revenue ? `$${data.revenue.toLocaleString()}` : "N/A"}</td></tr>
+              <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Ingram Account #</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.ingramAccount ?? "N/A"}</td></tr>
+              <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Quote #</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.quote ?? "N/A"}</td></tr>
+              <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Segment</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.segment ?? "N/A"}</td></tr>
+              <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Existing Manufacturer</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.manufacturer ?? "N/A"}</td></tr>
+            </table>
 
-        ${data.notes ? `
-        <table width="100%" cellpadding="8" cellspacing="0" style="border:1px solid #ccc;border-collapse:collapse;margin:15px 0;">
-          <tr>
-            <th style="background:#E3E3E3;border:1px solid #213747;text-align:left;padding:8px;font-size:15px;">
-              Order Notes
-            </th>
-          </tr>
-          <tr>
-            <td style="border:1px solid #ccc;padding:8px;color:#4b5563;">${data.notes}</td>
-          </tr>
-        </table>
-        ` : ''}
-      `
-    ),
-  };
+            ${data.notes ? `
+            <table width="100%" cellpadding="8" cellspacing="0" style="border:1px solid #ccc;border-collapse:collapse;margin:15px 0;">
+              <tr>
+                <th style="background:#E3E3E3;border:1px solid #213747;text-align:left;padding:8px;font-size:15px;">
+                  Order Notes
+                </th>
+              </tr>
+              <tr>
+                <td style="border:1px solid #ccc;padding:8px;color:#4b5563;">${data.notes}</td>
+              </tr>
+            </table>
+            ` : ''}
+          `
+        ),
+      };
 
   
-/* -------- ORDER_APPROVED_ADMIN (UPDATED) -------- */
+      /* -------- ORDER_APPROVED_ADMIN (UPDATED) -------- */
 case "ORDER_APPROVED_ADMIN":
   return {
     subject: `Order Approved (#${data.order_number}) | Ingrammicro Surface`,
@@ -605,102 +605,102 @@ case "ORDER_APPROVED_ADMIN":
 
 
     /* -------- ORDER_PLACED_USER-------- */
-case "ORDER_PLACED_USER":
-  return {
-    subject: `New Order (#${data.order_number}) | Ingram Micro Surface`,
-    html: orderLayout(
-      `New Ingrammicro Surface Order (#${data.order_number})`,
-      `
-        <!-- TITLE -->
-        <h3 style="margin:0;font-size:18px;font-weight:bold;color:#000;">
-          Order Placed Successfully (#${data.order_number})<br>
-          <span style="font-size:14px;font-weight:normal;color:#848484;">
-            Placed on ${data.createdAt ? new Date(data.createdAt).toLocaleDateString() : "N/A"}
-          </span>
-        </h3>
+      case "ORDER_PLACED_USER":
+        return {
+          subject: `New Order (#${data.order_number}) | Ingram Micro Surface`,
+          html: orderLayout(
+            `New Ingrammicro Surface Order (#${data.order_number})`,
+            `
+              <!-- TITLE -->
+              <h3 style="margin:0;font-size:18px;font-weight:bold;color:#000;">
+                Order Placed Successfully (#${data.order_number})<br>
+                <span style="font-size:14px;font-weight:normal;color:#848484;">
+                  Placed on ${data.createdAt ? new Date(data.createdAt).toLocaleDateString() : "N/A"}
+                </span>
+              </h3>
 
-        <div style="text-align:center; margin:24px 0;">
-          <img src="https://hcxexaouqvbvaycgpmfs.supabase.co/storage/v1/object/public/order-files/order%20email/order%20placed.png" width="550" style="width:100%; max-width:550px; height:auto;">
-        </div>
-        
-        <!-- INTRO -->
-        <div style="padding:15px 0;color:#000;">
-          <p style="font-size:15px;line-height:1.5;margin:10px 0;font-weight:100;">
-            Thank you for your order from ingrammicro-surface.com. Once your order is approved, you will receive a confirmation email after which it will be shipped to your customer.
-          </p>
-          <p>
-            If you have any questions please contact us at  <a style="color:#0d62c2;text-decoration:none" href="mailto:ahmer.ali@works360.com">ahmer.ali@worls360.com</a>
-          </p>
-        </div>
+              <div style="text-align:center; margin:24px 0;">
+                <img src="https://hcxexaouqvbvaycgpmfs.supabase.co/storage/v1/object/public/order-files/order%20email/order%20placed.png" width="550" style="width:100%; max-width:550px; height:auto;">
+              </div>
+              
+              <!-- INTRO -->
+              <div style="padding:15px 0;color:#000;">
+                <p style="font-size:15px;line-height:1.5;margin:10px 0;font-weight:100;">
+                  Thank you for your order from ingrammicro-surface.com. Once your order is approved, you will receive a confirmation email after which it will be shipped to your customer.
+                </p>
+                <p>
+                  If you have any questions please contact us at  <a style="color:#0d62c2;text-decoration:none" href="mailto:ahmer.ali@works360.com">ahmer.ali@worls360.com</a>
+                </p>
+              </div>
 
-        <!-- PRODUCTS TABLE -->
-        <table width="100%" cellpadding="8" cellspacing="0" style="border:1px solid #ccc;border-collapse:collapse;margin:15px 0;">
-          <tr style="background:#E3E3E3;">
-            <th width="75%" style="border:1px solid #213747;text-align:left;padding:8px;">Product</th>
-            <th width="25%" style="border:1px solid #213747;text-align:left;padding:8px;">Quantity</th>
-          </tr>
-          ${data.orderItems?.map((item: any) => {
-            const inv = Array.isArray(item.inventory) ? item.inventory[0] : item.inventory;
-            return `
-              <tr>
-                <td style="border:1px solid #ccc;padding:8px;">
-                  ${inv?.product_names || "N/A"}<br>
-                  <span style="font-size:12px;color:#666;">${inv?.skus || ""}</span>
-                </td>
-                <td style="border:1px solid #ccc;padding:8px;">${item.quantity}</td>
-              </tr>
-            `;
-          }).join("") || '<tr><td colspan="2" style="border:1px solid #ccc;padding:8px;">No items</td></tr>'}
-        </table>
+              <!-- PRODUCTS TABLE -->
+              <table width="100%" cellpadding="8" cellspacing="0" style="border:1px solid #ccc;border-collapse:collapse;margin:15px 0;">
+                <tr style="background:#E3E3E3;">
+                  <th width="75%" style="border:1px solid #213747;text-align:left;padding:8px;">Product</th>
+                  <th width="25%" style="border:1px solid #213747;text-align:left;padding:8px;">Quantity</th>
+                </tr>
+                ${data.orderItems?.map((item: any) => {
+                  const inv = Array.isArray(item.inventory) ? item.inventory[0] : item.inventory;
+                  return `
+                    <tr>
+                      <td style="border:1px solid #ccc;padding:8px;">
+                        ${inv?.product_names || "N/A"}<br>
+                        <span style="font-size:12px;color:#666;">${inv?.skus || ""}</span>
+                      </td>
+                      <td style="border:1px solid #ccc;padding:8px;">${item.quantity}</td>
+                    </tr>
+                  `;
+                }).join("") || '<tr><td colspan="2" style="border:1px solid #ccc;padding:8px;">No items</td></tr>'}
+              </table>
 
-        <!-- SHIPPING DETAILS -->
-        <table width="100%" cellpadding="8" cellspacing="0" style="border:1px solid #ccc;border-collapse:collapse;margin:15px 0;">
-          <tr>
-            <th colspan="2" style="background:#E3E3E3;border:1px solid #213747;text-align:left;padding:8px;font-size:15px;">
-              Shipping Details
-            </th>
-          </tr>  
-          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Company Name</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.companyName || 'N/A'}</td></tr>
-          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Contact Name</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.contactName || 'N/A'}</td></tr>
-          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Contact Email</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.contact_email || 'N/A'}</td></tr>
-          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Shipping Address</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.shippingAddress || 'N/A'}</td></tr>
-          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">State</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.state || 'N/A'}</td></tr>
-          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">City</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.city || 'N/A'}</td></tr>
-          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">ZIP code</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.zip || 'N/A'}</td></tr>
-          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Delivery Date</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.deliveryDate || 'N/A'}</td></tr>
-        </table>
+              <!-- SHIPPING DETAILS -->
+              <table width="100%" cellpadding="8" cellspacing="0" style="border:1px solid #ccc;border-collapse:collapse;margin:15px 0;">
+                <tr>
+                  <th colspan="2" style="background:#E3E3E3;border:1px solid #213747;text-align:left;padding:8px;font-size:15px;">
+                    Shipping Details
+                  </th>
+                </tr>  
+                <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Company Name</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.companyName || 'N/A'}</td></tr>
+                <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Contact Name</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.contactName || 'N/A'}</td></tr>
+                <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Contact Email</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.contact_email || 'N/A'}</td></tr>
+                <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Shipping Address</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.shippingAddress || 'N/A'}</td></tr>
+                <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">State</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.state || 'N/A'}</td></tr>
+                <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">City</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.city || 'N/A'}</td></tr>
+                <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">ZIP code</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.zip || 'N/A'}</td></tr>
+                <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Delivery Date</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.deliveryDate || 'N/A'}</td></tr>
+              </table>
 
-        <!-- OPPORTUNITY DETAILS -->
-        <table width="100%" cellpadding="8" cellspacing="0" style="border:1px solid #ccc;border-collapse:collapse;margin:15px 0;">
-          <tr>
-            <th colspan="2" style="background:#E3E3E3;border:1px solid #213747;text-align:left;padding:8px;font-size:15px;">
-              Opportunity Details
-            </th>
-          </tr>
-          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Device Opportunity Size(units)</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.units ?? "N/A"}</td></tr>
-          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Budget Per Device ($)</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.budget ?? "N/A"}</td></tr>
-          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Revenue Opportunity Size($ Device Rev)</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.revenue ?? "N/A"}</td></tr>
-          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">ingram_account #</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.ingramAccount ?? "N/A"}</td></tr>
-          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Quote #</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.quote ?? "N/A"}</td></tr>
-          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Segment</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.segment ?? "N/A"}</td></tr>
-          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Existing Manufacturer</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.manufacturer ?? "N/A"}</td></tr>
-        </table>
+              <!-- OPPORTUNITY DETAILS -->
+              <table width="100%" cellpadding="8" cellspacing="0" style="border:1px solid #ccc;border-collapse:collapse;margin:15px 0;">
+                <tr>
+                  <th colspan="2" style="background:#E3E3E3;border:1px solid #213747;text-align:left;padding:8px;font-size:15px;">
+                    Opportunity Details
+                  </th>
+                </tr>
+                <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Device Opportunity Size(units)</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.units ?? "N/A"}</td></tr>
+                <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Budget Per Device ($)</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.budget ?? "N/A"}</td></tr>
+                <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Revenue Opportunity Size($ Device Rev)</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.revenue ?? "N/A"}</td></tr>
+                <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">ingram_account #</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.ingramAccount ?? "N/A"}</td></tr>
+                <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Quote #</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.quote ?? "N/A"}</td></tr>
+                <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Segment</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.segment ?? "N/A"}</td></tr>
+                <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Existing Manufacturer</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.manufacturer ?? "N/A"}</td></tr>
+              </table>
 
-        ${data.notes ? `
-        <table width="100%" cellpadding="8" cellspacing="0" style="border:1px solid #ccc;border-collapse:collapse;margin:15px 0;">
-          <tr>
-            <th style="background:#E3E3E3;border:1px solid #213747;text-align:left;padding:8px;font-size:15px;">
-              Order Notes
-            </th>
-          </tr>
-          <tr>
-            <td style="border:1px solid #ccc;padding:8px;color:#4b5563;">${data.notes}</td>
-          </tr>
-        </table>
-        ` : ''}
-      `
-    ),
-  };
+              ${data.notes ? `
+              <table width="100%" cellpadding="8" cellspacing="0" style="border:1px solid #ccc;border-collapse:collapse;margin:15px 0;">
+                <tr>
+                  <th style="background:#E3E3E3;border:1px solid #213747;text-align:left;padding:8px;font-size:15px;">
+                    Order Notes
+                  </th>
+                </tr>
+                <tr>
+                  <td style="border:1px solid #ccc;padding:8px;color:#4b5563;">${data.notes}</td>
+                </tr>
+              </table>
+              ` : ''}
+            `
+          ),
+        };
 
 
     /* -------- ORDER_PLACED_Admin-------- */
@@ -1560,6 +1560,184 @@ case "ORDER_RETURN_ADMIN":
       `
     ),
   };
+
+/* -------- Win report user-------- */
+case "REPORT_A_WIN_USER":
+  return {
+    subject: `Report a Win #${data.orderNumber ?? "N/A"} | Ingram Micro Surface`,
+    html: orderLayout(
+      `Win Report Submitted #${data.orderNumber ?? "N/A"} | Ingram Micro Surface`,
+      `
+        <h3 style="margin:0;font-size:18px;font-weight:bold;color:#000;">
+          Win Report Submitted
+          <br>
+          <span style="font-size:14px;font-weight:normal;color:#848484;">
+            ${new Date().toLocaleDateString()}
+          </span>
+        </h3>
+
+        <!-- HERO IMAGE (KEEPING SAME) -->
+        <div style="text-align:center; margin:24px 0;">
+          <img src="https://hcxexaouqvbvaycgpmfs.supabase.co/storage/v1/object/public/order-files/order%20email/report%20a%20win.png"
+               width="550"
+               style="width:100%; max-width:550px; height:auto;">
+        </div>
+
+        <!-- HEADER INFO -->
+        <p><strong>Submitted by:</strong> ${data.submittedBy ?? "N/A"}</p>
+        <p><strong>Win Reported Order#</strong> (${data.orderNumber ?? "N/A"})</p>
+
+        <!-- PRODUCT TABLE -->
+        <table width="100%" cellpadding="8" cellspacing="0"
+          style="border-collapse:collapse;margin:15px 0;">
+          <tr style="background:#3C8DBC;color:#fff;font-weight:bold;">
+            <td style="border:1px solid #ccc;">Product</td>
+            <td style="border:1px solid #ccc;" width="120">Quantity</td>
+          </tr>
+          <tr>
+            <td style="border:1px solid #ccc;">${data.product ?? "N/A"}</td>
+            <td style="border:1px solid #ccc;">${data.units ?? "N/A"}</td>
+          </tr>
+        </table>
+
+        <!-- DETAILS TABLE -->
+        <table width="100%" cellpadding="8" cellspacing="0"
+          style="border-collapse:collapse;margin:15px 0;">
+
+          <tr>
+            <td style="font-weight:bold;border:1px solid #ccc;">Ingram #</td>
+            <td style="border:1px solid #ccc;">${data.resellerAccount ?? "N/A"}</td>
+          </tr>
+
+          <tr>
+            <td style="font-weight:bold;border:1px solid #ccc;">Customer Name</td>
+            <td style="border:1px solid #ccc;">${data.customerName ?? "N/A"}</td>
+          </tr>
+
+          <tr>
+            <td style="font-weight:bold;border:1px solid #ccc;">Number of Units</td>
+            <td style="border:1px solid #ccc;">${data.units ?? "N/A"}</td>
+          </tr>
+
+          <tr>
+            <td style="font-weight:bold;border:1px solid #ccc;">Is this a one-time purchase or roll-out?</td>
+            <td style="border:1px solid #ccc;">${data.purchaseType ?? "N/A"}</td>
+          </tr>
+
+          <tr>
+            <td style="font-weight:bold;border:1px solid #ccc;">Total Deal Revenue ($)</td>
+            <td style="border:1px solid #ccc;">${data.revenue ?? "N/A"}</td>
+          </tr>
+
+          <tr>
+            <td style="font-weight:bold;border:1px solid #ccc;">Date of Purchase</td>
+            <td style="border:1px solid #ccc;">${data.purchaseDate ?? "N/A"}</td>
+          </tr>
+
+          <tr>
+            <td style="font-weight:bold;border:1px solid #ccc;">How did Ingram Surface help you close this deal?</td>
+            <td style="border:1px solid #ccc;">${data.notes ?? "N/A"}</td>
+          </tr>
+
+        </table>
+      `
+    ),
+  };
+
+/* -------- Win report admin-------- */
+
+case "REPORT_A_WIN_ADMIN":
+  return {
+    subject: `New Win Report Submitted #${data.orderNumber ?? "N/A"} | Ingram Micro Surface`,
+    html: orderLayout(
+      `New Win Report Submitted #${data.orderNumber ?? "N/A"} | Ingram Micro Surface`,
+      `
+        <h3 style="margin:0;font-size:18px;font-weight:bold;color:#000;">
+          Win Report Notification
+          <br>
+          <span style="font-size:14px;font-weight:normal;color:#848484;">
+            ${new Date().toLocaleDateString()}
+          </span>
+        </h3>
+
+        <!-- HERO IMAGE -->
+        <div style="text-align:center; margin:24px 0;">
+          <img src="https://hcxexaouqvbvaycgpmfs.supabase.co/storage/v1/object/public/order-files/order%20email/report%20a%20win.png"
+               width="550"
+               style="width:100%; max-width:550px; height:auto;">
+        </div>
+
+        <p><strong>Submitted by:</strong> ${data.submittedBy ?? "N/A"}</p>
+        <p><strong>Win Reported Order#</strong> (${data.orderNumber ?? "N/A"})</p>
+
+        <!-- PRODUCT TABLE -->
+        <table width="100%" cellpadding="8" cellspacing="0"
+          style="border-collapse:collapse;margin:15px 0;">
+          <tr style="background:#3C8DBC;color:#fff;font-weight:bold;">
+            <td style="border:1px solid #ccc;">Product</td>
+            <td style="border:1px solid #ccc;" width="120">Quantity</td>
+          </tr>
+          <tr>
+            <td style="border:1px solid #ccc;">${data.product ?? "N/A"}</td>
+            <td style="border:1px solid #ccc;">${data.units ?? "N/A"}</td>
+          </tr>
+        </table>
+
+        <!-- DETAILS TABLE -->
+        <table width="100%" cellpadding="8" cellspacing="0"
+          style="border-collapse:collapse;margin:15px 0;">
+
+          <tr>
+            <td style="font-weight:bold;border:1px solid #ccc;">Ingram #</td>
+            <td style="border:1px solid #ccc;">${data.resellerAccount ?? "N/A"}</td>
+          </tr>
+
+          <tr>
+            <td style="font-weight:bold;border:1px solid #ccc;">Customer Name</td>
+            <td style="border:1px solid #ccc;">${data.customerName ?? "N/A"}</td>
+          </tr>
+
+          <tr>
+            <td style="font-weight:bold;border:1px solid #ccc;">Number of Units</td>
+            <td style="border:1px solid #ccc;">${data.units ?? "N/A"}</td>
+          </tr>
+
+          <tr>
+            <td style="font-weight:bold;border:1px solid #ccc;">Purchase Type</td>
+            <td style="border:1px solid #ccc;">${data.purchaseType ?? "N/A"}</td>
+          </tr>
+
+          <tr>
+            <td style="font-weight:bold;border:1px solid #ccc;">Revenue ($)</td>
+            <td style="border:1px solid #ccc;">${data.revenue ?? "N/A"}</td>
+          </tr>
+
+          <tr>
+            <td style="font-weight:bold;border:1px solid #ccc;">Purchase Date</td>
+            <td style="border:1px solid #ccc;">${data.purchaseDate ?? "N/A"}</td>
+          </tr>
+
+          ${
+            data.isOther
+              ? `
+          <tr>
+            <td style="font-weight:bold;border:1px solid #ccc;">Custom SKU</td>
+            <td style="border:1px solid #ccc;">${data.otherDesc ?? "N/A"}</td>
+          </tr>
+          `
+              : ""
+          }
+
+          <tr>
+            <td style="font-weight:bold;border:1px solid #ccc;">Deal Notes</td>
+            <td style="border:1px solid #ccc;">${data.notes ?? "N/A"}</td>
+          </tr>
+
+        </table>
+      `
+    ),
+  };
+
 
 /* -------- eol-device-------- */
 case "EOL_DEVICE_SUBMITTED":

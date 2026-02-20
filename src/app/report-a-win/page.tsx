@@ -147,77 +147,150 @@ setOrders(filteredOrders);
     ? otherProduct
     : form.product_name;
 
+const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  e.preventDefault();
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  if (!selectedOrder) {
+    setModalMessage("Please select an order first.");
+    setShowModal(true);
+    return;
+  }
 
-    e.preventDefault();
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
 
-    if (!selectedOrder) {
-      setModalMessage("Please select an order first.");
+  if (!session) {
+    setModalMessage("Session expired. Please login again.");
+    setShowModal(true);
+    return;
+  }
+
+  if (isOtherSelected && !otherProduct.trim()) {
+    setModalMessage("Please enter other device / SKU.");
+    setShowModal(true);
+    return;
+  }
+
+  try {
+    const res = await fetch("/api/report-a-win", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        order_id: selectedOrder,
+        user_id: session.user.id,
+        product: productToSave,
+        submitted_by: email,
+        isOther: isOtherSelected,
+        otherDesc: isOtherSelected ? otherProduct : null,
+        reseller,
+        resellerAccount: form.account,
+        orderHash: form.orderNumber,
+        customerName: form.customerName,
+        units: form.numberOfUnits,
+        revenue: form.totalRevenue,
+        purchaseType: form.oneTimePurchase,
+        purchaseDate: form.dateOfPurchase,
+        notes: form.description,
+      }),
+    });
+
+    const result = await res.json();
+
+    if (!res.ok) {
+      setModalMessage(result.error || "Something went wrong.");
       setShowModal(true);
       return;
     }
 
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
+ // USER EMAIL (fire & forget)
+fetch("/api/send-email", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    to: email,
+    type: "REPORT_A_WIN_USER",
+    data: {
+      reseller,
+      resellerAccount: form.account,
+      orderNumber: form.orderNumber,
+      customerName: form.customerName,
+      units: form.numberOfUnits,
+      revenue: form.totalRevenue,
+      purchaseType: form.oneTimePurchase,
+      purchaseDate: form.dateOfPurchase,
+      notes: form.description,
+      product: productToSave,
+      submittedBy: email,
+    },
+  }),
+}).catch(err => console.error("User email error:", err));
 
-    if (isOtherSelected && !otherProduct.trim()) {
-      setModalMessage("Please enter other device / SKU.");
-      setShowModal(true);
-      return;
-    }
 
-    const { error } = await supabase
-      .from("win_reports")
-      .insert([
-        {
-          order_id: selectedOrder,
-          user_id: session?.user?.id,
-          product_id: productToSave,        // formatted products string
-          submitted_by: email,
-          isOther: isOtherSelected,
-          otherDesc: isOtherSelected ? otherProduct : null,
-          reseller: reseller,
-          resellerAccount: form.account,
-          orderHash: form.orderNumber,
-          customerName: form.customerName,
-          units: form.numberOfUnits,
-          deal_rev: form.totalRevenue,
-          purchaseType: form.oneTimePurchase,
-          purchaseDate: form.dateOfPurchase,
-          notes: form.description,
-        },
-      ]);
+// ADMIN EMAIL (fire & forget)
+fetch("/api/send-email", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    to: "ahmer.ali@works360.com",
+    type: "REPORT_A_WIN_ADMIN",
+    data: {
+      order_id: selectedOrder,
+        user_id: session.user.id,
+        submittedBy: email,
 
-      
+        reseller,
+        resellerAccount: form.account,
 
-    if (error) {
-      console.log("Error inserting into win_reports:", error);
-      setModalMessage("Something went wrong. Please try again.");
-      setShowModal(true);
-    } else {
-      setModalMessage("Win reported successfully! 🎉");
-      setShowModal(true);
+        orderNumber: form.orderNumber,
+        product: productToSave,
 
-        setOrders(prev => prev.filter(o => o.id !== selectedOrder));
-  setSelectedOrder("");
-  setOrderItems([]);
-  setIsOtherSelected(false);
-  setOtherProduct("");
-  setForm({
-    orderNumber: "",
-    product_name: "",
-    account: "",
-    customerName: "",
-    numberOfUnits: "",
-    totalRevenue: "",
-    oneTimePurchase: "",
-    dateOfPurchase: "",
-    description: "",
-  });
-    }
-  };
+        isOther: isOtherSelected,
+        otherDesc: isOtherSelected ? otherProduct : null,
+
+        customerName: form.customerName,
+        units: form.numberOfUnits,
+        revenue: form.totalRevenue,
+
+        purchaseType: form.oneTimePurchase,
+        purchaseDate: form.dateOfPurchase,
+
+        notes: form.description,
+    },
+  }),
+}).catch(err => console.error("Admin email error:", err));
+
+    // ✅ SUCCESS
+    setModalMessage("Win reported successfully! 🎉");
+    setShowModal(true);
+
+    setOrders(prev => prev.filter(o => o.id !== selectedOrder));
+    setSelectedOrder("");
+    setOrderItems([]);
+    setIsOtherSelected(false);
+    setOtherProduct("");
+
+    setForm({
+      orderNumber: "",
+      product_name: "",
+      account: "",
+      customerName: "",
+      numberOfUnits: "",
+      totalRevenue: "",
+      oneTimePurchase: "",
+      dateOfPurchase: "",
+      description: "",
+    });
+
+  } catch (err) {
+    console.error("API Error:", err);
+    setModalMessage("Server error. Please try again.");
+    setShowModal(true);
+  }
+};
+
 
 
   return (
