@@ -157,6 +157,7 @@ export default function EOLDevicesPage() {
                 type="email"
                 value={email}
                 readOnly
+                required
                 className="w-full border border-gray-300 px-3 py-1.5 text-sm rounded-md bg-white"
               />
             </div>
@@ -172,7 +173,7 @@ export default function EOLDevicesPage() {
                   <button
                     type="button"
                     onClick={() => removeProduct(index)}
-                   className="absolute cursor-pointer top-0 right-0 text-red-500 hover:text-red-800"
+                   className="absolute cursor-pointer top-1 right-0 text-red-500 hover:text-red-800"
                   >
                     <X size={16} />
                   </button>
@@ -183,6 +184,7 @@ export default function EOLDevicesPage() {
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Product Name
+                      <span className="text-red-500 ml-1">*</span>
                     </label>
                     <input
                       type="text"
@@ -198,6 +200,7 @@ export default function EOLDevicesPage() {
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       SKU
+                      <span className="text-red-500 ml-1">*</span>
                     </label>
                     <input
                       type="text"
@@ -213,6 +216,7 @@ export default function EOLDevicesPage() {
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Quantity
+                      <span className="text-red-500 ml-1">*</span>
                     </label>
                     <input
                       type="number"
@@ -231,6 +235,7 @@ export default function EOLDevicesPage() {
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Address
+                      <span className="text-red-500 ml-1">*</span>
                     </label>
                     <input
                       type="text"

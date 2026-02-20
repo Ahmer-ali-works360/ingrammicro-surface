@@ -1785,7 +1785,47 @@ case "EOL_DEVICE_SUBMITTED":
     ),
   };
 
+/* -------- dispatch-device-------- */
+case "DISPATCH_DEVICE_SUBMITTED":
+  return {
+    subject: "Dispatch Submitted | Ingrammicro Surface",
+    html: baseLayout(
+      "Device Dispatch Submitted",
+      `
+        <p><strong>Submitted By:</strong> ${data.submitted_by}</p>
+        <p><strong>Tracking Number:</strong> ${data.tracking_number}</p>
+        <p><strong>Date of Shipment:</strong> ${data.shipment_date}</p>
 
+        <table width="100%" cellpadding="8" cellspacing="0" 
+          style="border:1px solid #ccc;border-collapse:collapse;margin-top:20px;">
+          
+          <tr style="background:#E3E3E3;">
+            <th style="border:1px solid #ccc;text-align:left;">Product</th>
+            <th style="border:1px solid #ccc;text-align:left;">SKU</th>
+            <th style="border:1px solid #ccc;text-align:left;">Qty</th>
+            <th style="border:1px solid #ccc;text-align:left;">Inventory Owner</th>
+          </tr>
+
+          ${
+            data.products?.length
+              ? data.products.map((item: any) => `
+                  <tr>
+                    <td style="border:1px solid #ccc;">${item.product_name}</td>
+                    <td style="border:1px solid #ccc;">${item.sku}</td>
+                    <td style="border:1px solid #ccc;">${item.quantity}</td>
+                    <td style="border:1px solid #ccc;">${item.inventory_owner}</td>
+                  </tr>
+                `).join("")
+              : `<tr>
+                   <td colspan="4" style="border:1px solid #ccc;">
+                     No products
+                   </td>
+                 </tr>`
+          }
+        </table>
+      `
+    ),
+  };
 
 
     /* -------- SAFETY -------- */
