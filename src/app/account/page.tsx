@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 import { User, Lock, ChevronRight, Eye, EyeOff } from "lucide-react";
@@ -12,14 +11,10 @@ export default function AccountPage() {
   const [user, setUser] = useState<any>(null);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
-  const [uploading, setUploading] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // Sidebar tab
   const [activeTab, setActiveTab] = useState<"account" | "password">("account");
 
-  // Password form states
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -27,14 +22,11 @@ export default function AccountPage() {
   const [showNew, setShowNew] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
 
-  // ---------------------------
-  // Load session + profile
-  // ---------------------------
   useEffect(() => {
     const loadProfile = async (userId: string) => {
       const { data, error } = await supabase
         .from("profiles")
-        .select("first_name, last_name, avatar_url")
+        .select("first_name, last_name")
         .eq("id", userId)
         .single();
 
@@ -46,7 +38,6 @@ export default function AccountPage() {
       if (data) {
         setFirstName(data.first_name || "");
         setLastName(data.last_name || "");
-        setAvatarUrl(data.avatar_url || null);
       }
     };
 
@@ -80,62 +71,13 @@ export default function AccountPage() {
     };
   }, [router]);
 
-  // ---------------------------
-  // Avatar upload
-  // ---------------------------
-  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!user) return;
-    if (!e.target.files || e.target.files.length === 0) return;
-
-    try {
-      setUploading(true);
-
-      const file = e.target.files[0];
-      const fileExt = file.name.split(".").pop();
-      const filePath = `${user.id}.${fileExt}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from("avatars")
-        .upload(filePath, file, { upsert: true });
-
-      if (uploadError) throw uploadError;
-
-      const { data } = supabase.storage
-        .from("avatars")
-        .getPublicUrl(filePath);
-
-      const publicUrl = data.publicUrl;
-
-      const { error: updateError } = await supabase
-        .from("profiles")
-        .update({ avatar_url: publicUrl })
-        .eq("id", user.id);
-
-      if (updateError) throw updateError;
-
-      // Force image refresh
-      setAvatarUrl(`${publicUrl}?t=${Date.now()}`);
-    } catch (err) {
-      console.error(err);
-      alert("Avatar upload failed");
-    } finally {
-      setUploading(false);
-    }
-  };
-
-  // ---------------------------
-  // Update profile
-  // ---------------------------
   const handleUpdateAccount = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
 
     const { error } = await supabase
       .from("profiles")
-      .update({
-        first_name: firstName,
-        last_name: lastName,
-      })
+      .update({ first_name: firstName, last_name: lastName })
       .eq("id", user.id);
 
     if (error) {
@@ -147,9 +89,6 @@ export default function AccountPage() {
     alert("Profile updated successfully!");
   };
 
-  // ---------------------------
-  // Change password with old password verification
-  // ---------------------------
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
@@ -165,7 +104,6 @@ export default function AccountPage() {
     }
 
     try {
-      // Re-authenticate with old password
       const { error: signInError } = await supabase.auth.signInWithPassword({
         email: user.email,
         password: oldPassword,
@@ -176,7 +114,6 @@ export default function AccountPage() {
         return;
       }
 
-      // Update password
       const { error: updateError } = await supabase.auth.updateUser({
         password: newPassword,
       });
@@ -198,75 +135,73 @@ export default function AccountPage() {
 
   if (loading) return <p className="p-6">Loading...</p>;
 
-  // ---------------------------
-  // UI
-  // ---------------------------
   return (
-    <div className="max-w-6xl mx-auto p-6 flex gap-8">
+    <div className="max-w-6xl mx-auto p-4 sm:p-6 flex flex-col md:flex-row gap-6">
+
       {/* LEFT SIDEBAR */}
-      <div className="w-1/4 bg-gray-200 p-4 rounded-md">
-        <div className="flex flex-col items-center gap-4 mb-6">
-          {avatarUrl ? (
-  <div className="w-40 h-40 relative rounded-full overflow-hidden">
-    <Image
-      src={avatarUrl}
-      alt="Profile"
-      fill
-      className="object-cover"
-    />
-  </div>
-) : (
-  <div className="w-24 h-24 bg-gray-300 rounded-full flex items-center justify-center">
-    <span className="text-white text-3xl">
-      {user.email?.charAt(0).toUpperCase()}
-    </span>
-  </div>
-)}
+      <div className="w-full md:w-1/4 bg-gray-200 p-4 rounded-md">
 
+        {/* Silhouette Icon + Email */}
+        <div className="flex flex-col items-center gap-3 mb-6">
 
-          <p className="font-semibold text-sm">{user.email}</p>
+          {/* Big User Silhouette Circle */}
+          <div
+            className="w-24 h-24 rounded-full flex items-center justify-center shadow-md"
+            style={{ backgroundColor: "#4799D5" }}
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="white"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="w-12 h-12"
+            >
+              <circle cx="12" cy="8" r="4" />
+              <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
+            </svg>
+          </div>
 
-          <label className="text-sm text-blue-500 cursor-pointer">
-            {uploading ? "Uploading..." : "Change Photo"}
-            <input type="file" className="hidden" onChange={handleUpload} />
-          </label>
+          <p className="font-semibold text-sm text-center break-all">{user.email}</p>
         </div>
 
         {/* MENU */}
-        <nav className="flex flex-col gap-2 text-sm w-full">
-        
-
+        <nav className="flex flex-row md:flex-col gap-2 text-sm w-full">
           <button
             onClick={() => setActiveTab("account")}
-            className={`flex items-center justify-between px-3 py-2 rounded w-full transition ${activeTab === "account" ? "bg-blue-200" : "hover:bg-gray-100"
-              }`}
+            className={`flex items-center justify-between px-3 py-2 rounded w-full transition ${
+              activeTab === "account" ? "bg-blue-200" : "hover:bg-gray-100"
+            }`}
           >
             <div className="flex items-center gap-2">
-              <User className="w-4 h-4 text-blue-600" />
-              <span className="font-medium text-gray-700">Account</span>
+              <User className="w-4 h-4 text-blue-600 shrink-0" />
+              <span className="font-medium text-gray-700 text-xs sm:text-sm">Account</span>
             </div>
-            <ChevronRight className="w-4 h-4 text-gray-400" />
+            <ChevronRight className="w-4 h-4 text-gray-400 hidden md:block" />
           </button>
 
           <button
             onClick={() => setActiveTab("password")}
-            className={`flex items-center justify-between px-3 py-2 rounded w-full transition ${activeTab === "password" ? "bg-blue-200" : "hover:bg-gray-100"
-              }`}
+            className={`flex items-center justify-between px-3 py-2 rounded w-full transition ${
+              activeTab === "password" ? "bg-blue-200" : "hover:bg-gray-100"
+            }`}
           >
             <div className="flex items-center gap-2">
-              <Lock className="w-4 h-4 text-blue-600" />
-              <span className="font-medium text-gray-700">Change Password</span>
+              <Lock className="w-4 h-4 text-blue-600 shrink-0" />
+              <span className="font-medium text-gray-700 text-xs sm:text-sm whitespace-nowrap">Change Password</span>
             </div>
-            <ChevronRight className="w-4 h-4 text-gray-400" />
+            <ChevronRight className="w-4 h-4 text-gray-400 hidden md:block" />
           </button>
         </nav>
       </div>
 
       {/* RIGHT FORM */}
-      <div className="w-3/4 bg-white p-6 rounded-md shadow-md flex flex-col gap-4">
+      <div className="w-full md:w-3/4 bg-white p-4 sm:p-6 rounded-md shadow-md flex flex-col gap-4">
         {activeTab === "account" ? (
           <form onSubmit={handleUpdateAccount} className="flex flex-col gap-4">
-            <h1 className="text-2xl font-bold mb-4">Account</h1>
+            <h1 className="text-xl sm:text-2xl font-bold mb-2">Account</h1>
 
             <div>
               <label className="block text-sm font-medium mb-1">Username</label>
@@ -274,7 +209,7 @@ export default function AccountPage() {
                 type="text"
                 value={user.email}
                 disabled
-                className="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100 cursor-not-allowed"
+                className="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100 cursor-not-allowed text-sm"
               />
             </div>
 
@@ -284,7 +219,7 @@ export default function AccountPage() {
                 type="text"
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
-                className="w-full border border-gray-300 rounded px-3 py-2"
+                className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
               />
             </div>
 
@@ -294,99 +229,69 @@ export default function AccountPage() {
                 type="text"
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
-                className="w-full border border-gray-300 rounded px-3 py-2"
+                className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
               />
             </div>
 
             <button
               type="submit"
-              className="mt-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition"
+              className="custom-blue mt-2 text-white px-4 py-2 rounded transition text-sm sm:text-base"
             >
               Update Account
             </button>
           </form>
         ) : (
           <form onSubmit={handleChangePassword} className="flex flex-col gap-4">
+            <h1 className="text-xl sm:text-2xl font-bold mb-2">Change Password</h1>
 
-            <div className="flex flex-col gap-4">
-              <h1 className="text-2xl font-bold mb-4">Change Password</h1>
-
-              {/* Old Password */}
-              <div className="relative">
-                <input
-                  type={showOld ? "text" : "password"}
-                  value={oldPassword}
-                  onChange={(e) => setOldPassword(e.target.value)}
-                  placeholder="Old Password"
-                  className="w-full border border-gray-300 rounded px-3 py-2 pr-10"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowOld(!showOld)}
-                  className="absolute right-2 top-1/2 -translate-y-1/2"
-                >
-                  {showOld ? (
-                    <EyeOff className="w-5 h-5 text-gray-500" />
-                  ) : (
-                    <Eye className="w-5 h-5 text-gray-500" />
-                  )}
-                </button>
-              </div>
-
-              {/* New Password */}
-              <div className="relative">
-                <input
-                  type={showNew ? "text" : "password"}
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  placeholder="New Password"
-                  className="w-full border border-gray-300 rounded px-3 py-2 pr-10"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowNew(!showNew)}
-                  className="absolute right-2 top-1/2 -translate-y-1/2"
-                >
-                  {showNew ? (
-                    <EyeOff className="w-5 h-5 text-gray-500" />
-                  ) : (
-                    <Eye className="w-5 h-5 text-gray-500" />
-                  )}
-                </button>
-              </div>
-
-              {/* Confirm Password */}
-              <div className="relative">
-                <input
-                  type={showConfirm ? "text" : "password"}
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="Confirm Password"
-                  className="w-full border border-gray-300 rounded px-3 py-2 pr-10"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowConfirm(!showConfirm)}
-                  className="absolute right-2 top-1/2 -translate-y-1/2"
-                >
-                  {showConfirm ? (
-                    <EyeOff className="w-5 h-5 text-gray-500" />
-                  ) : (
-                    <Eye className="w-5 h-5 text-gray-500" />
-                  )}
-                </button>
-              </div>
-
-              <button
-                type="submit"
-                className="mt-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition"
-              >
-                Change Password
+            {/* Old Password */}
+            <div className="relative">
+              <input
+                type={showOld ? "text" : "password"}
+                value={oldPassword}
+                onChange={(e) => setOldPassword(e.target.value)}
+                placeholder="Old Password"
+                className="w-full border border-gray-300 rounded px-3 py-2 pr-10 text-sm"
+              />
+              <button type="button" onClick={() => setShowOld(!showOld)} className="absolute right-2 top-1/2 -translate-y-1/2">
+                {showOld ? <EyeOff className="w-5 h-5 text-gray-500" /> : <Eye className="w-5 h-5 text-gray-500" />}
               </button>
             </div>
 
+            {/* New Password */}
+            <div className="relative">
+              <input
+                type={showNew ? "text" : "password"}
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder="New Password"
+                className="w-full border border-gray-300 rounded px-3 py-2 pr-10 text-sm"
+              />
+              <button type="button" onClick={() => setShowNew(!showNew)} className="absolute right-2 top-1/2 -translate-y-1/2">
+                {showNew ? <EyeOff className="w-5 h-5 text-gray-500" /> : <Eye className="w-5 h-5 text-gray-500" />}
+              </button>
+            </div>
 
+            {/* Confirm Password */}
+            <div className="relative">
+              <input
+                type={showConfirm ? "text" : "password"}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Confirm Password"
+                className="w-full border border-gray-300 rounded px-3 py-2 pr-10 text-sm"
+              />
+              <button type="button" onClick={() => setShowConfirm(!showConfirm)} className="absolute right-2 top-1/2 -translate-y-1/2">
+                {showConfirm ? <EyeOff className="w-5 h-5 text-gray-500" /> : <Eye className="w-5 h-5 text-gray-500" />}
+              </button>
+            </div>
 
+            <button
+              type="submit"
+              className="custom-blue mt-2 text-white px-4 py-2 rounded transition text-sm sm:text-base"
+            >
+              Change Password
+            </button>
           </form>
         )}
       </div>

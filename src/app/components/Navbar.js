@@ -362,46 +362,44 @@ const [bellDropdownOpen, setBellDropdownOpen] = useState(false);
 
             {/* Desktop: hover se dropdown */}
             <div className="group hidden md:block">
-              <Link
-                href="/account"
-                aria-label="Account"
-                className="flex items-center gap-1 hover:opacity-70"
-              >
+              <button
+  aria-label="Account"
+  className="flex items-center gap-1 hover:opacity-70"
+>
                 <FiUser className="w-6 h-6" />
                 <FiChevronDown size={16} className="transition-transform group-hover:rotate-180" />
-              </Link>
+              </button>
 
               <div className="absolute right-0 top-full pt-0 w-36 bg-white border border-gray-200 rounded shadow-md text-[13px] leading-[20px] font-normal text-[#2B3F50] opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity z-50">
                 {!user ? (
-                  <>
-                    <Link href="/account-registration" className="block w-full px-3 py-3 rounded-t hover:bg-[#2B3F50] hover:text-white">Register</Link>
-                    <Link href="/login" className="block w-full px-3 py-3 rounded-b hover:bg-[#2B3F50] hover:text-white">Login</Link>
-                  </>
-                ) : (
-                  <button
-                    onClick={handleLogout}
-                    className="block w-full px-3 py-3 rounded hover:bg-[#2B3F50] hover:text-white bg-transparent border-none text-left"
-                  >
-                    Logout
-                  </button>
-                )}
+  <>
+    <Link href="/account-registration" className="block w-full px-3 py-3 rounded-t hover:bg-[#2B3F50] hover:text-white">Register</Link>
+    <Link href="/login" className="block w-full px-3 py-3 rounded-b hover:bg-[#2B3F50] hover:text-white">Login</Link>
+  </>
+) : (
+  <>
+    <Link href="/account" className="block w-full px-3 py-3 rounded-t hover:bg-[#2B3F50] hover:text-white">
+      Account
+    </Link>
+    <button
+      onClick={handleLogout}
+      className="block w-full px-3 py-3 rounded-b hover:bg-[#2B3F50] hover:text-white bg-transparent border-none text-left"
+    >
+      Logout
+    </button>
+  </>
+)}
               </div>
             </div>
 
             {/* Mobile: User Icon click = account page, Arrow click = dropdown */}
             <div className="flex md:hidden items-center gap-1">
-              <Link
-                href="/account"
-                aria-label="Account"
-                className="hover:opacity-70"
-                onClick={() => {
-                  setBellDropdownOpen(false);
-                  setUserDropdownOpen(false);
-                  setMobileMenuOpen(false);
-                }}
-              >
-                <FiUser className="w-4 h-4" />
-              </Link>
+              <button
+  aria-label="Account"
+  className="hover:opacity-70"
+>
+  <FiUser className="w-4 h-4" />
+</button>
               <button
                 onClick={() => {
                   setUserDropdownOpen(!userDropdownOpen);
@@ -439,15 +437,24 @@ const [bellDropdownOpen, setBellDropdownOpen] = useState(false);
                     </Link>
                   </>
                 ) : (
-                  <button
-                    onClick={() => {
-                      setUserDropdownOpen(false);
-                      handleLogout();
-                    }}
-                    className="block w-full px-3 py-3 rounded hover:bg-[#2B3F50] hover:text-white bg-transparent border-none text-left"
-                  >
-                    Logout
-                  </button>
+                  <>
+    <Link
+      href="/account"
+      onClick={() => setUserDropdownOpen(false)}
+      className="block w-full px-3 py-3 rounded-t hover:bg-[#2B3F50] hover:text-white"
+    >
+      Account
+    </Link>
+    <button
+      onClick={() => {
+        setUserDropdownOpen(false);
+        handleLogout();
+      }}
+      className="block w-full px-3 py-3 rounded-b hover:bg-[#2B3F50] hover:text-white bg-transparent border-none text-left"
+    >
+      Logout
+    </button>
+  </>
                 )}
               </div>
             )}
