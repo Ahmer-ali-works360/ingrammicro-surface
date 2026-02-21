@@ -158,11 +158,8 @@ const [bellDropdownOpen, setBellDropdownOpen] = useState(false);
                 >
                   <FiBell className="w-6 h-6" />
                   {notificationCounts.total > 0 && (
-                  <span className="absolute -top-2 -right-2">
-  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-  <span className="relative inline-flex items-center justify-center bg-red-500 text-white text-[10px] font-bold rounded-full w-4 h-4 border-2 border-white">
-    {notificationCounts.total}
-  </span>
+<span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center border-2 border-white">
+  {notificationCounts.total}
 </span>
                   )}
                 </button>
@@ -187,9 +184,9 @@ const [bellDropdownOpen, setBellDropdownOpen] = useState(false);
                   >
                     <span>Orders</span>
                     {notificationCounts.orders > 0 && (
-                      <span className="bg-red-500 text-white text-xs rounded-full px-2">
-                        {notificationCounts.orders}
-                      </span>
+                      <span className="bg-red-500 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
+  {notificationCounts.orders}
+</span>
                     )}
                   </Link>
                   {role !== "shop_manager" && (
@@ -211,7 +208,7 @@ const [bellDropdownOpen, setBellDropdownOpen] = useState(false);
                     >
                       <span>Users</span>
                       {notificationCounts.users > 0 && (
-                        <span className="bg-red-500 text-white text-xs rounded-full px-2">
+                        <span className="bg-red-500 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
                           {notificationCounts.users}
                         </span>
                       )}
@@ -233,11 +230,8 @@ const [bellDropdownOpen, setBellDropdownOpen] = useState(false);
               >
                 <FiBell className="w-4 h-4" />
                 {notificationCounts.total > 0 && (
-                  <span className="absolute -top-2 -right-2">
-  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-  <span className="relative inline-flex items-center justify-center bg-red-500 text-white text-[10px] font-bold rounded-full w-4 h-4 border-2 border-white">
-    {notificationCounts.total}
-  </span>
+                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center border-2 border-white">
+  {notificationCounts.total}
 </span>
                 )}
               </button>
@@ -264,9 +258,9 @@ const [bellDropdownOpen, setBellDropdownOpen] = useState(false);
                   >
                     <span>Orders</span>
                     {notificationCounts.orders > 0 && (
-                      <span className="bg-red-500 text-white text-xs rounded-full px-2">
-                        {notificationCounts.orders}
-                      </span>
+                     <span className="bg-red-500 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
+  {notificationCounts.orders}
+</span>
                     )}
                   </Link>
                   {role !== "shop_manager" && (
@@ -289,7 +283,7 @@ const [bellDropdownOpen, setBellDropdownOpen] = useState(false);
                     >
                       <span>Users</span>
                       {notificationCounts.users > 0 && (
-                        <span className="bg-red-500 text-white text-xs rounded-full px-2">
+                        <span className="bg-red-500 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
                           {notificationCounts.users}
                         </span>
                       )}
