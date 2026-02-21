@@ -5,7 +5,7 @@
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 import { useAuth } from "@/app/context/AuthContext";
 
 
@@ -24,7 +24,7 @@ function LoginPageContent() {
 
    // Custom toast styles
 
-const isMobile = window.innerWidth < 640;
+const isMobile = typeof window !== "undefined" ? window.innerWidth < 640 : false;
 const toastOptions = {
   success: {
     duration: 7000,
@@ -126,7 +126,7 @@ setTimeout(() => {
 
   return (
   <>
-    <Toaster 
+    {/* <Toaster 
   position="top-right"
   containerStyle={{
     top: 60,  // Page ke top se 60px neeche
@@ -136,7 +136,7 @@ setTimeout(() => {
       marginRight: '20px',  // Right side se 20px spacing
     },
   }}
-/>
+/> */}
 
     <div className="relative min-h-screen flex items-start sm:items-center justify-center px-4 py-16 sm:py-24 overflow-hidden">
       {/* Background image */}

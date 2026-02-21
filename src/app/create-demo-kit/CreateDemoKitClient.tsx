@@ -422,32 +422,34 @@ export default function CreateDemoKitClient() {
     </p>
   </div>
 
-  <div className="mt-auto pt-3 flex justify-center">
-    <button
-      disabled={outOfStock}
-      onClick={() => {
-        if (outOfStock) return;
-        addToCart({
-          id: product.id,
-          product_name: product.product_name,
-          image_url: product.thumbnail_url,
-          sku: product.sku,
-          brand: product.brand ?? "—",
-          processor: product.processor ?? "—",
-          memory: product.memory ?? "—",
-          quantity: 1,
-        });
+<div className="mt-auto pt-3 flex justify-center">
+  <button
+    disabled={outOfStock}
+    onClick={() => {
+      if (outOfStock) return;
+      const success = addToCart({
+        id: product.id,
+        product_name: product.product_name,
+        image_url: product.thumbnail_url,
+        sku: product.sku,
+        brand: product.brand ?? "—",
+        processor: product.processor ?? "—",
+        memory: product.memory ?? "—",
+        quantity: 1,
+      });
+      if (success) {
         openCart();
-      }}
-      className={`w-full sm:w-32 py-2 rounded text-sm transition ${
-        outOfStock
-          ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-          : "custom-blue text-white cursor-pointer"
-      }`}
-    >
-      {outOfStock ? "Out of Stock" : "Add to Cart"}
-    </button>
-  </div>
+      }
+    }}
+    className={`w-full sm:w-32 py-2 rounded text-sm transition ${
+      outOfStock
+        ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+        : "custom-blue text-white cursor-pointer"
+    }`}
+  >
+    {outOfStock ? "Out of Stock" : "Add to Cart"}
+  </button>
+</div>
 
 </div>
 </div>

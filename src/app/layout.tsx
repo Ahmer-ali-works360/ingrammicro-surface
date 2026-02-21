@@ -14,6 +14,7 @@ import CartDrawer from "./components/cart/CartDrawer";
 
 /* ✅ AuthContext import */
 import { AuthProvider } from "./context/AuthContext";
+import { Toaster } from "react-hot-toast";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -39,6 +40,15 @@ export default function RootLayout({
         <CartProvider>
           {/* ✅ AuthProvider wraps all components that need auth */}
           <AuthProvider>
+            {/* ✅ Global Toaster */}
+  <Toaster
+    position="top-right"
+    containerStyle={{ top: 60 }}
+    toastOptions={{
+      style: { marginRight: "20px" },
+    }}
+  />
+
             <FontAwesomeClient />
 
             {/* Header */}

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, ReactNode, useEffect } from "react";
+import toast from "react-hot-toast";
 
 /* -------------------- Cart Item Type -------------------- */
 export type CartItem = {
@@ -14,11 +15,10 @@ export type CartItem = {
   quantity: number;
 };
 
-
 /* -------------------- Cart Context Type -------------------- */
 type CartContextType = {
   cartItems: CartItem[];
-  addToCart: (item: CartItem) => void;
+  addToCart: (item: CartItem) => boolean;
   removeFromCart: (id: number | string) => void;
   clearCart: () => void;
   updateQuantity: (id: number | string, quantity: number) => void;
@@ -35,6 +35,48 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
+
+  const isMobile =
+    typeof window !== "undefined" ? window.innerWidth < 640 : false;
+
+  const toastOptions = {
+    success: {
+      duration: 7000,
+      style: {
+        background: "#54c500",
+        color: "#fff",
+        borderRadius: "8px",
+        fontSize: isMobile ? "11px" : "12px",
+        fontWeight: "400",
+        minWidth: isMobile ? "200px" : "320px",
+        maxWidth: isMobile ? "280px" : "500px",
+        padding: isMobile ? "10px 14px" : "16px 20px",
+        boxShadow: "0 4px 12px rgba(16, 185, 129, 0.3)",
+      },
+      iconTheme: {
+        primary: "#fff",
+        secondary: "#10b981",
+      },
+    },
+    error: {
+      duration: 2000,
+      style: {
+        background: "#ef4444",
+        color: "#fff",
+        minWidth: isMobile ? "200px" : "320px",
+        maxWidth: isMobile ? "280px" : "500px",
+        padding: isMobile ? "10px 14px" : "16px 20px",
+        borderRadius: "8px",
+        fontSize: isMobile ? "11px" : "12px",
+        fontWeight: "400",
+        boxShadow: "0 4px 12px rgba(239, 68, 68, 0.3)",
+      },
+      iconTheme: {
+        primary: "#fff",
+        secondary: "#ef4444",
+      },
+    },
+  };
 
   /* -------------------- Load cart from localStorage -------------------- */
   useEffect(() => {
@@ -54,25 +96,39 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   };
 
   /* -------------------- Actions -------------------- */
-  const addToCart = (item: CartItem) => {
+
+  // Returns true if item was successfully added, false if rejected (qty > 3)
+  const addToCart = (item: CartItem): boolean => {
+    let success = false;
+
     setCartItems((prev) => {
       const existing = prev.find((i) => i.id === item.id);
 
-      // calculate new cart state (without setting it yet)
-     const newCart = existing
-      ? prev.map((i) =>
-          i.id === item.id
-            ? { ...i, quantity: i.quantity + item.quantity }
-            : i
-        )
-      : [...prev, { ...item, quantity: item.quantity }];
+      const newCart = existing
+        ? prev.map((i) =>
+            i.id === item.id
+              ? { ...i, quantity: i.quantity + item.quantity }
+              : i
+          )
+        : [...prev, { ...item, quantity: item.quantity }];
 
-      // validate total quantity <= 3
       const totalQty = getTotalQuantity(newCart);
-      if (totalQty > 3) return prev; // reject update
 
+      if (totalQty > 3) {
+  toast.dismiss(); 
+  toast.error(
+    "You can only add maximum 3 items to the cart.",
+    toastOptions.error
+  );
+  success = false;
+  return prev;
+}
+
+      success = true;
       return newCart;
     });
+
+    return success;
   };
 
   const removeFromCart = (id: number | string) => {
@@ -87,9 +143,15 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         i.id === id ? { ...i, quantity: quantity < 1 ? 1 : quantity } : i
       );
 
-      // validate total quantity <= 3
       const totalQty = getTotalQuantity(newCart);
-      if (totalQty > 3) return prev; // reject update
+if (totalQty > 3) {
+  toast.dismiss(); 
+  toast.error(
+    "You can only add maximum 3 items to the cart.",
+    toastOptions.error
+  );
+  return prev;
+}
 
       return newCart;
     });
