@@ -822,7 +822,7 @@ export default function AdminOrderDetailPage({
 
       <div className="max-w-6xl mx-auto px-4 space-y-6">
         {/* ================= BACK + EDIT BAR ================= */}
-        <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center justify-between mb-2 gap-2">
           <button
             onClick={() => router.push("/orders")}
             className="flex items-center gap-2 text-sm cursor-pointer text-gray-600 hover:text-blue-600"
@@ -843,14 +843,14 @@ export default function AdminOrderDetailPage({
             <div className="flex gap-2">
               <button
                 onClick={saveOrder}
-                className="px-4 py-2 custom-blue text-white cursor-pointer rounded-lg"
+                className="px-3 py-1.5 text-xs sm:text-sm sm:px-4 sm:py-2 custom-blue text-white cursor-pointer rounded-lg"
               >
                 Save Order
               </button>
 
               <button
                 onClick={() => router.push(`/orders/${order.id}`)}
-                className="px-4 py-2 border cursor-pointer rounded-lg"
+                className="px-3 py-1.5 text-xs sm:text-sm sm:px-4 sm:py-2 border cursor-pointer rounded-lg"
               >
                 Cancel
               </button>
@@ -865,14 +865,13 @@ export default function AdminOrderDetailPage({
         <div className="bg-white border border-gray-200 rounded-lg shadow">
 
           {/* ===== TOP ROW ===== */}
-          <div className="px-6 py-4 flex items-start justify-between">
+          <div className="px-6 py-4 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
             {/* LEFT */}
             <div>
               <div className="flex items-center gap-3">
                 <h1 className="text-xl font-semibold">
                   Order #{order.order_number}
                 </h1>
-
                 <span className="text-xs px-2 py-1 rounded-full bg-blue-50 text-blue-700">
                   {status.toUpperCase()}
                 </span>
@@ -894,13 +893,13 @@ export default function AdminOrderDetailPage({
             </div>
 
             {/* RIGHT */}
-            <div className="flex items-center gap-2">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
               {(isAdmin || isShopManager) && (
                 <>
                   <select
                     value={status}
                     onChange={(e) => setStatus(e.target.value as OrderStatus)}
-                    className="border border-gray-300 text-sm px-3 py-1.5 bg-white"
+                    className="border border-gray-300 text-sm px-3 py-1.5 bg-white w-full sm:w-auto"
                   >
                     <option value="pending">Pending</option>
                     <option value="approved">Approved</option>
@@ -913,7 +912,8 @@ export default function AdminOrderDetailPage({
                   <button
                     onClick={() => setShowStatusModal(true)}
                     disabled={updating || status === order.status}
-                    className="text-xs font-medium px-4 py-2 text-white custom-blue disabled:cursor-not-allowed transition cursor-pointer rounded-xl" >
+                    className="text-xs font-medium px-4 py-2 text-white custom-blue disabled:cursor-not-allowed transition cursor-pointer rounded-xl w-full sm:w-auto"
+                  >
                     {updating ? "Updating status…" : "Update Status"}
                   </button>
                 </>
@@ -924,13 +924,7 @@ export default function AdminOrderDetailPage({
                   <button
                     onClick={() => updateStatusWithEmail("approved")}
                     disabled={updating}
-                    className="cursor-pointer
-                            flex items-center gap-1.5
-                            rounded-md px-3 py-1.5 text-xs font-medium
-                            bg-green-600
-                            text-white
-                            hover:bg-green-800
-                            disabled:opacity-50"
+                    className="cursor-pointer flex-1 sm:flex-none flex items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium bg-green-600 text-white hover:bg-green-800 disabled:opacity-50"
                   >
                     Approve
                   </button>
@@ -938,27 +932,17 @@ export default function AdminOrderDetailPage({
                   <button
                     onClick={() => updateStatusWithEmail("rejected")}
                     disabled={updating}
-                    className="cursor-pointer
-                          flex items-center gap-1.5
-                          rounded-md px-3 py-1.5 text-xs font-medium
-                          border border-red-500
-                          text-red-600
-                          bg-transparent
-                          hover:bg-gradient-to-r hover:from-red-500 hover:to-red-600
-                          hover:text-white
-                          disabled:opacity-50"
+                    className="cursor-pointer flex-1 sm:flex-none flex items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium border border-red-500 text-red-600 bg-transparent hover:bg-gradient-to-r hover:from-red-500 hover:to-red-600 hover:text-white disabled:opacity-50"
                   >
                     Reject
                   </button>
                 </div>
               )}
-
-
             </div>
           </div>
 
           {/* ===== BOTTOM ROW (APPROVAL INFO) ===== */}
-          <div className="border-t border-gray-200 px-6 py-3 grid grid-cols-2 gap-6">
+          <div className="border-t border-gray-200 px-6 py-3 grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div>
               <p className="text-[10px] uppercase tracking-wide text-gray-400 mb-1">
                 Approved by
@@ -1005,7 +989,7 @@ export default function AdminOrderDetailPage({
                 </p>
               </div>
 
-              <div className="grid grid-cols-2 gap-6 px-6 py-4 text-sm">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 px-6 py-4 text-sm">
 
                 {/* Tracking Number */}
                 <div>
@@ -1253,7 +1237,7 @@ export default function AdminOrderDetailPage({
                       {item.sku}
                     </p>
 
-                    <div className="grid grid-cols-4 gap-4 text-xs items-center">
+                    <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 text-xs items-center">
                       <span>Brand: {item.brand}</span>
                       <span>Processor: {item.processor}</span>
                       <span>Memory: {item.memory}</span>
@@ -1306,7 +1290,7 @@ export default function AdminOrderDetailPage({
               Team Details
             </p>
           </div>
-          <div className="grid grid-cols-2 gap-6 px-6 py-4 text-sm">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 px-6 py-4 text-sm">
             <div>
               <p className="text-xs text-gray-500 mb-1">Account Manager</p>
               <p>{order.seller_name || "-"}</p>
@@ -1321,7 +1305,7 @@ export default function AdminOrderDetailPage({
 
 
         {/* ================= CUSTOMER + OPPORTUNITY ================= */}
-        <div className="grid grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
 
           {/* ================= CUSTOMER INFORMATION ================= */}
           <div className="bg-white border border-gray-200 rounded-lg shadow">
@@ -1410,7 +1394,7 @@ export default function AdminOrderDetailPage({
               </p>
             </div>
 
-            <div className="px-6 py-4 grid grid-cols-2 gap-x-6 gap-y-4">
+            <div className="px-6 py-4 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
               <div>
                 <p className="text-[11px] uppercase tracking-wide text-gray-400 mb-1 flex items-center gap-1">
                   {/* <Layers size={12} className="text-blue-400" /> */}
@@ -1585,7 +1569,7 @@ export default function AdminOrderDetailPage({
                 </p>
               </div>
 
-              <div className="grid grid-cols-2 gap-6 px-6 py-4 text-sm">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 px-6 py-4 text-sm">
 
                 {/* Tracking Number */}
                 <div>
@@ -1813,7 +1797,7 @@ export default function AdminOrderDetailPage({
             </p>
           </div>
 
-          <div className="grid grid-cols-4 gap-6 px-6 py-4 text-sm">
+          <div className="grid grid-cols-1 sm:grid-cols-4 gap-6 px-6 py-4 text-sm">
 
             {/* Address */}
             <div>
@@ -1892,12 +1876,12 @@ export default function AdminOrderDetailPage({
             </p>
           </div>
 
-          <div className="flex items-center px-6 py-6 gap-6">
+          <div className="flex items-center px-4 sm:px-6 py-6 gap-2 sm:gap-6">
             {/* Confirmed */}
             <TimelineDot active={currentStep >= 0} label="Approved" />
 
             <div
-              className={`flex-1 h-px ${currentStep >= 1 ? "bg-blue-400" : "bg-gray-300"
+              className={`flex-1 h-[2px] ${currentStep >= 1 ? "bg-blue-400" : "bg-gray-300"
                 }`}
             />
 
@@ -1905,7 +1889,7 @@ export default function AdminOrderDetailPage({
             <TimelineDot active={currentStep >= 1} label="Shipped" />
 
             <div
-              className={`flex-1 h-px ${currentStep >= 2 ? "bg-blue-400" : "bg-gray-300"
+              className={`flex-1 h-[2px] ${currentStep >= 2 ? "bg-blue-400" : "bg-gray-300"
                 }`}
             />
 
@@ -1963,7 +1947,7 @@ export default function AdminOrderDetailPage({
                     </p>
 
                     {/* Item details */}
-                    <div className="grid grid-cols-4 gap-4 text-xs items-center">
+                    <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 text-xs items-center">
                       <span>Brand: {item.brand}</span>
                       <span>Processor: {item.processor}</span>
                       <span>Memory: {item.memory}</span>
