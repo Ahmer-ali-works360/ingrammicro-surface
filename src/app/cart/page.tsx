@@ -88,18 +88,32 @@ export default function CartPage() {
                       <p className="text-sm text-gray-500">SKU: {item.sku}</p>
                     )}
 
+
                     {/* Quantity Selector */}
                     <div className="flex items-center gap-2">
                       <label className="text-sm">Qty:</label>
-                      <input
-                        type="number"
-                        min={1}
-                        value={item.quantity ?? 1}
-                        className="w-16 border rounded px-2 py-1 text-sm"
-                        onChange={(e) =>
-                          updateQuantity(item.id, Number(e.target.value))
-                        }
-                      />
+                      <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden">
+                        <button
+                          onClick={() =>
+                            updateQuantity(item.id, Math.max(1, (item.quantity ?? 1) - 1))
+                          }
+                          className="w-8 h-8 flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-700 text-lg font-bold transition-colors"
+                        >
+                          −
+                        </button>
+
+                        <span className="w-10 h-8 flex items-center justify-center text-sm font-semibold border-x border-gray-300">
+                          {item.quantity ?? 1}
+                        </span>
+                        <button
+                          onClick={() =>
+                            updateQuantity(item.id, (item.quantity ?? 1) + 1)
+                          }
+                          className="w-8 h-8 flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-700 text-lg font-bold transition-colors"
+                        >
+                          +
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
