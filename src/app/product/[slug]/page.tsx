@@ -195,7 +195,7 @@ const handleWaitlistSubmit = async () => {
             />
 
             {isAllowed && (
-              <div className="absolute top-3 left-3 flex gap-2 opacity-0 group-hover:opacity-100 transition z-20">
+              <div className="absolute top-3 left-3 flex gap-2 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition z-20">  
                 <button
                   onClick={() => router.push(`/edit-product?id=${product.id}`)}
                   className="p-2 bg-white rounded-full shadow hover:bg-gray-100"
