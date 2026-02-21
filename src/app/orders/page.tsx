@@ -23,11 +23,11 @@ export default function AdminOrdersPage() {
   const [search, setSearch] = useState("");
 
   // 🔐 Auth check
-  const { loading: authLoading, isAllowed } = useAuthRole([
-    "admin",
-    "program_manager",
-    "shop_manager",
-  ]);
+ const { loading: authLoading, isAllowed, role } = useAuthRole([
+  "admin",
+  "program_manager",
+  "shop_manager",
+]);
 
   // 🚫 Redirect if not allowed
   useEffect(() => {
@@ -58,12 +58,14 @@ export default function AdminOrdersPage() {
     }
   }, [authLoading, isAllowed]);
 
-  const filteredOrders = useMemo(() => {
-    return orders.filter((o) => {
-      const text = `${o.id} ${o.seller_email}`.toLowerCase();
-      return text.includes(search.toLowerCase());
-    });
-  }, [orders, search]);
+const filteredOrders = useMemo(() => {
+  return orders.filter((o) => {
+    const text = `${o.id} ${o.seller_email}`.toLowerCase();
+    const matchesSearch = text.includes(search.toLowerCase());
+    const matchesRole = role === "program_manager" ? o.status === "pending" : true;
+    return matchesSearch && matchesRole;
+  });
+}, [orders, search, role]);
 
   const downloadExcel = () => {
     if (filteredOrders.length === 0) return;

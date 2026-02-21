@@ -158,9 +158,12 @@ const [bellDropdownOpen, setBellDropdownOpen] = useState(false);
                 >
                   <FiBell className="w-6 h-6" />
                   {notificationCounts.total > 0 && (
-                    <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full px-1">
-                      {notificationCounts.total}
-                    </span>
+                  <span className="absolute -top-2 -right-2">
+  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+  <span className="relative inline-flex items-center justify-center bg-red-500 text-white text-[10px] font-bold rounded-full w-4 h-4 border-2 border-white">
+    {notificationCounts.total}
+  </span>
+</span>
                   )}
                 </button>
 
@@ -230,9 +233,12 @@ const [bellDropdownOpen, setBellDropdownOpen] = useState(false);
               >
                 <FiBell className="w-4 h-4" />
                 {notificationCounts.total > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full px-1">
-                    {notificationCounts.total}
-                  </span>
+                  <span className="absolute -top-2 -right-2">
+  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+  <span className="relative inline-flex items-center justify-center bg-red-500 text-white text-[10px] font-bold rounded-full w-4 h-4 border-2 border-white">
+    {notificationCounts.total}
+  </span>
+</span>
                 )}
               </button>
 
