@@ -609,7 +609,7 @@ case "ORDER_APPROVED_ADMIN":
         return {
           subject: `New Order (#${data.order_number}) | Ingram Micro Surface`,
           html: orderLayout(
-            `New Ingrammicro Surface Order (#${data.order_number})`,
+            `New Ingrammicro Surface Order (#${data.order_number}) | Ingram Micro Surface`,
             `
               <!-- TITLE -->
               <h3 style="margin:0;font-size:18px;font-weight:bold;color:#000;">
