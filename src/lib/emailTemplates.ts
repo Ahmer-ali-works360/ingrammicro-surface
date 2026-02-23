@@ -609,7 +609,7 @@ case "ORDER_APPROVED_ADMIN":
         return {
           subject: `New Order (#${data.order_number}) | Ingram Micro Surface`,
           html: orderLayout(
-            `New Ingrammicro Surface Order (#${data.order_number}) | Ingram Micro Surface`,
+            `New Order (#${data.order_number})| Ingram Micro Surface`,
             `
               <!-- TITLE -->
               <h3 style="margin:0;font-size:18px;font-weight:bold;color:#000;">
@@ -774,7 +774,7 @@ case "ORDER_PLACED_ADMIN":
           </tr>
           <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Company</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.companyName || 'N/A'}</td></tr>
           <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Contact</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.contactName || 'N/A'}</td></tr>
-          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Email</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.contactEmail || 'N/A'}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Email</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.sellerEmail || 'N/A'}</td></tr>
           <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Seller</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.sellerName || 'N/A'}</td></tr>
         </table>
 
@@ -1220,13 +1220,13 @@ case "ORDER_RETURN_USER":
     /* -------- ORDER_RETURN_ADMIN-------- */
 case "ORDER_RETURN_ADMIN":
   return {
-    subject: `Order Returned (#${data.orderId}) | Ingram Micro Surface`,
+    subject: `Order Returned (#${data.order_number}) | Ingram Micro Surface`,
     html: orderLayout(
-      `Order Returned (#${data.orderId}) | Ingram Micro Surface`,
+      `Order Returned (#${data.order_number}) | Ingram Micro Surface`,
       `
         <!-- TITLE -->
         <h3 style="margin:0;font-size:18px;font-weight:bold;color:#000;">
-          Order Returned (#${data.orderId})<br>
+          Order Returned (#${data.order_number})<br>
           <span style="font-size:14px;font-weight:normal;color:#848484;">
             Returned on ${data.returnedAt ? new Date(data.returnedAt).toLocaleDateString() : "N/A"}
           </span>
@@ -1285,7 +1285,7 @@ case "ORDER_RETURN_ADMIN":
           </tr>
           <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Company</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.companyName || 'N/A'}</td></tr>
           <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Contact</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.contactName || 'N/A'}</td></tr>
-          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Email</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.contactEmail || 'N/A'}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Email</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.sellerEmail || 'N/A'}</td></tr>
           <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Seller</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.sellerName || 'N/A'}</td></tr>
         </table>
 
@@ -1342,13 +1342,13 @@ case "ORDER_RETURN_ADMIN":
 /* -------- ORDER_REJECTED-------- */
  case "ORDER_REJECTED_USER":
   return {
-    subject: `Order Rejected (#${data.orderId}) | Ingram Micro Surface`,
+    subject: `Order Rejected (#${data.order_number}) | Ingram Micro Surface`,
     html: orderLayout(
-      `Order Rejected (#${data.orderId})  | Ingram Micro Surface`,
+      `Order Rejected (#${data.order_number})  | Ingram Micro Surface`,
       `
         <!-- TITLE -->
         <h3 style="margin:0;font-size:18px;font-weight:bold;color:#000;">
-          Order Rejected (#${data.orderId})<br>
+          Order Rejected (#${data.order_number})<br>
           <span style="font-size:14px;font-weight:normal;color:#848484;">
             Rejected on ${data.rejectedAt ? new Date(data.rejectedAt).toLocaleDateString() : "N/A"}
           </span>
@@ -1440,13 +1440,13 @@ case "ORDER_RETURN_ADMIN":
 /* -------- ORDER_REJECTED_ADMIN-------- */
   case "ORDER_REJECTED_ADMIN":
   return {
-    subject: `Order Rejected (#${data.orderId})  | Ingram Micro Surface`,
+    subject: `Order Rejected (#${data.order_number})  | Ingram Micro Surface`,
     html: orderLayout(
-      `Order Rejected (#${data.orderId})  | Ingram Micro Surface`,
+      `Order Rejected (#${data.order_number})  | Ingram Micro Surface`,
       `
         <!-- TITLE -->
         <h3 style="margin:0;font-size:18px;font-weight:bold;color:#000;">
-          Order Rejected (#${data.orderId})<br>
+          Order Rejected (#${data.order_number})<br>
           <span style="font-size:14px;font-weight:normal;color:#848484;">
             Rejected on ${data.rejectedAt ? new Date(data.rejectedAt).toLocaleDateString() : "N/A"}
           </span>
@@ -1508,7 +1508,7 @@ case "ORDER_RETURN_ADMIN":
           </tr>
           <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Company</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.companyName || 'N/A'}</td></tr>
           <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Contact</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.contactName || 'N/A'}</td></tr>
-          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Email</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.contactEmail || 'N/A'}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Email</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.sellerEmail || 'N/A'}</td></tr>
           <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Seller</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.sellerName || 'N/A'}</td></tr>
         </table>
 

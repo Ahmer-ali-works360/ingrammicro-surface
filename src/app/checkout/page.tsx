@@ -151,42 +151,44 @@ export default function CheckoutPage() {
     const user = data?.user;
     if (!user) return;
 
-    const { data: orderData, error } = await supabase
-      .from("orders")
-      .insert([
-        {
-          user_id: user.id,
-          seller_name: form.sellerName,
-          seller_email: form.sellerEmail,
-          units: Number(form.units),
-          budget: form.budget,
-          revenue: Number(form.revenue),
-          ingram_account: form.ingramAccount,
-          quote: form.quote,
-          segment: form.segment,
-          manufacturer: form.manufacturer,
-          is_reseller: form.isReseller === "yes",
-          company_name: form.companyName,
-          contact_name: form.contactName,
-          contact_email: form.contactEmail,
-          address: form.address,
-          city: form.city,
-          state: form.state,
-          zip: form.zip,
-          delivery_date: form.deliveryDate || null,
-          estimated_close_date: form.estimatedCloseDate || null,
-          notes: form.notes,
-          cart_items: cartItemsSnapshot,
-          status: "pending"
-        },
-      ])
-      .select("id, order_number")
-      .single();
+// ✅ Naya — API ke through
+const orderRes = await fetch("/api/orders/create", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    user_id: user.id,
+    seller_name: form.sellerName,
+    seller_email: form.sellerEmail,
+    units: Number(form.units),
+    budget: form.budget,
+    revenue: Number(form.revenue),
+    ingram_account: form.ingramAccount,
+    quote: form.quote,
+    segment: form.segment,
+    manufacturer: form.manufacturer,
+    is_reseller: form.isReseller === "yes",
+    company_name: form.companyName,
+    contact_name: form.contactName,
+    contact_email: form.contactEmail,
+    address: form.address,
+    city: form.city,
+    state: form.state,
+    zip: form.zip,
+    delivery_date: form.deliveryDate || null,
+    estimated_close_date: form.estimatedCloseDate || null,
+    notes: form.notes,
+    cart_items: cartItemsSnapshot,
+  }),
+});
 
-    if (error) {
-      setErrorModal("Something went wrong while placing order.");
-      return;
-    }
+const orderResult = await orderRes.json();
+
+if (!orderRes.ok) {
+  setErrorModal("Something went wrong while placing order.");
+  return;
+}
+
+const orderData = orderResult.orderData;
 
 
 
@@ -805,7 +807,7 @@ function Modal({
         <p className="text-gray-700 mb-4">{message}</p>
         <button
           onClick={onClose}
-          className="w-full bg-blue-500 text-white py-2 rounded"
+          className="w-full bg-blue-500 text-white  cursor-pointer py-2 rounded"
         >
           {buttonText}
         </button>
