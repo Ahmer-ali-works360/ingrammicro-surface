@@ -1,9 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
-import { supabase } from "@/lib/supabaseClient";
+import { createClient } from "@supabase/supabase-js"; // ✅ Direct import
+
+// ✅ Service role client banao
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
+
+    console.log("API HIT - body:", body); // ← Pehle yeh check karo
 
     const { data: orderData, error } = await supabase
       .from("orders")
@@ -36,12 +44,14 @@ export async function POST(req: NextRequest) {
       .single();
 
     if (error) {
+      console.log("Supabase error:", error); // ← Error dekho
       return NextResponse.json({ message: error.message }, { status: 500 });
     }
 
     return NextResponse.json({ orderData }, { status: 200 });
 
   } catch (err) {
+    console.log("Catch error:", err); // ← Catch dekho
     return NextResponse.json({ message: "Server error" }, { status: 500 });
   }
 }

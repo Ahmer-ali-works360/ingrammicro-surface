@@ -346,7 +346,7 @@ useEffect(() => {
             {stockQty > 0 ? (
               /* ✅ IN STOCK */
               <button
-                className="w-xs custom-blue text-white py-3 rounded font-semibold transition duration-200"
+                className="w-xs custom-blue cursor-pointer text-white py-3 rounded font-semibold transition duration-200"
                 onClick={() =>
                   addToCart({
                     id: product.id,
