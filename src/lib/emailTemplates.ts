@@ -662,7 +662,7 @@ case "ORDER_APPROVED_ADMIN":
                 </tr>  
                 <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Company Name</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.companyName || 'N/A'}</td></tr>
                 <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Contact Name</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.contactName || 'N/A'}</td></tr>
-                <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Contact Email</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.contact_email || 'N/A'}</td></tr>
+                <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Contact Email</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.contactEmail || 'N/A'}</td></tr>
                 <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Shipping Address</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.shippingAddress || 'N/A'}</td></tr>
                 <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">State</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.state || 'N/A'}</td></tr>
                 <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">City</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.city || 'N/A'}</td></tr>
@@ -787,7 +787,7 @@ case "ORDER_PLACED_ADMIN":
           </tr>  
           <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Company Name</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.companyName || 'N/A'}</td></tr>
           <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Contact Name</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.contactName || 'N/A'}</td></tr>
-          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Contact Email</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.contact_email || 'N/A'}</td></tr>
+          <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Contact Email</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.contactEmail || 'N/A'}</td></tr>
           <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">Shipping Address</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.shippingAddress || 'N/A'}</td></tr>
           <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">State</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.state || 'N/A'}</td></tr>
           <tr><td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">City</td><td width="60%" style="border:1px solid #ccc;padding:8px;">${data.city || 'N/A'}</td></tr>
