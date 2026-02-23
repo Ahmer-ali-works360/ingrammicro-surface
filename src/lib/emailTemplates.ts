@@ -1827,6 +1827,70 @@ case "DISPATCH_DEVICE_SUBMITTED":
     ),
   };
 
+  /* -------- WAITLIST_USER -------- */
+case "WAITLIST_USER":
+  return {
+    subject: `You have subscribed to ${data.productName} | Ingrammicro Surface`,
+    html: baseLayout(
+      "Product Waitlist Subscription | Ingrammicro Surface",
+      `
+      <p>Dear ${data.email},</p>
+
+      <p>
+        You have subscribed to <strong>${data.productName}</strong> on 
+        <strong>Ingrammicro Surface</strong>. An email notification will be 
+        sent once the product is back in stock.
+      </p>
+
+      <p style="margin-top:20px;">
+        Thank you for using <strong>Ingrammicro Surface</strong>.
+      </p>
+      `
+    ),
+  };
+
+
+  /* -------- WAITLIST_ADMIN -------- */
+case "WAITLIST_ADMIN":
+  return {
+    subject: `New Waitlist Subscription | Ingrammicro Surface`,
+    html: baseLayout(
+      "New Waitlist Subscription | Ingrammicro Surface",
+      `
+      <p>Dear PM,</p>
+
+      <p>
+        A new user has subscribed to a product on 
+        <strong>Ingrammicro Surface</strong>.
+      </p>
+
+      <table style="margin-top:15px;font-size:14px;border:1px solid #ccc;border-collapse:collapse;width:100%;">
+        <tr>
+          <td style="padding:8px;font-weight:bold;border:1px solid #ccc;background:#E3E3E3;">Product Name</td>
+          <td style="padding:8px;border:1px solid #ccc;">${data.productName}</td>
+        </tr>
+        <tr>
+          <td style="padding:8px;font-weight:bold;border:1px solid #ccc;background:#E3E3E3;">User Email</td>
+          <td style="padding:8px;border:1px solid #ccc;">${data.email}</td>
+        </tr>
+        <tr>
+          <td style="padding:8px;font-weight:bold;border:1px solid #ccc;background:#E3E3E3;">Company Name</td>
+          <td style="padding:8px;border:1px solid #ccc;">${data.companyName || 'N/A'}</td>
+        </tr>
+        <tr>
+          <td style="padding:8px;font-weight:bold;border:1px solid #ccc;background:#E3E3E3;">Date</td>
+          <td style="padding:8px;border:1px solid #ccc;">${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</td>
+        </tr>
+      </table>
+
+      <p style="margin-top:20px;">
+        Regards,<br/>
+        <strong>Ingrammicro Surface Team</strong>
+      </p>
+      `
+    ),
+  };
+
 
     /* -------- SAFETY -------- */
     default:
