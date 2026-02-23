@@ -51,23 +51,22 @@ serve(async (req) => {
     }
 
     // 5️⃣ Send email to each user
-    // for (const user of waitlist) {
-    //   await fetch(`${Deno.env.get("SITE_URL")}/api/send-email`, {
-    //     method: "POST",
-    //     headers: { "Content-Type": "application/json" },
-    //     body: JSON.stringify({
-    //       to: user.email,
-    //       type: "PRODUCT_BACK_IN_STOCK",
-    //       data: {
-    //         productName: product.product_name,
-    //         productUrl: `${Deno.env.get("SITE_URL")}/product/${product.slug}`,
-    //       },
-    //     }),
-    //   });
-    // }
-for (const user of waitlist){
-    console.log("Would send email to:", user.email);
-}
+    for (const user of waitlist) {
+      await fetch(`${Deno.env.get("SITE_URL")}/api/send-email`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          to: user.email,
+          type: "PRODUCT_BACK_IN_STOCK",
+          data: {
+            productName: product.product_name,
+            productUrl: `${Deno.env.get("SITE_URL")}/product/${product.slug}`,
+            email: user.email,
+          },
+        }),
+      });
+    }
+
     // 6️⃣ Mark all as notified
     await supabase
       .from("product_waitlist")

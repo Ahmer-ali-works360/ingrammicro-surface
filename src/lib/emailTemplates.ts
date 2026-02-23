@@ -1892,6 +1892,44 @@ case "WAITLIST_ADMIN":
   };
 
 
+  /* -------- PRODUCT_BACK_IN_STOCK -------- */
+case "PRODUCT_BACK_IN_STOCK":
+  return {
+    subject: `Your Subscribed Product is Back in Stock | Ingrammicro Surface`,
+    html: baseLayout(
+      "Product Back in Stock | Ingrammicro Surface",
+      `
+      <p>Hello ${data.email},</p>
+
+      <p>
+        Your Subscribed Product <strong>${data.productName}</strong> is now back in stock!
+      </p>
+
+      <p style="margin:25px 0;text-align:center;">
+        
+          href="${data.productUrl}"
+          style="
+            background:#3ba1da;
+            color:#ffffff;
+            padding:12px 30px;
+            text-decoration:none;
+            border-radius:4px;
+            font-size:14px;
+            display:inline-block;
+            font-weight:bold;
+          "
+        >
+          Order Now
+        </a>
+      </p>
+
+      <p>
+        Thank you for using <strong>Ingrammicro Surface</strong>.
+      </p>
+      `
+    ),
+  };
+
     /* -------- SAFETY -------- */
     default:
       throw new Error("Invalid email template type");
