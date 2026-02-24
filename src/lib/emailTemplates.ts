@@ -1374,18 +1374,15 @@ case "ORDER_RETURN_ADMIN":
             <th width="75%" style="border:1px solid #213747;text-align:left;padding:8px;">Product</th>
             <th width="25%" style="border:1px solid #213747;text-align:left;padding:8px;">Quantity</th>
           </tr>
-          ${data.orderItems?.map((item: any) => {
-            const inv = Array.isArray(item.inventory) ? item.inventory[0] : item.inventory;
-            return `
-              <tr>
-                <td style="border:1px solid #ccc;padding:8px;">
-                  ${inv?.product_names || "N/A"}<br>
-                  <span style="font-size:12px;color:#666;">${inv?.skus || ""}</span>
-                </td>
-                <td style="border:1px solid #ccc;padding:8px;">${item.quantity}</td>
-              </tr>
-            `;
-          }).join("") || '<tr><td colspan="2" style="border:1px solid #ccc;padding:8px;">No items</td></tr>'}
+          ${data.orderItems?.map((item: any) => `
+  <tr>
+    <td style="border:1px solid #ccc;padding:8px;">
+      ${item.productName || "N/A"}<br>
+      <span style="font-size:12px;color:#666;">${item.sku || ""}</span>
+    </td>
+    <td style="border:1px solid #ccc;padding:8px;">${item.quantity}</td>
+  </tr>
+`).join("") || '<tr><td colspan="2" style="border:1px solid #ccc;padding:8px;">No items</td></tr>'}
         </table>
 
         <!-- SHIPPING DETAILS -->
@@ -1485,18 +1482,15 @@ case "ORDER_RETURN_ADMIN":
             <th width="75%" style="border:1px solid #213747;text-align:left;padding:8px;">Product</th>
             <th width="25%" style="border:1px solid #213747;text-align:left;padding:8px;">Quantity</th>
           </tr>
-          ${data.orderItems?.map((item: any) => {
-            const inv = Array.isArray(item.inventory) ? item.inventory[0] : item.inventory;
-            return `
-              <tr>
-                <td style="border:1px solid #ccc;padding:8px;">
-                  ${inv?.product_names || "N/A"}<br>
-                  <span style="font-size:12px;color:#666;">${inv?.skus || ""}</span>
-                </td>
-                <td style="border:1px solid #ccc;padding:8px;">${item.quantity}</td>
-              </tr>
-            `;
-          }).join("") || '<tr><td colspan="2" style="border:1px solid #ccc;padding:8px;">No items</td></tr>'}
+          ${data.orderItems?.map((item: any) => `
+  <tr>
+    <td style="border:1px solid #ccc;padding:8px;">
+      ${item.productName || "N/A"}<br>
+      <span style="font-size:12px;color:#666;">${item.sku || ""}</span>
+    </td>
+    <td style="border:1px solid #ccc;padding:8px;">${item.quantity}</td>
+  </tr>
+`).join("") || '<tr><td colspan="2" style="border:1px solid #ccc;padding:8px;">No items</td></tr>'}
         </table>
 
         <!-- CUSTOMER INFO -->
