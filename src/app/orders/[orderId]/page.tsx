@@ -514,7 +514,7 @@ export default function AdminOrderDetailPage({
 
 
   useEffect(() => {
-    console.log("ROLE DEBUG 👉", { role, isAdmin, isShopManager, isProgramManager });
+    console.log("ROLE DEBUG", { role, isAdmin, isShopManager, isProgramManager });
   }, [role]);
 
   const uploadReturnLabel = async (file: File) => {
@@ -559,7 +559,7 @@ export default function AdminOrderDetailPage({
       }
 
 
-      // ✅ VERY IMPORTANT: API se fresh data lao
+      // VERY IMPORTANT: API se fresh data lao
       const refreshed = await fetch(`/api/admin-orders/${order.id}`, {
         cache: "no-store",
       });
@@ -605,7 +605,7 @@ export default function AdminOrderDetailPage({
     }
 
 
-    // 🔁 REFRESH
+    // REFRESH
     const refreshed = await fetch(`/api/admin-orders/${order.id}`, {
       cache: "no-store",
     });
@@ -714,27 +714,23 @@ export default function AdminOrderDetailPage({
     }
 
     // USER EMAIL
-    await fetch("/api/send-email", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        to: order.seller_email,
-        type: userType,
-        data: emailData,
-      }),
-    });
 
-    // ADMIN EMAIL
-    await fetch("/api/send-email", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        to: "ahmer.ali@works360.com",
-        type: adminType,
-        data: emailData,
-      }),
-    });
-  };
+await Promise.all([
+  fetch("/api/send-email", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ to: order.seller_email, type: userType, data: emailData }),
+  }),
+  // ADMIN EMAIL
+
+  fetch("/api/send-email", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ to: "ahmer.ali@works360.com", type: adminType, data: emailData }),
+  }),
+]);
+
+}; 
 
   // ================= PM APPROVE/REJECT WITH EMAIL =================
   const updateStatusWithEmail = async (nextStatus: OrderStatus) => {
@@ -782,7 +778,8 @@ export default function AdminOrderDetailPage({
       setOrder(refreshedJson.order);
       setStatus(refreshedJson.order.status);
 
-      alert(`Order ${nextStatus} successfully! Emails sent.`);
+      setStatusSuccess(true);
+      setShowStatusModal(true);
     } catch (err: any) {
       console.error("❌ Error:", err);
       alert(err.message);
