@@ -718,7 +718,7 @@ export default function AdminOrderDetailPage({
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        to: order.contact_email,
+        to: order.seller_email,
         type: userType,
         data: emailData,
       }),

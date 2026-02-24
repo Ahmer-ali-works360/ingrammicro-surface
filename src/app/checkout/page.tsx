@@ -222,7 +222,7 @@ await fetch("/api/send-email", {
   method: "POST",
   headers: { "Content-Type": "application/json" },
   body: JSON.stringify({
-    to: "ahmer.ali.works360@gmail.com",
+    to: "ahmer.ali@works360.com",
     type: "ORDER_PLACED_ADMIN",
     data: {
       orderId: orderData.id,
