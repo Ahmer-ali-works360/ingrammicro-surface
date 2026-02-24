@@ -143,7 +143,7 @@ await fetch("/api/notifications/create", {
 
     // 👉 Admin notification
     await sendEmail({
-      to: "ahmer.ali.works360@gmail.com",
+      to: "ahmer.ali@works360.com",
       type: "NEW_USER_REGISTRATION",
       data: {
         name: `${firstName.trim()} ${lastName.trim()}`,

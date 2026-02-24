@@ -130,7 +130,7 @@ const updateStatus = async (
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        to: "ahmer.ali.works360@gmail.com",
+        to: "ahmer.ali@works360.com",
          bcc: process.env.SMTP_BCC_EMAIL, 
         type: adminEmailType,
         data: userData,
