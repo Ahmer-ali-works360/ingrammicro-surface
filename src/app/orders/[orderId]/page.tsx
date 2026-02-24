@@ -302,24 +302,24 @@ export default function AdminOrderDetailPage({
         throw new Error(json.error || "Status update failed");
       }
 
-      if (finalStatus === "rejected" || finalStatus === "return") {
-  for (const item of order.cart_items) {
-    const { data: product } = await supabase
-      .from("products")
-      .select("stock_quantity")
-      .eq("id", item.product_id)
-      .single();
+//       if (finalStatus === "rejected" || finalStatus === "return") {
+//   for (const item of order.cart_items) {
+//     const { data: product } = await supabase
+//       .from("products")
+//       .select("stock_quantity")
+//       .eq("id", item.product_id)
+//       .single();
 
-    if (product) {
-      await supabase
-        .from("products")
-        .update({
-          stock_quantity: product.stock_quantity + item.quantity,
-        })
-        .eq("id", item.product_id);
-    }
-  }
-}
+//     if (product) {
+//       await supabase
+//         .from("products")
+//         .update({
+//           stock_quantity: product.stock_quantity + item.quantity,
+//         })
+//         .eq("id", item.product_id);
+//     }
+//   }
+// }
 
 
       if (isAdmin || isShopManager) {
