@@ -37,26 +37,26 @@ export default function ProductPage() {
   const [companyName, setCompanyName] = useState("");
   const [waitlistLoading, setWaitlistLoading] = useState(false);
 
-  // ✅ ZOOM STATES
+  // ZOOM STATES
   const [zoomOpen, setZoomOpen] = useState(false);
   const [zoomImage, setZoomImage] = useState<string | null>(null);
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
-  // ✅ WAITLIST MODAL STATES
+  // WAITLIST MODAL STATES
   const [showWaitlistModal, setShowWaitlistModal] = useState(false);
   const [waitlistSuccess, setWaitlistSuccess] = useState(false);
   const [alreadyOnWaitlist, setAlreadyOnWaitlist] = useState(false);
 
-  /* 🔒 LOGIN REQUIRED */
+  /*  LOGIN REQUIRED */
   useEffect(() => {
     if (!authLoading && !user) {
       router.replace(`/login?redirect=/product/${slug}`);
     }
   }, [authLoading, user, router, slug]);
 
-  /* 📦 FETCH PRODUCT */
+  /*  FETCH PRODUCT */
   useEffect(() => {
     if (!slug) return;
 
@@ -84,7 +84,7 @@ export default function ProductPage() {
     fetchProduct();
   }, [slug]);
 
-  /* ✅ CHECK WAITLIST */
+  /* CHECK WAITLIST */
 useEffect(() => {
   if (!user?.email || !product?.id) return;
 
@@ -132,7 +132,7 @@ useEffect(() => {
     setQuantity((q) => (q > 1 ? q - 1 : 1));
   };
 
-  /* ⛔ SAFE RENDERS */
+  /* SAFE RENDERS */
   if (authLoading || !user) return null;
   if (!product) return <p className="text-center mt-10">Loading...</p>;
 
@@ -143,7 +143,7 @@ useEffect(() => {
     ...(product.gallery_urls || []),
   ].filter(Boolean);
 
-  // ✅ IMAGE ZOOM FUNCTIONALITY
+  // IMAGE ZOOM FUNCTIONALITY
   const handleZoomImage = (imageUrl: string) => {
     setZoomImage(imageUrl);
     setZoomOpen(true);
@@ -152,7 +152,7 @@ useEffect(() => {
 
 
 
-  // ✅ WAITLIST SUBMIT — API ke through
+  // WAITLIST SUBMIT — API ke through
   const handleWaitlistSubmit = async () => {
     if (!user?.email) return;
 
@@ -178,7 +178,7 @@ useEffect(() => {
     }
 
 
-  // ✅ User ko email
+  // User ko email
   fetch("/api/send-email", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -192,7 +192,7 @@ useEffect(() => {
     }),
   });
 
-  // ✅ Admin ko email
+  // Admin ko email
   fetch("/api/send-email", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -344,7 +344,7 @@ useEffect(() => {
 
             {/* Add to Cart */}
             {stockQty > 0 ? (
-              /* ✅ IN STOCK */
+              /* IN STOCK */
               <button
                 className="w-xs custom-blue cursor-pointer text-white py-3 rounded font-semibold transition duration-200"
                 onClick={() =>
@@ -363,7 +363,7 @@ useEffect(() => {
                 Add to Cart
               </button>
             ) : (
-              /* ❌ OUT OF STOCK */
+              /*  OUT OF STOCK */
               <div className="border rounded-lg p-4 bg-gray-50 space-y-4 mt-4">
                 {/* Email */}
                 <div>
@@ -390,10 +390,10 @@ useEffect(() => {
                   />
                 </div>
 
-                {/* ✅ Waitlist Button — ab modal kholega */}
+                {/*  Waitlist Button — ab modal kholega */}
 {alreadyOnWaitlist ? (
   <p className="text-green-600 font-semibold text-sm text-center py-2">
-    ✓ You are already on the waitlist for this product!
+    You are already on the waitlist for this product!
   </p>
 ) : (
   <button
@@ -538,7 +538,7 @@ useEffect(() => {
         </div>
       )}
 
-      {/* ✅ WAITLIST CONFIRMATION MODAL */}
+      {/*  WAITLIST CONFIRMATION MODAL */}
       {showWaitlistModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="bg-white rounded-xl p-6 w-[90%] max-w-md shadow-lg">
@@ -568,7 +568,7 @@ useEffect(() => {
         </div>
       )}
 
-      {/* ✅ WAITLIST SUCCESS MODAL */}
+      {/*  WAITLIST SUCCESS MODAL */}
       {waitlistSuccess && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="bg-white rounded-xl p-6 w-[90%] max-w-md shadow-lg text-center">
