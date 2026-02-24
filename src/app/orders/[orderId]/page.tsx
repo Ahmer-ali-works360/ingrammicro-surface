@@ -302,6 +302,26 @@ export default function AdminOrderDetailPage({
         throw new Error(json.error || "Status update failed");
       }
 
+      if (finalStatus === "rejected" || finalStatus === "return") {
+  for (const item of order.cart_items) {
+    const { data: product } = await supabase
+      .from("products")
+      .select("stock_quantity")
+      .eq("id", item.product_id)
+      .single();
+
+    if (product) {
+      await supabase
+        .from("products")
+        .update({
+          stock_quantity: product.stock_quantity + item.quantity,
+        })
+        .eq("id", item.product_id);
+    }
+  }
+}
+
+
       if (isAdmin || isShopManager) {
         console.log("Admin/ShopManager sending email for:", finalStatus);
         await sendStatusEmails(finalStatus);
@@ -764,6 +784,25 @@ await Promise.all([
       if (!res.ok) {
         throw new Error("Status update failed");
       }
+
+      if (nextStatus === "rejected") {
+  for (const item of order.cart_items) {
+    const { data: product } = await supabase
+      .from("products")
+      .select("stock_quantity")
+      .eq("id", item.product_id)
+      .single();
+
+    if (product) {
+      await supabase
+        .from("products")
+        .update({
+          stock_quantity: product.stock_quantity + item.quantity,
+        })
+        .eq("id", item.product_id);
+    }
+  }
+}
 
       // ✅ Call shared email function
       console.log("Calling shared email sender for status:", nextStatus);
