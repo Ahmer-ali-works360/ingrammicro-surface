@@ -1,3 +1,5 @@
+//src/app/api/admin-orders/[id]/route.ts
+
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
@@ -189,6 +191,36 @@ export async function PATCH(
         { status: 500 }
       );
     }
+
+    if (status === "rejected" || status === "return") {
+  const { data: orderDetails } = await supabaseAdmin
+    .from("orders")
+    .select("cart_items")
+    .eq("id", id)
+    .single();
+
+  if (orderDetails?.cart_items) {
+    for (const item of orderDetails.cart_items) {
+      const { data: product } = await supabaseAdmin
+        .from("products")
+        .select("stock_quantity")
+        .eq("id", item.product_id)
+        .single();
+
+      if (product) {
+        await supabaseAdmin
+          .from("products")
+          .update({
+            stock_quantity: product.stock_quantity + item.quantity,
+          })
+          .eq("id", item.product_id);
+      }
+    }
+  }
+}
+
+
+
 
     /* 👇 YAHAN LOG INSERT AAYEGA */
 

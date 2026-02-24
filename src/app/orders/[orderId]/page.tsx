@@ -785,30 +785,30 @@ await Promise.all([
         throw new Error("Status update failed");
       }
 
-if (nextStatus === "rejected") {
-  for (const item of order.cart_items) {
-    console.log("Processing item:", item.product_id, "qty:", item.quantity);
+// if (nextStatus === "rejected") {
+//   for (const item of order.cart_items) {
+//     console.log("Processing item:", item.product_id, "qty:", item.quantity);
     
-    const { data: product, error } = await supabase
-      .from("products")
-      .select("stock_quantity")
-      .eq("id", item.product_id)
-      .single();
+//     const { data: product, error } = await supabase
+//       .from("products")
+//       .select("stock_quantity")
+//       .eq("id", item.product_id)
+//       .single();
 
-    console.log("Product fetched:", product, "error:", error);
+//     console.log("Product fetched:", product, "error:", error);
 
-    if (product) {
-      const { error: updateError } = await supabase
-        .from("products")
-        .update({
-          stock_quantity: product.stock_quantity + item.quantity,
-        })
-        .eq("id", item.product_id);
+//     if (product) {
+//       const { error: updateError } = await supabase
+//         .from("products")
+//         .update({
+//           stock_quantity: product.stock_quantity + item.quantity,
+//         })
+//         .eq("id", item.product_id);
       
-      console.log("Update error:", updateError);
-    }
-  }
-}
+//       console.log("Update error:", updateError);
+//     }
+//   }
+// }
 
       // ✅ Call shared email function
       console.log("Calling shared email sender for status:", nextStatus);
