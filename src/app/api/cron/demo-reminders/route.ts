@@ -119,7 +119,7 @@ export async function GET(req: Request) {
 }
 
 async function sendEmail(type: string, order: any, daysOverdue?: number) {
-  await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/send-email`, {
+  await fetch(`https://${process.env.VERCEL_URL}/api/send-email`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
