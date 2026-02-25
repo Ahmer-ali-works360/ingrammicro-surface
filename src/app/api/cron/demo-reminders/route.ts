@@ -25,6 +25,9 @@ export async function GET(req: Request) {
     }
 
     for (const order of orders || []) {
+
+        if (!order.demo_expiry_date) continue;
+
       const expiryDate = new Date(order.demo_expiry_date);
       const diffTime = today.getTime() - expiryDate.getTime();
       const daysOverdue = Math.floor(diffTime / (1000 * 60 * 60 * 24));
@@ -32,12 +35,31 @@ export async function GET(req: Request) {
       // =========================
       // 🔔 25 DAY REMINDER
       // =========================
-      if (
-        order.demo_status === "active" &&
-        daysOverdue === -5 // 5 days before expiry
-      ) {
-        await sendEmail("DEMO_REMINDER_25", order);
-      }
+     if (
+  order.demo_status === "active" &&
+  daysOverdue === -5
+) {
+
+  const todayDate = new Date().toISOString().split("T")[0];
+
+  const { data: existing } = await supabaseAdmin
+    .from("demo_email_logs")
+    .select("id")
+    .eq("order_id", order.id)
+    .eq("email_type", "DEMO_REMINDER_25")
+    .eq("sent_on", todayDate)
+    .maybeSingle();
+
+  if (!existing) {
+    await sendEmail("DEMO_REMINDER_25", order);
+
+    await supabaseAdmin.from("demo_email_logs").insert({
+      order_id: order.id,
+      email_type: "DEMO_REMINDER_25",
+      sent_on: todayDate
+    });
+  }
+}
 
       // =========================
       // ⏰ EXPIRE AT DAY 30
@@ -50,19 +72,39 @@ export async function GET(req: Request) {
           .from("orders")
           .update({ demo_status: "expired" })
           .eq("id", order.id);
+          order.demo_status = "expired";
       }
 
       // =========================
       // 📧 OVERDUE EMAILS
       // =========================
       if (
-        order.demo_status === "expired" &&
-        daysOverdue > 0 &&
-        daysOverdue % 5 === 0 &&
-        daysOverdue <= 20 // up to day 50
-      ) {
-        await sendEmail(`DEMO_OVERDUE_${daysOverdue}`, order);
-      }
+  order.demo_status === "expired" &&
+  daysOverdue > 0 &&
+  daysOverdue % 5 === 0 &&
+  daysOverdue <= 20
+) {
+
+  const todayDate = new Date().toISOString().split("T")[0];
+
+  const { data: existing } = await supabaseAdmin
+    .from("demo_email_logs")
+    .select("id")
+    .eq("order_id", order.id)
+    .eq("email_type", "DEMO_OVERDUE")
+    .eq("sent_on", todayDate)
+    .maybeSingle();
+
+  if (!existing) {
+    await sendEmail("DEMO_OVERDUE", order, daysOverdue);
+
+    await supabaseAdmin.from("demo_email_logs").insert({
+      order_id: order.id,
+      email_type: "DEMO_OVERDUE",
+      sent_on: todayDate
+    });
+  }
+}
     }
 
     return NextResponse.json({ success: true });
@@ -76,19 +118,33 @@ export async function GET(req: Request) {
   }
 }
 
-async function sendEmail(type: string, order: any) {
+async function sendEmail(type: string, order: any, daysOverdue?: number) {
   await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/send-email`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      to: order.seller_email,
+      to: order.contact_email, // send to customer
       type,
       data: {
         orderId: order.id,
         order_number: order.order_number,
         demo_expiry_date: order.demo_expiry_date,
+        days_overdue: daysOverdue ?? 0,
+
+        // 👇 REQUIRED FOR TEMPLATE
+        sellerName: order.seller_name,
+        sellerEmail: order.seller_email,
+        companyName: order.company_name,
+        contactName: order.contact_name,
+        contact_email: order.contact_email,
+
+        orderItems: order.cart_items?.map((item: any) => ({
+          productName: item.product_name,
+          sku: item.sku,
+          quantity: item.quantity,
+        })) || [],
       },
     }),
   });

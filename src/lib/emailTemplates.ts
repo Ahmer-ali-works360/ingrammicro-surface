@@ -1923,6 +1923,248 @@ case "PRODUCT_BACK_IN_STOCK":
       `
     ),
   };
+  /* -------- reminder email-------- */
+  case "DEMO_REMINDER_25":
+  return {
+    subject: `Demo Return Reminder (#${data.order_number}) | Ingram Micro Surface`,
+    html: orderLayout(
+      `Demo Return Reminder (#${data.order_number})`,
+      `
+        <!-- TITLE -->
+        <h3 style="margin:0;font-size:18px;font-weight:bold;color:#000;">
+          Demo Return Reminder (#${data.order_number})<br>
+          <span style="font-size:14px;font-weight:normal;color:#848484;">
+            Demo expires on ${data.demo_expiry_date || "N/A"}
+          </span>
+        </h3>
+
+        <!-- INTRO -->
+        <div style="padding:15px 0;color:#000;">
+          <p style="font-size:15px;line-height:1.5;margin:10px 0;">
+            This is a friendly reminder that your 30-day demo period will end on 
+            <strong>${data.demo_expiry_date || "N/A"}</strong>.
+          </p>
+          <p>Please prepare the demo units listed below for return.</p>
+        </div>
+
+        <!-- PRODUCTS TABLE -->
+        <table width="100%" cellpadding="8" cellspacing="0" 
+          style="border:1px solid #ccc;border-collapse:collapse;margin:15px 0;">
+          <tr style="background:#E3E3E3;">
+            <th width="75%" style="border:1px solid #ccc;text-align:left;padding:8px;">
+              Product
+            </th>
+            <th width="25%" style="border:1px solid #ccc;text-align:left;padding:8px;">
+              Quantity
+            </th>
+          </tr>
+          ${data.orderItems?.map((item: any) => `
+            <tr>
+              <td style="border:1px solid #ccc;padding:8px;">
+                ${item.productName || "N/A"}
+              </td>
+              <td style="border:1px solid #ccc;padding:8px;">
+                ${item.quantity}
+              </td>
+            </tr>
+          `).join("") || `
+            <tr>
+              <td colspan="2" style="border:1px solid #ccc;padding:8px;">
+                No items
+              </td>
+            </tr>
+          `}
+        </table>
+
+        <!-- ORDER DETAILS TABLE -->
+        <table width="100%" cellpadding="8" cellspacing="0"
+          style="border:1px solid #ccc;border-collapse:collapse;margin:15px 0;">
+          
+          <tr>
+            <th colspan="2" style="background:#E3E3E3;border:1px solid #ccc;
+              text-align:left;padding:8px;font-size:15px;">
+              Order Details
+            </th>
+          </tr>
+
+          <tr>
+            <td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">
+              Sales Executive Name
+            </td>
+            <td width="60%" style="border:1px solid #ccc;padding:8px;">
+              ${data.sellerName || "N/A"}
+            </td>
+          </tr>
+
+          <tr>
+            <td style="font-weight:bold;border:1px solid #ccc;padding:8px;">
+              Sales Executive Email
+            </td>
+            <td style="border:1px solid #ccc;padding:8px;">
+              ${data.sellerEmail || "N/A"}
+            </td>
+          </tr>
+
+          <tr>
+            <td style="font-weight:bold;border:1px solid #ccc;padding:8px;">
+              Customer Company Name
+            </td>
+            <td style="border:1px solid #ccc;padding:8px;">
+              ${data.companyName || "N/A"}
+            </td>
+          </tr>
+
+          <tr>
+            <td style="font-weight:bold;border:1px solid #ccc;padding:8px;">
+              Contact Name
+            </td>
+            <td style="border:1px solid #ccc;padding:8px;">
+              ${data.contactName || "N/A"}
+            </td>
+          </tr>
+
+          <tr>
+            <td style="font-weight:bold;border:1px solid #ccc;padding:8px;">
+              Contact Email
+            </td>
+            <td style="border:1px solid #ccc;padding:8px;">
+              ${data.contact_email || "N/A"}
+            </td>
+          </tr>
+
+        </table>
+
+        <p>
+          If the return has already been initiated, please ignore this message.
+        </p>
+      `
+    ),
+  };
+/* -------- over due email-------- */
+  case "DEMO_OVERDUE":
+  return {
+    subject: `Overdue Demo Return – ${data.days_overdue} Days Past Due (#${data.order_number})`,
+    html: orderLayout(
+      `Overdue Demo Return (#${data.order_number})`,
+      `
+        <!-- TITLE -->
+        <h3 style="margin:0;font-size:18px;font-weight:bold;color:#000;">
+          Overdue Demo Return (#${data.order_number})<br>
+          <span style="font-size:14px;font-weight:normal;color:#c0392b;">
+            ${data.days_overdue || 0} Days Overdue
+          </span>
+        </h3>
+
+        <!-- INTRO -->
+        <div style="padding:15px 0;color:#000;">
+          <p style="font-size:15px;line-height:1.5;margin:10px 0;">
+            The 30-day demo period expired on 
+            <strong>${data.demo_expiry_date || "N/A"}</strong>.
+          </p>
+
+          <p>
+            The demo equipment listed below is now 
+            <strong>${data.days_overdue || 0} days overdue</strong>.
+          </p>
+
+          <p style="color:#c0392b;font-weight:bold;">
+            Immediate return action is required to avoid further escalation.
+          </p>
+        </div>
+
+        <!-- PRODUCTS TABLE -->
+        <table width="100%" cellpadding="8" cellspacing="0" 
+          style="border:1px solid #ccc;border-collapse:collapse;margin:15px 0;">
+          <tr style="background:#E3E3E3;">
+            <th width="75%" style="border:1px solid #ccc;text-align:left;padding:8px;">
+              Product
+            </th>
+            <th width="25%" style="border:1px solid #ccc;text-align:left;padding:8px;">
+              Quantity
+            </th>
+          </tr>
+          ${data.orderItems?.map((item: any) => `
+            <tr>
+              <td style="border:1px solid #ccc;padding:8px;">
+                ${item.productName || "N/A"}
+              </td>
+              <td style="border:1px solid #ccc;padding:8px;">
+                ${item.quantity}
+              </td>
+            </tr>
+          `).join("") || `
+            <tr>
+              <td colspan="2" style="border:1px solid #ccc;padding:8px;">
+                No items
+              </td>
+            </tr>
+          `}
+        </table>
+
+        <!-- ORDER DETAILS TABLE -->
+        <table width="100%" cellpadding="8" cellspacing="0"
+          style="border:1px solid #ccc;border-collapse:collapse;margin:15px 0;">
+          
+          <tr>
+            <th colspan="2" style="background:#E3E3E3;border:1px solid #ccc;
+              text-align:left;padding:8px;font-size:15px;">
+              Order Details
+            </th>
+          </tr>
+
+          <tr>
+            <td width="40%" style="font-weight:bold;border:1px solid #ccc;padding:8px;">
+              Sales Executive Name
+            </td>
+            <td width="60%" style="border:1px solid #ccc;padding:8px;">
+              ${data.sellerName || "N/A"}
+            </td>
+          </tr>
+
+          <tr>
+            <td style="font-weight:bold;border:1px solid #ccc;padding:8px;">
+              Sales Executive Email
+            </td>
+            <td style="border:1px solid #ccc;padding:8px;">
+              ${data.sellerEmail || "N/A"}
+            </td>
+          </tr>
+
+          <tr>
+            <td style="font-weight:bold;border:1px solid #ccc;padding:8px;">
+              Customer Company Name
+            </td>
+            <td style="border:1px solid #ccc;padding:8px;">
+              ${data.companyName || "N/A"}
+            </td>
+          </tr>
+
+          <tr>
+            <td style="font-weight:bold;border:1px solid #ccc;padding:8px;">
+              Contact Name
+            </td>
+            <td style="border:1px solid #ccc;padding:8px;">
+              ${data.contactName || "N/A"}
+            </td>
+          </tr>
+
+          <tr>
+            <td style="font-weight:bold;border:1px solid #ccc;padding:8px;">
+              Contact Email
+            </td>
+            <td style="border:1px solid #ccc;padding:8px;">
+              ${data.contact_email || "N/A"}
+            </td>
+          </tr>
+
+        </table>
+
+        <p>
+          If the return has already been initiated, please share the tracking details to avoid further reminders.
+        </p>
+      `
+    ),
+  };
 
     /* -------- SAFETY -------- */
     default:
