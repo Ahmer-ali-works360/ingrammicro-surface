@@ -120,6 +120,15 @@ export async function GET(req: Request) {
   }
 }
 
+function formatDate(dateStr: string) {
+  if (!dateStr) return "N/A";
+  return new Date(dateStr).toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  }).replace(/ /g, "-"); // → 26-Feb-2025
+}
+
 async function sendEmail(type: string, order: any, daysOverdue?: number) {
   const recipients = [
     order.seller_email,           // Seller
@@ -139,7 +148,7 @@ async function sendEmail(type: string, order: any, daysOverdue?: number) {
       data: {
         orderId: order.id,
         order_number: order.order_number,
-        demo_expiry_date: order.demo_expiry_date,
+        demo_expiry_date: formatDate(order.demo_expiry_date),
         days_overdue: daysOverdue ?? 0,
 
         sellerName: order.seller_name,
@@ -147,7 +156,7 @@ async function sendEmail(type: string, order: any, daysOverdue?: number) {
         companyName: order.company_name,
         contactName: order.contact_name,
         contact_email: order.contact_email,
-        shippedAt: order.shipped_at,
+        shippedAt: formatDate(order.shipped_at),
 
         orderItems: order.cart_items?.map((item: any) => ({
           productName: item.product_name,
