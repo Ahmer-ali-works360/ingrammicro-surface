@@ -102,7 +102,7 @@ export async function GET(req: Request) {
 
     await supabaseAdmin.from("demo_email_logs").insert({
       order_id: order.id,
-      email_type: "DEMO_OVERDUE_${daysOverdue}",
+      email_type: `DEMO_OVERDUE_${daysOverdue}`,
       sent_on: todayDate
     });
   }
