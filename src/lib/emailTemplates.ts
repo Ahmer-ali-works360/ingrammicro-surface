@@ -2031,6 +2031,14 @@ case "PRODUCT_BACK_IN_STOCK":
               ${data.contact_email || "N/A"}
             </td>
           </tr>
+          <tr>
+  <td style="font-weight:bold;border:1px solid #ccc;padding:8px;">
+    Shipped At
+  </td>
+  <td style="border:1px solid #ccc;padding:8px;">
+    ${data.shippedAt || "N/A"}
+  </td>
+</tr>
 
         </table>
 
@@ -2043,7 +2051,7 @@ case "PRODUCT_BACK_IN_STOCK":
 /* -------- over due email-------- */
   case "DEMO_OVERDUE":
   return {
-    subject: `Overdue Demo Return – ${data.days_overdue} Days Past Due (#${data.order_number})`,
+    subject: `Overdue Demo Return – ${data.days_overdue} Days Past Due (#${data.order_number}) | Ingram Micro Surface`,
     html: orderLayout(
       `Overdue Demo Return (#${data.order_number})`,
       `
@@ -2156,6 +2164,14 @@ case "PRODUCT_BACK_IN_STOCK":
               ${data.contact_email || "N/A"}
             </td>
           </tr>
+          <tr>
+  <td style="font-weight:bold;border:1px solid #ccc;padding:8px;">
+    Shipped At
+  </td>
+  <td style="border:1px solid #ccc;padding:8px;">
+    ${data.shippedAt || "N/A"}
+  </td>
+</tr>
 
         </table>
 

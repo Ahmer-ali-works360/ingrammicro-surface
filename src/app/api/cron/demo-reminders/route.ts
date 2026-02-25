@@ -147,6 +147,7 @@ async function sendEmail(type: string, order: any, daysOverdue?: number) {
         companyName: order.company_name,
         contactName: order.contact_name,
         contact_email: order.contact_email,
+        shippedAt: order.shipped_at,
 
         orderItems: order.cart_items?.map((item: any) => ({
           productName: item.product_name,
