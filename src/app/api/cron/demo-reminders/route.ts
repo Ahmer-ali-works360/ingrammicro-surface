@@ -93,7 +93,7 @@ export async function GET(req: Request) {
     .from("demo_email_logs")
     .select("id")
     .eq("order_id", order.id)
-    .eq("email_type", "DEMO_OVERDUE")
+    .eq("email_type", `DEMO_OVERDUE_${daysOverdue}`)
     .eq("sent_on", todayDate)
     .maybeSingle();
 
@@ -102,7 +102,7 @@ export async function GET(req: Request) {
 
     await supabaseAdmin.from("demo_email_logs").insert({
       order_id: order.id,
-      email_type: "DEMO_OVERDUE",
+      email_type: "DEMO_OVERDUE_${daysOverdue}",
       sent_on: todayDate
     });
   }
