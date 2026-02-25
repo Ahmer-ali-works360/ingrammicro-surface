@@ -121,13 +121,20 @@ export async function GET(req: Request) {
 }
 
 async function sendEmail(type: string, order: any, daysOverdue?: number) {
- const response = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/send-email`, {
+  const recipients = [
+    order.seller_email,           // Seller
+    order.contact_email,          // Contact/Customer
+    "ahmer.ali@works360.com",     // Admin
+    // "koi.aur@example.com",     // Aur log add karo yahan
+  ].filter(Boolean); // removes null/undefined emails
+
+  const response = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/send-email`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      to: "ahmer.ali@works360.com", // send to customer
+      to: recipients, // ✅ Array of emails
       type,
       data: {
         orderId: order.id,
@@ -135,7 +142,6 @@ async function sendEmail(type: string, order: any, daysOverdue?: number) {
         demo_expiry_date: order.demo_expiry_date,
         days_overdue: daysOverdue ?? 0,
 
-        // 👇 REQUIRED FOR TEMPLATE
         sellerName: order.seller_name,
         sellerEmail: order.seller_email,
         companyName: order.company_name,
@@ -150,7 +156,7 @@ async function sendEmail(type: string, order: any, daysOverdue?: number) {
       },
     }),
   });
-const result = await response.text();
-console.log("EMAIL API RESPONSE:", result);
-  
+
+  const result = await response.text();
+  console.log("EMAIL API RESPONSE:", result);
 }
