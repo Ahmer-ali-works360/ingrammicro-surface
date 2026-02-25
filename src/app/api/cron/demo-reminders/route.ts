@@ -1,3 +1,5 @@
+//src/app/api/cron/demo-reminders/route.ts
+
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
@@ -119,7 +121,7 @@ export async function GET(req: Request) {
 }
 
 async function sendEmail(type: string, order: any, daysOverdue?: number) {
- const response = await fetch(`https://${process.env.VERCEL_URL}/api/send-email`, {
+ const response = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/send-email`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
