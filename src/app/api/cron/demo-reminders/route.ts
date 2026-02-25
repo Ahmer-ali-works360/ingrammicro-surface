@@ -119,7 +119,7 @@ export async function GET(req: Request) {
 }
 
 async function sendEmail(type: string, order: any, daysOverdue?: number) {
-  await fetch(`https://${process.env.VERCEL_URL}/api/send-email`, {
+ const response = await fetch(`https://${process.env.VERCEL_URL}/api/send-email`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -148,4 +148,7 @@ async function sendEmail(type: string, order: any, daysOverdue?: number) {
       },
     }),
   });
+const result = await response.text();
+console.log("EMAIL API RESPONSE:", result);
+  
 }
