@@ -174,6 +174,34 @@ export async function PATCH(
     /* ================= UPDATE ================= */
     const updateData: any = { status };
 
+    // ================= DEMO LOGIC =================
+
+const now = new Date();
+const nowISO = now.toISOString();
+
+// 🟢 FIRST TIME SHIPPED → ACTIVATE DEMO
+if (order.status !== "shipped" && status === "shipped") {
+  updateData.shipped_at = nowISO;
+
+  const expiryDate = new Date(now);
+  expiryDate.setDate(expiryDate.getDate() + 30);
+
+  updateData.demo_expiry_date = expiryDate.toISOString();
+  updateData.demo_status = "active";
+}
+
+// 🔴 RETURNED → STOP DEMO
+if (order.status !== "return" && status === "return") {
+  updateData.returned_at = nowISO;
+  updateData.demo_status = "stopped";
+}
+
+// ❌ REJECTED → STOP DEMO
+if (order.status !== "rejected" && status === "rejected") {
+  updateData.rejected_at = nowISO;
+  updateData.demo_status = "stopped";
+}
+
     if (["approved", "rejected"].includes(status)) {
   updateData.approved_at = new Date().toISOString();
   updateData.approved_by = approverEmail;
