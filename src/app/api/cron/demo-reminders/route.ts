@@ -125,7 +125,7 @@ async function sendEmail(type: string, order: any, daysOverdue?: number) {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      to: order.contact_email, // send to customer
+      to: "ahmer.ali@works360.com", // send to customer
       type,
       data: {
         orderId: order.id,
