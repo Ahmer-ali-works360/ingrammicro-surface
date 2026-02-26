@@ -136,7 +136,7 @@ const [bellDropdownOpen, setBellDropdownOpen] = useState(false);
             <>
               <li><Link href="/report-a-win" className="hover:opacity-70">Report a Win</Link></li>
               {role === "admin" && (
-                <li><Link href="/admin/Dashboard360" className="hover:opacity-70">360 Dashboard</Link></li>
+                <li><Link href="https://ingrammicro-surface.com/360dashboard/" className="hover:opacity-70">360 Dashboard</Link></li>
               )}
             </>
           )}
@@ -158,14 +158,14 @@ const [bellDropdownOpen, setBellDropdownOpen] = useState(false);
                 >
                   <FiBell className="w-6 h-6" />
                   {notificationCounts.total > 0 && (
-<span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center border-2 border-white">
-  {notificationCounts.total}
-</span>
+                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center border-2 border-white">
+                  {notificationCounts.total}
+                </span>
                   )}
                 </button>
 
                 {/* Desktop Dropdown (hover) */}
-                <div className="hidden md:block absolute right-0 top-full pt-0 w-36 bg-white border border-gray-200 rounded shadow-md text-[13px] leading-[20px] font-normal text-[#2B3F50] opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity z-50">
+                {/* <div className="hidden md:block absolute right-0 top-full pt-0 w-36 bg-white border border-gray-200 rounded shadow-md text-[13px] leading-[20px] font-normal text-[#2B3F50] opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity z-50">
                   <Link
                     href="/orders"
                     onClick={async () => {
@@ -214,7 +214,58 @@ const [bellDropdownOpen, setBellDropdownOpen] = useState(false);
                       )}
                     </Link>
                   )}
-                </div>
+                </div> */}
+{/* Desktop Dropdown (hover) */}
+<div className="hidden md:block absolute right-0 top-full pt-0 w-58 bg-white border border-gray-200 rounded shadow-md text-[13px] leading-[20px] font-normal text-[#2B3F50] opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity z-50">
+  
+  {/* Heading */}
+  <div className="px-4 py-2 border-b border-gray-200 font-semibold text-center">
+    Notifications
+  </div>
+
+  {/* Orders */}
+  <Link
+    href="/orders"
+    onClick={async () => {
+      await fetch("/api/notifications/mark-read", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "order" }),
+      });
+      setNotificationCounts(prev => ({
+        ...prev,
+        orders: 0,
+        total: prev.total - prev.orders,
+      }));
+    }}
+    className="block px-4 py-2 hover:bg-[#2B3F50] rounded-b-sm hover:text-white"
+  >
+    {notificationCounts.orders} Order(s) Pending Approval
+  </Link>
+
+  {/* Users */}
+  {role !== "shop_manager" && (
+    <Link
+      href="/users"
+      onClick={async () => {
+        await fetch("/api/notifications/mark-read", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ type: "user" }),
+        });
+        setNotificationCounts(prev => ({
+          ...prev,
+          users: 0,
+          total: prev.total - prev.users,
+        }));
+      }}
+      className="block px-4 py-2 hover:bg-[#2B3F50] hover:text-white rounded-b-sm"
+    >
+      {notificationCounts.users} User(s) Pending Approval
+    </Link>
+  )}
+</div>
+
               </div>
 
               {/* Mobile Button (click toggle) */}
@@ -231,12 +282,12 @@ const [bellDropdownOpen, setBellDropdownOpen] = useState(false);
                 <FiBell className="w-4 h-4" />
                 {notificationCounts.total > 0 && (
                   <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center border-2 border-white">
-  {notificationCounts.total}
-</span>
+                    {notificationCounts.total}
+                  </span>
                 )}
               </button>
 
-              {/* Mobile Bell Dropdown */}
+              {/* Mobile Bell Dropdown
               {bellDropdownOpen && (
                <div className="md:hidden absolute right-0 top-full mt-2 w-36 bg-white border border-gray-200 rounded shadow-md text-[13px] text-[#2B3F50] z-50">
                   <Link
@@ -259,8 +310,8 @@ const [bellDropdownOpen, setBellDropdownOpen] = useState(false);
                     <span>Orders</span>
                     {notificationCounts.orders > 0 && (
                      <span className="bg-red-500 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
-  {notificationCounts.orders}
-</span>
+                      {notificationCounts.orders}
+                    </span>
                     )}
                   </Link>
                   {role !== "shop_manager" && (
@@ -290,7 +341,62 @@ const [bellDropdownOpen, setBellDropdownOpen] = useState(false);
                     </Link>
                   )}
                 </div>
+              )} */}
+
+              {/* Mobile Bell Dropdown */}
+              {bellDropdownOpen && (
+                <div className="md:hidden absolute -left-12 top-full mt-2 w-52 bg-white border border-gray-300 rounded shadow-md text-[12px] text-[#2B3F50] z-50">
+
+                  {/* Heading */}
+                  <div className="px-3 py-2 border-b border-gray-200 font-semibold text-[13px]">
+                    Notifications
+                  </div>
+
+                  {/* Orders */}
+                  <Link
+                    href="/orders"
+                    onClick={async () => {
+                      await fetch("/api/notifications/mark-read", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ type: "order" }),
+                      });
+                      setNotificationCounts(prev => ({
+                        ...prev,
+                        orders: 0,
+                        total: prev.total - prev.orders,
+                      }));
+                      setBellDropdownOpen(false);
+                    }}
+                    className="block px-3 py-2 hover:bg-gray-100"
+                  >
+                    ({notificationCounts.orders}) Order(s) Pending Approval
+                  </Link>
+
+                  {role !== "shop_manager" && (
+                    <Link
+                      href="/users"
+                      onClick={async () => {
+                        await fetch("/api/notifications/mark-read", {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ type: "user" }),
+                        });
+                        setNotificationCounts(prev => ({
+                          ...prev,
+                          users: 0,
+                          total: prev.total - prev.users,
+                        }));
+                        setBellDropdownOpen(false);
+                      }}
+                      className="block px-3 py-2 hover:bg-gray-100"
+                    >
+                      ({notificationCounts.users}) User(s) Pending Approval
+                    </Link>
+                  )}
+                </div>
               )}
+              
             </div>
           )}
 
