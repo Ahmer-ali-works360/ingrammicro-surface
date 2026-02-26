@@ -1946,6 +1946,7 @@ case "PRODUCT_BACK_IN_STOCK":
           </p>
           <p>You can use the provided return label to ship back the products or click on the button to view order details and download label again.</p>
         </div>
+        
         <div style="text-align:center; margin:15px 0;">
          <a href="${data.return_label}" target="_blank" style="display:inline-block; margin:10px; padding:8px 16px; text-decoration:none; ">
         Download Return Label
