@@ -80,11 +80,10 @@ export async function GET(req: Request) {
       // =========================
       // 📧 OVERDUE EMAILS
       // =========================
-      if (
+if (
   order.demo_status === "expired" &&
   daysOverdue > 0 &&
-  daysOverdue % 5 === 0 &&
-  daysOverdue <= 20
+  (daysOverdue === 5 || (daysOverdue > 5 && (daysOverdue - 5) % 10 === 0))
 ) {
 
   const todayDate = new Date().toISOString().split("T")[0];
