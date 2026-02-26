@@ -1945,13 +1945,19 @@ case "PRODUCT_BACK_IN_STOCK":
             Your order for <strong>${data.companyName || "N/A"}</strong> is now due for return.  
           </p>
           <p>You can use the provided return label to ship back the products or click on the button to view order details and download label again.</p>
-        </div>
         
-        <div style="text-align:center; margin:15px 0;">
-         <a href="${data.return_label}" target="_blank" style="display:inline-block; margin:10px; padding:8px 16px; text-decoration:none; ">
+
+         ${data.return_label ? `
+    <div style="text-align:center; margin:15px 0;">
+      <a href="${data.return_label}" target="_blank" style="display:inline-block; margin:10px; padding:8px 16px; text-decoration:none;">
         Download Return Label
-        </a>
-        </div>
+      </a>
+    </div>
+  ` : `
+    <p style="color:#c0392b;font-weight:bold;">No Return Label uploaded</p>
+  `}
+</div>
+        
 
         <!-- PRODUCTS TABLE -->
         <table width="100%" cellpadding="8" cellspacing="0" 
@@ -2070,21 +2076,26 @@ case "PRODUCT_BACK_IN_STOCK":
         </h3>
 
         <!-- INTRO -->
-        <div style="padding:15px 0;color:#000;">
-          <p style="font-size:15px;line-height:1.5;margin:10px 0;">
-            The 30-day demo period expired on 
-            <strong>${data.demo_expiry_date || "N/A"}</strong>.
-          </p>
-
-          <p>
-            The demo equipment listed below is now 
-            <strong>${data.days_overdue || 0} days overdue</strong>.
-          </p>
-
-          <p style="color:#c0392b;font-weight:bold;">
-            Immediate return action is required to avoid further escalation.
-          </p>
-        </div>
+<div style="padding:15px 0;color:#000;">
+  <p style="font-size:15px;line-height:1.5;margin:10px 0;">
+    This is a message from Ingram Surface Demo to remind you that Order 
+    <strong>#${data.order_number}</strong> (<strong>${data.companyName || "N/A"}</strong>) 
+    is due for return and has been shipped for 
+    <strong>${data.days_overdue || 0} days</strong> out of its 30-day trial period.
+  </p>
+  <p style="font-size:15px;line-height:1.5;margin:10px 0;">
+    Please remind your customer to use the provided return label and ship back this order with all devices & accessories.
+  </p>
+  ${data.return_label ? `
+    <div style="text-align:center; margin:15px 0;">
+      <a href="${data.return_label}" target="_blank" style="display:inline-block; margin:10px; padding:8px 16px; text-decoration:none;">
+        Download Return Label
+      </a>
+    </div>
+  ` : `
+    <p style="color:#c0392b;font-weight:bold;">No Return Label uploaded</p>
+  `}
+</div>
 
         <!-- PRODUCTS TABLE -->
         <table width="100%" cellpadding="8" cellspacing="0" 
