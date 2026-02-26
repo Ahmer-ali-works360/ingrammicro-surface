@@ -1941,10 +1941,15 @@ case "PRODUCT_BACK_IN_STOCK":
         <!-- INTRO -->
         <div style="padding:15px 0;color:#000;">
           <p style="font-size:15px;line-height:1.5;margin:10px 0;">
-            This is a friendly reminder that your 30-day demo period will end on 
-            <strong>${data.demo_expiry_date || "N/A"}</strong>.
+           Thank you for using Battle-Pack! We hope your experience was very positive.<br>
+            Your order for ${data.companyName || "N/A"} is now due for return.  
           </p>
-          <p>Please prepare the demo units listed below for return.</p>
+          <p>You can use the provided return label to ship back the products or click on the button to view order details and download label again.</p>
+        </div>
+        <div style="text-align:center; margin:15px 0;">
+         <a href="${data.trackingLink}" target="_blank" style="display:inline-block; margin:10px; padding:8px 16px; text-decoration:none; ">
+        Download Return Label
+        </a>
         </div>
 
         <!-- PRODUCTS TABLE -->
