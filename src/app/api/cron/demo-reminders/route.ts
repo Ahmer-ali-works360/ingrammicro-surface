@@ -14,6 +14,8 @@ export async function GET(req: Request) {
 
     const today = new Date();
     const todayISO = today.toISOString();
+    const dayOfWeek = today.getDay(); // 0 = Sunday, 6 = Saturday
+    const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
 
     // 1️⃣ Fetch relevant orders only
     const { data: orders, error } = await supabaseAdmin
@@ -37,9 +39,11 @@ export async function GET(req: Request) {
       // =========================
       // 🔔 25 DAY REMINDER
       // =========================
-     if (
+if (
   order.demo_status === "active" &&
-  daysOverdue === -5
+  !isWeekend && // ✅ weekend block
+  (daysOverdue === -5 || // normal weekday
+    (dayOfWeek === 1 && (daysOverdue === -4 || daysOverdue === -3))) // Monday ko Saturday/Sunday ka check
 ) {
 
   const todayDate = new Date().toISOString().split("T")[0];
@@ -80,10 +84,24 @@ export async function GET(req: Request) {
       // =========================
       // 📧 OVERDUE EMAILS
       // =========================
+
+
+
+// Weekend adjustment
+let effectiveDaysOverdue = daysOverdue;
+
+if (dayOfWeek === 1) { // Aaj Monday hai
+  if ((daysOverdue - 1) === 5 || (daysOverdue - 1 > 5 && (daysOverdue - 1 - 5) % 10 === 0)) {
+    effectiveDaysOverdue = daysOverdue - 1; // Sunday ka tha
+  } else if ((daysOverdue - 2) === 5 || (daysOverdue - 2 > 5 && (daysOverdue - 2 - 5) % 10 === 0)) {
+    effectiveDaysOverdue = daysOverdue - 2; // Saturday ka tha
+  }
+}
 if (
   order.demo_status === "expired" &&
   daysOverdue > 0 &&
-  (daysOverdue === 5 || (daysOverdue > 5 && (daysOverdue - 5) % 10 === 0))
+  !isWeekend && // ✅ weekend pe email block
+  (effectiveDaysOverdue === 5 || (effectiveDaysOverdue > 5 && (effectiveDaysOverdue - 5) % 10 === 0))
 ) {
 
   const todayDate = new Date().toISOString().split("T")[0];
