@@ -65,12 +65,12 @@ function baseLayout(title: string, body: string): string {
         style="
           background:#3ba1da;
           padding:12px 15px;
-          font-size:16px;
+          font-size:14px;
           color:#ffffff;
           text-align:center;
         "
       >
-        <a href="https://www.ingrammicro-surface.com/" style="color:white;text-decoration:none;">www.ingrammicro-surface.com</a> | <a href="mailto:ahmer.ali@worls360.com" style="color:white;text-decoration:none;">support@Ingrammicro-surface.com</a> 
+        <a href="https://www.ingrammicro-surface.com/" style="color:white;text-decoration:none;">www.ingrammicro-surface.com</a> | <a href="mailto:ahmer.ali@works360.com" style="color:white;text-decoration:none;">support@Ingrammicro-surface.com</a> 
       </td>
     </tr>
   </table>
@@ -178,7 +178,7 @@ export function getEmailTemplate(type: string, data: any): EmailTemplate {
 
           <p style="margin:25px 0;text-align:center;">
             <a
-              href="http://https://ingrammicro-surface.vercel.app/users"
+              href="https://ingrammicro-surface.vercel.app/users"
               style="
                 background:#3ba1da;
                 color:#ffffff;
@@ -491,9 +491,8 @@ export function getEmailTemplate(type: string, data: any): EmailTemplate {
         ),
       };
 
-  
-      /* -------- ORDER_APPROVED_ADMIN (UPDATED) -------- */
-case "ORDER_APPROVED_ADMIN":
+  /* -------- ORDER_APPROVED_Admin  -------- */
+  case "ORDER_APPROVED_ADMIN":
   return {
     subject: `Order Approved (#${data.order_number}) | Ingrammicro Surface`,
     html: orderLayout(
@@ -521,7 +520,7 @@ case "ORDER_APPROVED_ADMIN":
             Please review the order details below.
           </p>
           
-          <a href="${data.ordersPageUrl || 'https://ingrammicro-surface.vercel.app/orders'}" 
+          <a href="${data.ordersPageUrl || `https://ingrammicro-surface.vercel.app/orders/${data.order_id}`}" 
              style="display:inline-block;
                     margin:20px 0;
                     padding:12px 30px;
